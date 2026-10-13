@@ -45,7 +45,7 @@ export function JoinCard({
     (async () => {
       try {
         acquired = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 640 }, height: { ideal: 360 }, facingMode: "user" },
+          video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 }, facingMode: "user" },
           audio: { echoCancellation: true, noiseSuppression: true },
         });
       } catch {

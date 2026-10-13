@@ -93,7 +93,10 @@ async function join(page, name) {
 const sessions = [];
 try {
   // The tab that gets shared: a title the picker flag can match, with something moving in it.
-  const shareCtx = await browser.newContext();
+  // 4K, to prove the share is not downscaled on the way to viewers.
+  const SHARE_W = 3840;
+  const SHARE_H = 2160;
+  const shareCtx = await browser.newContext({ viewport: { width: SHARE_W, height: SHARE_H } });
   const sharePage = await shareCtx.newPage();
   await sharePage.setContent(
     `<title>${SHARE_TITLE}</title><body style="margin:0;background:#123"><div id="b" style="width:200px;height:200px;background:#f0f"></div>
@@ -144,6 +147,37 @@ try {
       { timeout: STEP_MS },
     );
     await bob.getByText("Connecting to").waitFor({ state: "detached", timeout: 2_000 });
+  });
+
+  await step(`Bob receives the share at full resolution (≥ 90% of ${SHARE_W}×${SHARE_H})`, async () => {
+    const dims = () =>
+      bob.evaluate(() => {
+        const v = Array.from(document.querySelectorAll("video")).find((v) => !v.muted && v.videoWidth > 300);
+        return v ? [v.videoWidth, v.videoHeight] : [0, 0];
+      });
+    const minW = Math.floor(SHARE_W * 0.9);
+    const t0 = Date.now();
+    let w = 0;
+    let h = 0;
+    while (Date.now() - t0 < STEP_MS) {
+      [w, h] = await dims();
+      log("Bob", `share at ${w}×${h} after ${Date.now() - t0}ms`);
+      if (w >= minW) break;
+      await bob.waitForTimeout(3000);
+    }
+    const stats = await bob.evaluate(async () => {
+      const pc = window.__pcs.find((p) => p.connectionState === "connected" && p.getReceivers().some((r) => r.track?.kind === "video"));
+      if (!pc) return null;
+      const out = [];
+      for (const s of (await pc.getStats()).values()) {
+        if (s.type === "inbound-rtp" && s.kind === "video") out.push({ w: s.frameWidth, h: s.frameHeight, fps: s.framesPerSecond, bytes: s.bytesReceived, codec: s.codecId });
+        if (s.type === "codec") out.push({ id: s.id, mime: s.mimeType });
+      }
+      return out;
+    });
+    log("Bob", `inbound stats: ${JSON.stringify(stats)}`);
+    if (w < minW) throw new Error(`received ${w}×${h}, wanted ≥ ${minW} wide`);
+    log("Bob", `share arrives at ${w}×${h}`);
   });
 
   await step("Carol joins late and sees the share too", async () => {

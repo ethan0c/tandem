@@ -5,8 +5,28 @@ import type { AppSocket } from "@/lib/socket";
 import type { Member, ScreenSignal, Source } from "@/lib/types";
 import { iceServers } from "./useWebRTC";
 
-/** Enough for 1080p film with motion; the browser still scales down on weak links. */
-const MAX_BITRATE = 6_000_000;
+/**
+ * Ceiling, not a target: the encoder uses what the link can carry. 20 Mbps covers 4K at 30 fps in
+ * VP9; Chrome's own default is ~4 Mbps, which turns anything above 1080p to mush.
+ */
+const MAX_BITRATE = 20_000_000;
+
+/** Best quality per bit first; VP8 last because it blurs high-resolution content. */
+const CODEC_ORDER = ["video/VP9", "video/AV1", "video/H264", "video/VP8"];
+
+/** Put the sharer's preferred codecs first so the viewer's answer picks one of them. */
+function preferCodecs(pc: RTCPeerConnection) {
+  const caps = RTCRtpSender.getCapabilities?.("video");
+  if (!caps) return;
+  const ranked = [...caps.codecs].sort((a, b) => {
+    const ia = CODEC_ORDER.indexOf(a.mimeType);
+    const ib = CODEC_ORDER.indexOf(b.mimeType);
+    return (ia === -1 ? CODEC_ORDER.length : ia) - (ib === -1 ? CODEC_ORDER.length : ib);
+  });
+  for (const t of pc.getTransceivers()) {
+    if (t.sender.track?.kind === "video") t.setCodecPreferences?.(ranked);
+  }
+}
 
 interface Options {
   socketRef: RefObject<AppSocket | null>;
@@ -90,6 +110,7 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
       const pc = newPc(peerId);
       sendPcs.current.set(peerId, pc);
       for (const track of stream.getTracks()) pc.addTrack(track, stream);
+      preferCodecs(pc);
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
       for (const sender of pc.getSenders()) {
@@ -97,7 +118,9 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
         const params = sender.getParameters();
         if (!params.encodings?.length) continue;
         params.encodings[0].maxBitrate = MAX_BITRATE;
-        params.degradationPreference = "maintain-framerate";
+        params.encodings[0].scaleResolutionDownBy = 1;
+        // Stay sharp on a tight link: shed frames rather than resolution.
+        params.degradationPreference = "maintain-resolution";
         await sender.setParameters(params).catch(() => {});
       }
       send(peerId, { type: "offer", sdp: offer });
@@ -181,7 +204,8 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
     let stream: MediaStream;
     try {
       stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: { ideal: 30, max: 60 }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        // No width/height constraint: capture at the surface's native size (4K or Retina stays 4K/Retina).
+        video: { frameRate: { ideal: 30, max: 60 } },
         audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
         // Chrome-only hints: offer tabs first, hide the Tandem tab (no hall of mirrors), allow tab audio.
         preferCurrentTab: false,
@@ -195,7 +219,8 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
     }
     const video = stream.getVideoTracks()[0];
     if (video) {
-      video.contentHint = "motion";
+      // "detail" keeps the encoder from downscaling under load; "motion" would trade sharpness for fps.
+      video.contentHint = "detail";
       video.addEventListener("ended", () => {
         // The browser's own "Stop sharing" button.
         if (localRef.current === stream) changeSource(null);
