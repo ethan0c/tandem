@@ -43,7 +43,7 @@ export function Session({ roomId, name, localStream }: Props) {
   const [playing, setPlaying] = useState(false);
   const [active, setActive] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
-  // How many messages had arrived the last time the chat was open; the rest are unread.
+  // How many messages had arrived when the chat was last open or closed; anything after is unread.
   const [seenCount, setSeenCount] = useState(0);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const origin = useClientValue(() => window.location.origin, "");
@@ -66,11 +66,16 @@ export function Session({ roomId, name, localStream }: Props) {
   }, []);
 
   const messageCount = room.messages.length;
-  useEffect(() => {
-    if (chatOpen) setSeenCount(messageCount);
-  }, [chatOpen, messageCount]);
   const unread = chatOpen ? 0 : Math.max(0, messageCount - seenCount);
-  const toggleChat = useCallback(() => setChatOpen((o) => !o), []);
+  // Opening or closing marks everything so far as seen, so the badge only counts what arrives while closed.
+  const setChat = useCallback(
+    (open: boolean) => {
+      setSeenCount(messageCount);
+      setChatOpen(open);
+    },
+    [messageCount],
+  );
+  const toggleChat = useCallback(() => setChat(!chatOpen), [setChat, chatOpen]);
 
   // "c" opens and closes the chat, unless you are typing somewhere.
   useEffect(() => {
@@ -185,7 +190,7 @@ export function Session({ roomId, name, localStream }: Props) {
 
       <ChatPanel
         open={chatOpen}
-        onClose={() => setChatOpen(false)}
+        onClose={() => setChat(false)}
         messages={room.messages}
         selfId={room.selfId}
         onSend={room.sendMessage}

@@ -21,6 +21,7 @@ const sections = [
     body: [
       "While your room is open, Tandem keeps its code, the names people choose, which video is shared, and whether the video is playing or paused and where you are in it. People in the room can see each other’s names and the shared video details.",
       "Tandem helps your browsers connect for the call. Your camera, microphone, and shared video are not recorded or stored by Tandem.",
+      "Chat messages go to everyone in the room. Tandem keeps the most recent hundred while the room is open, so someone who joins late or reconnects can read them, and deletes them with the room.",
     ],
   },
   {
