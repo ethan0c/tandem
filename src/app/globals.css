@@ -227,7 +227,13 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 }
 
 
-.hero-shell { display: flex; flex-direction: column; min-height: 100svh; }
+/* The hero's ink ends partway down the player, so the next section starts behind it. */
+.hero-shell {
+  --hero-overlap: 220px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(to bottom, var(--color-ink) calc(100% - var(--hero-overlap)), #fff calc(100% - var(--hero-overlap)));
+}
 .hero-glow {
   position: absolute;
   inset: -20% 0 auto;
@@ -236,13 +242,23 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   pointer-events: none;
 }
 .hero-header { height: 72px; }
-.hero-body { gap: clamp(40px, 6vh, 64px); padding-top: clamp(32px, 8vh, 88px); padding-bottom: 48px; }
+.hero-body { gap: clamp(40px, 6vh, 64px); padding-top: clamp(32px, 8vh, 88px); padding-bottom: 0; }
 .hero-title { font-size: clamp(2.5rem, 6vw, 4.75rem); line-height: 1; }
 .hero-preview { max-width: 1080px; }
+.extension-card::before {
+  content: "";
+  position: absolute;
+  inset: auto -10% -60% 30%;
+  height: 120%;
+  background: radial-gradient(closest-side, rgb(196 181 253 / 0.35), transparent);
+  pointer-events: none;
+}
+.extension-card > * { position: relative; }
 .hero-nav a { padding: 8px 12px; border-radius: 8px; transition: color 180ms ease; }
 .hero-nav a:hover, .hero-nav a:focus-visible { color: white; }
 .hero-nav a:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: 2px; }
 @media (max-width: 767px) {
+  .hero-shell { --hero-overlap: 72px; }
   .hero-header { height: 64px; }
   .hero-body { gap: 36px; padding-top: 28px; }
   .hero-title { font-size: clamp(2.4rem, 11vw, 3rem); }

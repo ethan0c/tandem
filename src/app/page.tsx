@@ -68,7 +68,7 @@ export default function Home() {
   return (
     <LandingMotion>
       {/* Theater */}
-      <section className="hero-shell relative overflow-hidden bg-ink text-white">
+      <section className="hero-shell relative overflow-hidden text-white">
         <div aria-hidden="true" className="hero-glow" />
         <header className="hero-header relative mx-auto flex site-width items-center justify-between gap-6 site-gutter">
           <Link href="/" aria-label="Tandem home" className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-brand-400 focus-visible:outline-offset-4">
@@ -108,7 +108,7 @@ export default function Home() {
       </section>
 
       {/* Works with */}
-      <section id="sources" className="scroll-mt-10 border-b border-cream-200 bg-cream py-14 sm:py-20">
+      <section id="sources" className="scroll-mt-10 bg-white pb-14 pt-6 sm:pb-20 sm:pt-10">
         <div data-reveal className="mx-auto site-width site-gutter">
           <h2 className="font-display text-3xl font-bold text-ink sm:text-4xl">Works with</h2>
           <p className="mt-3 text-sm text-zinc-600">Watch on your usual site with the Tandem extension.</p>
@@ -122,14 +122,14 @@ export default function Home() {
           <p className="mt-5 text-sm text-zinc-500">Support for these sites is experimental. Both viewers need access to the same episode; ads can interrupt sync.</p>
           <ul className="source-chips mt-6 flex flex-wrap gap-3">
             {sources.map((source) => (
-              <li key={source} className="rounded-full border border-cream-200 bg-white px-4 py-2 text-sm text-zinc-700">{source}</li>
+              <li key={source} className="rounded-full border border-cream-200 bg-cream px-4 py-2 text-sm text-zinc-700">{source}</li>
             ))}
           </ul>
         </div>
       </section>
 
       {/* How it works */}
-      <section id="sync" className="scroll-mt-20 bg-white">
+      <section id="sync" className="scroll-mt-20 bg-cream">
         <div data-reveal className="mx-auto grid site-width gap-12 site-gutter py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28">
           <div>
             <p className="font-sans text-[11px] font-medium text-zinc-500">How it works</p>
@@ -155,9 +155,9 @@ export default function Home() {
       </section>
 
       {/* Extension */}
-      <section className="bg-brand-700 text-white">
-        <div data-reveal className="mx-auto site-width site-gutter py-16">
-          <div>
+      <section className="bg-cream pb-20 lg:pb-28">
+        <div data-reveal className="mx-auto site-width site-gutter">
+          <div className="extension-card relative overflow-hidden rounded-3xl bg-brand-700 px-6 py-12 text-white sm:px-12 sm:py-16">
             <p className="font-sans text-[11px] font-medium text-brand-200">The extension</p>
             <h2 className="mt-4 font-display text-4xl font-bold leading-[1] tracking-[-0.03em] text-white sm:text-5xl">
               Watch on the site you use.
@@ -178,10 +178,10 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="scroll-mt-20 bg-cream">
+      <section id="faq" className="scroll-mt-20 bg-white">
         <div data-reveal className="mx-auto grid site-width gap-10 site-gutter py-20 lg:grid-cols-[0.6fr_1.4fr] lg:py-28">
           <h2 className="font-display text-4xl font-bold leading-[1] tracking-[-0.03em] text-ink">Questions</h2>
-          <div className="divide-y divide-cream-200 border-y border-cream-200">
+          <div className="divide-y divide-zinc-200 border-y border-zinc-200">
             {faq.map(({ q, a }) => (
               <details key={q} className="faq group">
                 <summary className="flex items-center justify-between gap-6 py-5 font-display text-lg font-bold text-ink">
