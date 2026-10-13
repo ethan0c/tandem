@@ -2,7 +2,9 @@
 
 import { useRef, useState, type RefObject } from "react";
 import { Check, Copy, Mic, MicOff, Minimize2, Maximize2, Video, VideoOff } from "lucide-react";
+import { CallVolumeControl } from "@/components/CallVolumeControl";
 import { useDraggable } from "@/hooks/useDraggable";
+import { useCallOutputVolume } from "@/lib/call-volume";
 import type { Peer } from "@/hooks/useWebRTC";
 import type { Member } from "@/lib/types";
 import { StreamVideo } from "./StreamVideo";
@@ -23,6 +25,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
   const ref = useRef<HTMLDivElement>(null);
   const [minimized, setMinimized] = useState(false);
   const [copied, setCopied] = useState(false);
+  const callVolume = useCallOutputVolume();
   const { pos, dragging, handlers } = useDraggable(containerRef, ref, (c, e) => ({
     x: c.width - e.width - 16,
     y: c.height - e.height - 88,
@@ -81,7 +84,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
               <div className={`grid h-full ${peers.length > 1 ? "grid-cols-2 grid-rows-2 gap-0.5" : ""}`}>
                 {peers.map((p) => (
                   <div key={p.id} className="relative h-full overflow-hidden bg-ink-700">
-                    <StreamVideo stream={p.stream} className="h-full w-full object-cover" />
+                    <StreamVideo stream={p.stream} volume={callVolume} className="h-full w-full object-cover" />
                     <span className="absolute left-2 top-2 rounded-md bg-black/55 px-1.5 py-0.5 text-[11px] font-medium">
                       {nameOf(p.id)}
                     </span>
@@ -107,6 +110,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
           <CallButton onClick={toggleCam} active={camOn} disabled={!hasLocalVideo} label={camOn ? "Camera off" : "Camera on"}>
             {camOn ? <Video className="size-3.5" /> : <VideoOff className="size-3.5" />}
           </CallButton>
+          <CallVolumeControl buttonClassName="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20" />
         </div>
         {minimized && (
           <span className="truncate px-1 text-[11px] text-zinc-400">

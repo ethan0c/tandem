@@ -261,11 +261,21 @@ try {
     await bob.getByText("Nothing playing yet").waitFor({ timeout: STEP_MS });
   });
 
+  await step("Call volume turns the partner down without touching the show", async () => {
+    await bob.getByLabel("Call volume").fill("0.3");
+    await bob.waitForFunction(
+      () => Array.from(document.querySelectorAll("video")).some((v) => !v.muted && v.srcObject && Math.abs(v.volume - 0.3) < 0.01),
+      null,
+      { timeout: 2_000 },
+    );
+  });
+
   await step("Bob reloads and reconnects; Alice still sees him", async () => {
     await bob.reload({ waitUntil: "domcontentloaded" });
     await join(bob, "Bob");
     await bob.getByText("Ready", { exact: true }).waitFor({ timeout: STEP_MS });
     await bob.getByRole("button", { name: "Turn sounds on" }).waitFor({ timeout: 2_000 });
+    if ((await bob.getByLabel("Call volume").inputValue()) !== "0.3") throw new Error("call volume not remembered");
     for (const p of [alice, bob]) {
       await p.waitForFunction(
         () => Array.from(document.querySelectorAll("video")).some((v) => !v.muted && v.videoWidth > 0 && !v.paused),

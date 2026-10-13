@@ -5,11 +5,14 @@ import { useEffect, useRef } from "react";
 export function StreamVideo({
   stream,
   muted = false,
+  volume = 1,
   mirror = false,
   className = "",
 }: {
   stream: MediaStream | null;
   muted?: boolean;
+  /** 0–1. Ignored while muted. */
+  volume?: number;
   mirror?: boolean;
   className?: string;
 }) {
@@ -23,6 +26,9 @@ export function StreamVideo({
       v.srcObject = null;
     };
   }, [stream]);
+  useEffect(() => {
+    if (ref.current) ref.current.volume = volume;
+  }, [volume, stream]);
   return (
     <video
       ref={ref}

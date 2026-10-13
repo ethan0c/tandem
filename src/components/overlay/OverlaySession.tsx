@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Check, Copy, LogOut, Mic, MicOff, Video, VideoOff } from "lucide-react";
+import { CallVolumeControl } from "@/components/CallVolumeControl";
 import { ChimeToggle } from "@/components/ChimeToggle";
 import { LogoMark } from "@/components/Logo";
 import { StreamVideo } from "@/components/room/StreamVideo";
 import { useReleaseStream } from "@/hooks/useReleaseStream";
 import { useRoom } from "@/hooks/useRoom";
 import { useWebRTC } from "@/hooks/useWebRTC";
+import { useCallOutputVolume } from "@/lib/call-volume";
 import type { SyncReason } from "@/lib/types";
 
 interface Props {
@@ -75,6 +77,7 @@ export function OverlaySession({ roomId, name, localStream, embedded }: Props) {
   }, [roomId]);
 
   const peer = rtc.peers[0] ?? null;
+  const callVolume = useCallOutputVolume();
   const peerName = peer ? (room.members.find((m) => m.id === peer.id)?.name ?? "Guest") : null;
   const hasLocalVideo = !!localStream?.getVideoTracks().length;
   const hasLocalAudio = !!localStream?.getAudioTracks().length;
@@ -95,7 +98,7 @@ export function OverlaySession({ roomId, name, localStream, embedded }: Props) {
       <div className="relative aspect-[4/3] bg-ink-800">
         {peer ? (
           <>
-            <StreamVideo stream={peer.stream} className="h-full w-full object-cover" />
+            <StreamVideo stream={peer.stream} volume={callVolume} className="h-full w-full object-cover" />
             <span className="absolute left-2 top-2 rounded-md bg-black/55 px-1.5 py-0.5 text-[11px] font-medium">{peerName}</span>
           </>
         ) : (
@@ -131,6 +134,7 @@ export function OverlaySession({ roomId, name, localStream, embedded }: Props) {
         <Toggle on={rtc.camOn} onClick={rtc.toggleCam} disabled={!hasLocalVideo} label={rtc.camOn ? "Camera off" : "Camera on"}>
           {rtc.camOn ? <Video className="size-3.5" /> : <VideoOff className="size-3.5" />}
         </Toggle>
+        <CallVolumeControl buttonClassName="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20" />
         <ChimeToggle className="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 [&_svg]:size-3.5" />
         <div className="ml-auto flex -space-x-1.5">
           {room.members.map((m) => (
