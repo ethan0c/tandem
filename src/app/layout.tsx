@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: { default: "Tandem — watch anime together, same second", template: "%s · Tandem" },
   description:
     "Synced video playback and a live video call in one tab. Create a room, share the link, press play together.",
+  openGraph: { type: "website", siteName: "Tandem" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
