@@ -49,11 +49,11 @@ export function Footer() {
                 {col.links.map((l) => (
                   <li key={l.label}>
                     {"external" in l && l.external ? (
-                      <a href={l.href} target="_blank" rel="noreferrer" className="text-sm text-zinc-400 transition hover:text-brand-300">
+                      <a href={l.href} target="_blank" rel="noreferrer" className="text-sm text-zinc-400 transition hover:text-white">
                         {l.label} ↗
                       </a>
                     ) : (
-                      <Link href={l.href} className="text-sm text-zinc-400 transition hover:text-brand-300">
+                      <Link href={l.href} className="text-sm text-zinc-400 transition hover:text-white">
                         {l.label}
                       </Link>
                     )}
@@ -67,11 +67,11 @@ export function Footer() {
           <span>© 2026 tandem · MIT</span>
           <span>
             built by{" "}
-            <a href={GITHUB} target="_blank" rel="noreferrer" className="text-zinc-300 hover:text-brand-300">
+            <a href={GITHUB} target="_blank" rel="noreferrer" className="text-zinc-300 hover:text-white">
               ethan0c
             </a>{" "}
             /{" "}
-            <a href={OCELABS} target="_blank" rel="noreferrer" className="text-zinc-300 hover:text-brand-300">
+            <a href={OCELABS} target="_blank" rel="noreferrer" className="text-zinc-300 hover:text-white">
               ocelabs.xyz
             </a>
           </span>

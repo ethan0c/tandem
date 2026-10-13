@@ -55,7 +55,7 @@ const sections = [
 export default function Privacy() {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="bg-ink text-white">
+      <header className="border-b border-white/10 bg-ink text-white">
         <HeaderFrame>
           <Link href="/" aria-label="Tandem home">
             <Logo size={24} light />
@@ -63,13 +63,13 @@ export default function Privacy() {
         </HeaderFrame>
       </header>
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-16">
-        <h1 className="font-display text-4xl font-bold tracking-tight">Privacy</h1>
+        <h1 className="font-display text-4xl font-bold tracking-[-0.03em]">Privacy</h1>
         <p className="mt-3 font-sans text-xs text-zinc-500">Last updated 13 October 2026</p>
         {sections.map((s) => (
           <section key={s.title} className="mt-10">
             <h2 className="font-display text-xl font-bold">{s.title}</h2>
             {s.body.map((p) => (
-              <p key={p.slice(0, 24)} className="mt-3 leading-relaxed text-zinc-600">
+              <p key={p.slice(0, 24)} className="mt-3 leading-relaxed text-zinc-400">
                 {p}
               </p>
             ))}

@@ -40,7 +40,7 @@ export function LogoTile({ size = 32, className = "" }: { size?: number; classNa
 export function Logo({
   size = 32,
   className = "",
-  light = false,
+  light = true,
 }: {
   size?: number;
   className?: string;
@@ -48,9 +48,9 @@ export function Logo({
 }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
-      <LogoMark size={size * 1.15} color={light ? "#a78bfa" : "#7c3aed"} />
+      <LogoMark size={size * 1.15} color="#8b5cf6" />
       <span
-        className={`font-display font-bold tracking-tight ${light ? "text-white" : "text-ink"}`}
+        className={`font-display font-bold tracking-[-0.03em] ${light ? "text-white" : "text-ink"}`}
         style={{ fontSize: size * 0.72, lineHeight: 1 }}
       >
         tandem

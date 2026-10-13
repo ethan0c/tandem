@@ -2,13 +2,12 @@
 
 @theme {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-bricolage), var(--font-geist-sans), sans-serif;
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 
-  --color-ink: #120a1f;
-  --color-ink-800: #1b1030;
-  --color-ink-700: #2a1b45;
-  --color-cream: #f7f5f1;
-  --color-cream-200: #ebe7df;
+  /* Neutral blacks. Purple stays on the logo and the primary button. */
+  --color-ink: #0a0a0a;
+  --color-ink-800: #141414;
+  --color-ink-700: #1f1f1f;
 
   /* Brand purple scale (violet). Swap these to retheme the whole app. */
   --color-brand-50: #f5f3ff;
@@ -42,8 +41,8 @@ html, body {
 }
 
 body {
-  background: var(--color-cream);
-  color: var(--color-ink);
+  background: var(--color-ink);
+  color: #fff;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
@@ -86,9 +85,10 @@ input[type="range"].tandem-range:hover::-webkit-slider-thumb {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 
-/* ---------- 3D "press" buttons (Duolingo style) ---------- */
+/* ---------- Buttons. Flat, except the primary (brand) one, which keeps a 3D press. ---------- */
 .btn3d {
-  --btn-shadow: #000;
+  --btn-shadow: transparent;
+  --btn-lift: 0px;
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -102,7 +102,7 @@ input[type="range"].tandem-range:hover::-webkit-slider-thumb {
   user-select: none;
   cursor: pointer;
   border: 2px solid transparent;
-  box-shadow: 0 4px 0 0 var(--btn-shadow);
+  box-shadow: 0 var(--btn-lift) 0 0 var(--btn-shadow);
   transform: translateY(0);
   transition:
     transform 90ms ease,
@@ -110,24 +110,24 @@ input[type="range"].tandem-range:hover::-webkit-slider-thumb {
     background-color 150ms ease,
     filter 150ms ease;
 }
-.btn3d:hover { filter: brightness(1.06); }
-.btn3d:active,
-.btn3d[data-pressed="true"] {
-  transform: translateY(4px);
+.btn3d:hover { filter: brightness(1.08); }
+.btn3d-brand:active,
+.btn3d-brand[data-pressed="true"] {
+  transform: translateY(var(--btn-lift));
   box-shadow: 0 0 0 0 var(--btn-shadow);
 }
-.btn3d:focus-visible { outline: 3px solid var(--color-brand-300); outline-offset: 2px; }
+.btn3d:focus-visible { outline: 3px solid rgb(255 255 255 / 0.5); outline-offset: 2px; }
 .btn3d:disabled { opacity: 0.55; pointer-events: none; }
 
-.btn3d-brand { background: var(--color-brand-600); color: #fff; --btn-shadow: var(--color-brand-800); }
-.btn3d-dark { background: var(--color-ink); color: #fff; --btn-shadow: #000; }
-.btn3d-light { background: #fff; color: var(--color-ink); border-color: #e4e4e7; --btn-shadow: #d4d4d8; }
-.btn3d-ghost { background: rgb(255 255 255 / 0.1); color: #fff; border-color: rgb(255 255 255 / 0.14); --btn-shadow: rgb(0 0 0 / 0.6); }
-.btn3d-danger { background: #ef4444; color: #fff; --btn-shadow: #991b1b; }
+.btn3d-brand { background: var(--color-brand-600); color: #fff; --btn-shadow: var(--color-brand-800); --btn-lift: 4px; }
+.btn3d-dark { background: var(--color-ink-700); color: #fff; }
+.btn3d-light { background: #fff; color: var(--color-ink); }
+.btn3d-ghost { background: rgb(255 255 255 / 0.08); color: #fff; border-color: rgb(255 255 255 / 0.12); }
+.btn3d-danger { background: #ef4444; color: #fff; }
 
 .btn3d-sm { height: 2.25rem; padding: 0 0.9rem; font-size: 0.8125rem; border-radius: 0.7rem; }
 .btn3d-md { height: 2.75rem; padding: 0 1.25rem; font-size: 0.875rem; }
-.btn3d-lg { height: 3.25rem; padding: 0 1.6rem; font-size: 0.95rem; border-radius: 1rem; }
+.btn3d-lg { height: 3.5rem; padding: 0 1.75rem; font-size: 1.05rem; border-radius: 1rem; }
 .btn3d-icon { width: 2.5rem; height: 2.5rem; padding: 0; border-radius: 0.75rem; }
 
 /* Motion stays brief and tied to entering content or direct interaction. */
@@ -143,7 +143,7 @@ html { scroll-behavior: smooth; }
   transition: border-color 250ms ease, box-shadow 250ms ease;
 }
 .room-link-field { transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease; }
-.room-link-field:focus-within { box-shadow: 0 4px 0 rgb(0 0 0 / 0.3), 0 0 0 4px rgb(167 139 250 / 0.15); }
+.room-link-field:focus-within { box-shadow: 0 0 0 4px rgb(255 255 255 / 0.08); }
 .btn3d svg { transition: transform 180ms ease; }
 .form-error { animation: fade-up 180ms ease-out both; }
 .source-chips li { transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease; }
@@ -155,7 +155,7 @@ html { scroll-behavior: smooth; }
   right: 0;
   bottom: -5px;
   height: 2px;
-  background: var(--color-brand-400);
+  background: #fff;
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 200ms ease;
@@ -163,8 +163,7 @@ html { scroll-behavior: smooth; }
 .landing nav:not(.hero-nav) a:focus-visible::after { transform: scaleX(1); }
 details.faq { transition: background-color 200ms ease; }
 details.faq > summary { transition: color 200ms ease; }
-details.faq > summary:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: 3px; border-radius: 4px; }
-details.faq[open] { background: rgb(124 58 237 / 0.025); }
+details.faq > summary:focus-visible { outline: 2px solid rgb(255 255 255 / 0.5); outline-offset: 3px; border-radius: 4px; }
 details.faq[open] > p { animation: fade-up 220ms ease-out; }
 @supports (interpolate-size: allow-keywords) {
   details.faq { interpolate-size: allow-keywords; }
@@ -176,13 +175,13 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   details.faq[open]::details-content { block-size: auto; }
 }
 @media (hover: hover) {
-  .btn3d:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--btn-shadow); }
-  .btn3d:active { transform: translateY(4px); box-shadow: 0 0 0 var(--btn-shadow); }
+  .btn3d-brand:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--btn-shadow); }
+  .btn3d-brand:active { transform: translateY(4px); box-shadow: 0 0 0 var(--btn-shadow); }
   .btn3d-icon:hover svg { transform: translateX(2px); }
-  .source-chips li:hover { transform: translateY(-2px); border-color: var(--color-brand-200); box-shadow: 0 4px 12px rgb(18 10 31 / 0.06); }
-  .room-preview:hover > div { border-color: rgb(167 139 250 / 0.4); box-shadow: 0 40px 90px -20px rgb(0 0 0 / 0.85), 0 0 0 1px rgb(167 139 250 / 0.12); }
+  .source-chips li:hover { transform: translateY(-2px); border-color: rgb(255 255 255 / 0.25); }
+  .room-preview:hover > div { border-color: rgb(255 255 255 / 0.2); }
   .landing nav:not(.hero-nav) a:hover::after { transform: scaleX(1); }
-  details.faq > summary:hover { color: var(--color-brand-600); }
+  details.faq > summary:hover { color: #d4d4d8; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -192,7 +191,7 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
     transition-duration: 0.01ms !important;
   }
   [data-visible="false"] { opacity: 1; transform: none; }
-  .btn3d:hover, .source-chips li:hover { transform: none; }
+  .btn3d-brand:hover, .source-chips li:hover { transform: none; }
 }
 
 .tandem-loader { overflow: visible; }
@@ -214,55 +213,54 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   .tandem-loader circle { animation: none; stroke-dasharray: none; }
 }
 
-/* Bare brand marks use the same raised feel as the buttons. */
-.service-logo {
-  filter: drop-shadow(0 3px 0 rgb(18 10 31 / 0.16));
-  transition: transform 200ms ease, filter 200ms ease;
-}
+.service-logo { transition: transform 200ms ease, opacity 200ms ease; opacity: 0.9; }
+.service-logo[data-invert] { filter: invert(1); }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .service-logos li:hover .service-logo {
-    transform: translateY(-3px);
-    filter: drop-shadow(0 6px 0 rgb(18 10 31 / 0.12));
-  }
+  .service-logos li:hover .service-logo { transform: translateY(-3px); opacity: 1; }
 }
 
 
-/* The hero's ink ends partway down the player, so the next section starts behind it. */
 .hero-shell {
-  --hero-overlap: 220px;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(to bottom, var(--color-ink) calc(100% - var(--hero-overlap)), #fff calc(100% - var(--hero-overlap)));
+  background: var(--color-ink);
 }
-.hero-glow {
-  position: absolute;
-  inset: -20% 0 auto;
-  height: 80%;
-  background: radial-gradient(50% 50% at 50% 50%, rgb(124 58 237 / 0.28), transparent 70%);
+/* A curved horizon under the hero: the top sliver of a wide ellipse, faded at both ends. */
+.hero-horizon {
+  position: relative;
+  height: 96px;
+  margin-top: clamp(40px, 6vh, 64px);
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
   pointer-events: none;
+}
+.hero-horizon::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  width: 160vw;
+  height: 600px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  border-top: 2px solid var(--color-brand-500);
+  box-shadow: 0 -24px 60px -16px rgb(139 92 246 / 0.55);
+  background: linear-gradient(to bottom, rgb(139 92 246 / 0.07), transparent 20%);
 }
 .site-header { min-height: 72px; flex-shrink: 0; }
 .hero-body { gap: clamp(40px, 6vh, 64px); padding-top: clamp(32px, 8vh, 88px); padding-bottom: 0; }
 .hero-title { font-size: clamp(2.5rem, 6vw, 4.75rem); line-height: 1; }
 .hero-preview { max-width: 1080px; }
-.extension-card::before {
-  content: "";
-  position: absolute;
-  inset: auto -10% -60% 30%;
-  height: 120%;
-  background: radial-gradient(closest-side, rgb(196 181 253 / 0.35), transparent);
-  pointer-events: none;
-}
-.extension-card > * { position: relative; }
 .hero-nav a { padding: 8px 12px; border-radius: 8px; transition: color 180ms ease; }
 .hero-nav a:hover, .hero-nav a:focus-visible { color: white; }
-.hero-nav a:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: 2px; }
+.hero-nav a:focus-visible { outline: 2px solid rgb(255 255 255 / 0.5); outline-offset: 2px; }
 @media (max-width: 767px) {
-  .hero-shell { --hero-overlap: 72px; }
+  .hero-horizon { height: 64px; margin-top: 32px; }
   .site-header { min-height: 64px; }
   .hero-body { gap: 36px; padding-top: 28px; }
   .hero-title { font-size: clamp(2.4rem, 11vw, 3rem); }
   .hero-body .btn3d-lg, .hero-body .room-link-field { height: 48px; }
+  .hero-body .btn3d-lg { font-size: 0.95rem; }
   .hero-preview header > div:last-child { display: none; }
 }
 
