@@ -367,13 +367,13 @@ try {
 
   await step("Bob reloads and reconnects; Alice still sees him", async () => {
     await bob.reload({ waitUntil: "domcontentloaded" });
-    await join(bob, "Bob");
+    await bob.getByRole("link", { name: "Leave room", exact: true }).waitFor({ timeout: STEP_MS });
     await bob.getByText("Ready", { exact: true }).waitFor({ timeout: STEP_MS });
     await bob.getByRole("button", { name: "Turn sounds on" }).waitFor({ timeout: 2_000 });
     if ((await bob.getByLabel("Call volume").inputValue()) !== "0.3") throw new Error("call volume not remembered");
     const w = Math.round((await bob.getByRole("button", { name: /^Resize call/ }).locator("..").boundingBox()).width);
     if (Math.abs(w - globalThis.bobCallWidth) > 2) throw new Error(`call size not remembered: ${globalThis.bobCallWidth} -> ${w}`);
-    // His old page said goodbye as it left, so nobody is left holding a ghost: Alice, Carol and the new Bob.
+    // A refresh replaces his old seat without leaving a ghost: Alice, Carol and the new Bob.
     await alice.waitForFunction(() => document.querySelectorAll("header span[title]").length === 3, null, { timeout: 5_000 });
     for (const p of [alice, bob]) {
       await p.waitForFunction(

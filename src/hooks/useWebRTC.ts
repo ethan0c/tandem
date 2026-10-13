@@ -96,9 +96,11 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
           if (!Array.from(pcs.current.values()).includes(pc)) continue;
           const struggling = monitor.quality.sample(stats, pc.connectionState);
           poor ||= struggling;
-          if (monitor.applied !== monitor.quality.limited) {
-            await setCameraQuality(pc, monitor.quality.limited);
-            monitor.applied = monitor.quality.limited;
+          // A hidden tab gets less CPU, and nobody is looking at our self-view: send the light camera.
+          const light = monitor.quality.limited || document.visibilityState === "hidden";
+          if (monitor.applied !== light) {
+            await setCameraQuality(pc, light);
+            monitor.applied = light;
           }
         } catch {
           poor ||= monitor.quality.poor;

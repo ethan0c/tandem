@@ -3,13 +3,9 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { AppSocket } from "@/lib/socket";
 import type { Member, ScreenSignal, Source } from "@/lib/types";
+import { ShareAdaptation, setShareQuality } from "@/lib/connection-quality";
 import { iceServers, preferCodecs } from "./useWebRTC";
 
-/**
- * Ceiling, not a target: the encoder uses what the link can carry. 20 Mbps covers 4K at 30 fps in
- * VP9; Chrome's own default is ~4 Mbps, which turns anything above 1080p to mush.
- */
-const MAX_BITRATE = 20_000_000;
 /** A viewer with no picture asks the sharer again this often, in case a request or offer was lost. */
 const REQUEST_RETRY_MS = 5_000;
 
@@ -21,10 +17,12 @@ interface Options {
   changeSource: (s: Source | null) => void;
 }
 
-/** Sharer side: the connection to one viewer and the nonce its offer carried. */
+/** Sharer side: the connection to one viewer, the nonce its offer carried, and its quality step. */
 interface Outbound {
   pc: RTCPeerConnection;
   nonce: number;
+  adaptation: ShareAdaptation;
+  tier: number;
 }
 
 /**
@@ -119,25 +117,42 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
         if (sendPcs.current.get(peerId)?.pc === pc) dropViewer(peerId);
       });
       const nonce = ++nonceRef.current;
-      sendPcs.current.set(peerId, { pc, nonce });
+      sendPcs.current.set(peerId, { pc, nonce, adaptation: new ShareAdaptation(), tier: 0 });
       for (const track of stream.getTracks()) pc.addTrack(track, stream);
       preferCodecs(pc);
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      for (const sender of pc.getSenders()) {
-        if (sender.track?.kind !== "video") continue;
-        const params = sender.getParameters();
-        if (!params.encodings?.length) continue;
-        params.encodings[0].maxBitrate = MAX_BITRATE;
-        params.encodings[0].scaleResolutionDownBy = 1;
-        // Stay sharp on a tight link: shed frames rather than resolution.
-        params.degradationPreference = "maintain-resolution";
-        await sender.setParameters(params).catch(() => {});
-      }
+      // Start at the top step; the adaptation loop steps down if the link or the CPU can't keep up.
+      await setShareQuality(pc, 0);
       send(peerId, { type: "offer", sdp: offer, nonce });
     },
     [dropViewer, newPc, send],
   );
+
+  // Each viewer's connection adapts on its own: one partner on weak Wi-Fi doesn't blur the others.
+  useEffect(() => {
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    async function poll() {
+      for (const out of Array.from(sendPcs.current.values())) {
+        if (cancelled) return;
+        if (out.pc.connectionState !== "connected") continue;
+        try {
+          const tier = out.adaptation.sample(await out.pc.getStats());
+          if (cancelled) return;
+          if (tier !== out.tier) {
+            out.tier = tier;
+            await setShareQuality(out.pc, tier);
+          }
+        } catch {
+          // A connection closing mid-poll is dropped elsewhere.
+        }
+      }
+      if (!cancelled) timer = setTimeout(poll, 2000);
+    }
+    timer = setTimeout(poll, 2000);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, []);
 
   // Signalling.
   useEffect(() => {

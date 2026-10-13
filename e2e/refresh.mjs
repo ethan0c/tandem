@@ -44,7 +44,8 @@ try {
   await healthy(alice); await healthy(bob);
   for (let i = 0; i < 3; i++) {
     const oldTab = await bob.evaluate(() => sessionStorage.getItem('tandem:tab-id'));
-    await bob.reload(); await join(bob, 'Bob');
+    await bob.reload();
+    await bob.getByRole('link', { name: 'Leave room', exact: true }).waitFor();
     assert.equal(await bob.evaluate(() => sessionStorage.getItem('tandem:tab-id')), oldTab);
     await healthy(alice); await healthy(bob);
     console.log(`PASS: refresh ${i + 1}, two members and one remote camera per person`);

@@ -139,6 +139,7 @@ export function Session({ roomId, name, localStream }: Props) {
         roomUrl={roomUrl}
         members={room.members}
         selfId={room.selfId}
+        hostId={room.hostId}
         status={room.status}
         drift={isScreen ? null : drift}
         isFullscreen={isFullscreen}

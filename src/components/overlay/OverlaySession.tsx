@@ -5,6 +5,7 @@ import { Check, Copy, LogOut, Mic, MicOff, Video, VideoOff } from "lucide-react"
 import { CallVolumeControl } from "@/components/CallVolumeControl";
 import { ConnectionNotice } from "@/components/ConnectionNotice";
 import { ChimeToggle } from "@/components/ChimeToggle";
+import { Participants } from "@/components/Participants";
 import { LogoMark } from "@/components/Logo";
 import { StreamVideo } from "@/components/room/StreamVideo";
 import { useReleaseStream } from "@/hooks/useReleaseStream";
@@ -138,19 +139,7 @@ export function OverlaySession({ roomId, name, localStream, embedded }: Props) {
         </Toggle>
         <CallVolumeControl buttonClassName="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20" />
         <ChimeToggle className="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 [&_svg]:size-3.5" />
-        <div className="ml-auto flex -space-x-1.5">
-          {room.members.map((m) => (
-            <span
-              key={m.id}
-              title={m.name}
-              className={`flex size-6 items-center justify-center rounded-full border-2 border-ink text-[10px] font-semibold ${
-                m.id === room.selfId ? "bg-brand-600" : "bg-brand-900"
-              }`}
-            >
-              {m.name.slice(0, 1).toUpperCase()}
-            </span>
-          ))}
-        </div>
+        <div className="ml-auto"><Participants members={room.members} selfId={room.selfId} hostId={room.hostId} compact /></div>
         <button
           onClick={() => post({ type: "tandem:close" })}
           className="ml-1 flex h-7 items-center gap-1 rounded-full border border-white/10 px-2 text-[11px] text-zinc-300 transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-white"

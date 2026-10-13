@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Check, Copy, LogOut, Maximize, MessageSquare, Minimize } from "lucide-react";
 import { ChimeToggle } from "@/components/ChimeToggle";
+import { Participants } from "@/components/Participants";
 import { HeaderFrame } from "@/components/HeaderFrame";
 import { Logo } from "@/components/Logo";
 import type { Member } from "@/lib/types";
@@ -14,6 +15,7 @@ interface Props {
   roomUrl: string;
   members: Member[];
   selfId: string | null;
+  hostId?: string | null;
   status: RoomStatus;
   drift: number | null;
   isFullscreen: boolean;
@@ -23,7 +25,7 @@ interface Props {
   chat?: { open: boolean; unread: number; onToggle: () => void };
 }
 
-export function TopBar({ roomId, roomUrl, members, selfId, status, drift, isFullscreen, onToggleFullscreen, visible, chat }: Props) {
+export function TopBar({ roomId, roomUrl, members, selfId, hostId, status, drift, isFullscreen, onToggleFullscreen, visible, chat }: Props) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -52,9 +54,9 @@ export function TopBar({ roomId, roomUrl, members, selfId, status, drift, isFull
       }`}
     >
       <HeaderFrame>
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <Link href="/" className="shrink-0" aria-label="Tandem home">
-            <Logo size={24} light />
+            <Logo size={24} light className="[&>span]:hidden sm:[&>span]:inline" />
           </Link>
           <button
             onClick={copy}
@@ -67,20 +69,8 @@ export function TopBar({ roomId, roomUrl, members, selfId, status, drift, isFull
           </button>
           <span className={`hidden rounded-full px-2.5 py-1 text-[11px] font-medium sm:inline ${sync.tone}`}>{sync.text}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden -space-x-2 sm:flex">
-            {members.map((m) => (
-              <span
-                key={m.id}
-                title={m.name}
-                className={`flex size-7 items-center justify-center rounded-full border-2 border-ink text-[11px] font-semibold ${
-                  m.id === selfId ? "bg-brand-600" : "bg-brand-900"
-                }`}
-              >
-                {m.name.slice(0, 1).toUpperCase()}
-              </span>
-            ))}
-          </div>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <Participants members={members} selfId={selfId} hostId={hostId} />
           {chat && (
             <button
               onClick={chat.onToggle}

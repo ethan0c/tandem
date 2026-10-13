@@ -235,12 +235,7 @@ try {
 
   await step("A reconnect keeps the chat (Bob reloads and sees the history)", async () => {
     await bob.reload({ waitUntil: "domcontentloaded" });
-    await bob.waitForFunction(() => {
-      const b = document.querySelector('button[aria-label*="microphone"]');
-      return b && !b.disabled;
-    }, null, { timeout: STEP_MS });
-    await bob.getByLabel("Your name").fill("Bob");
-    await bob.getByRole("button", { name: "Join room" }).click();
+    await bob.getByRole("link", { name: "Leave room", exact: true }).waitFor({ timeout: STEP_MS });
     await bob.getByText("Ready", { exact: true }).waitFor({ timeout: STEP_MS });
     await openChat(bob);
     await bob.waitForFunction(() => document.querySelectorAll('[data-testid="chat-message"]').length === 6, null, { timeout: STEP_MS });
