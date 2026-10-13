@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useClientValue } from "@/hooks/useClientValue";
+import { reloadSession, saveSession } from "@/lib/last-room";
 import Link from "next/link";
 import { ArrowRight, Mic, MicOff, Video, VideoOff } from "lucide-react";
 import { HeaderFrame } from "@/components/HeaderFrame";
@@ -43,6 +44,7 @@ export function JoinCard({
   useEffect(() => {
     let cancelled = false;
     let acquired: MediaStream | null = null;
+    const resume = reloadSession(roomId);
     (async () => {
       try {
         acquired = await navigator.mediaDevices.getUserMedia({
@@ -62,12 +64,18 @@ export function JoinCard({
         return;
       }
       setStream(acquired);
+      if (resume) {
+        acquired?.getVideoTracks().forEach((track) => { track.enabled = resume.camOn; });
+        acquired?.getAudioTracks().forEach((track) => { track.enabled = resume.micOn; });
+        handedOff.current = true;
+        onJoin({ name: resume.name, stream: acquired });
+      }
     })();
     return () => {
       cancelled = true;
       if (!handedOff.current) acquired?.getTracks().forEach((t) => t.stop());
     };
-  }, []);
+  }, [roomId, onJoin]);
 
   function toggleCam() {
     const next = !camOn;
@@ -89,6 +97,7 @@ export function JoinCard({
       /* ignore */
     }
     handedOff.current = true;
+    saveSession({ roomId, name: clean, camOn, micOn, active: true });
     onJoin({ name: clean, stream });
   }
 

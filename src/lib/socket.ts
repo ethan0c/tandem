@@ -36,11 +36,11 @@ let socket: AppSocket | null = null;
  * and delivered after the page has gone. The server frees our seat at once instead of holding it
  * for a reconnect that is not coming.
  */
-export function sendGoodbye() {
+export function sendGoodbye(reconnecting = false) {
   const base = (process.env.NEXT_PUBLIC_SOCKET_URL ?? "").replace(/\/$/, "");
   try {
     // text/plain keeps this a "simple" request: no CORS preflight, so it is sent cross-origin too.
-    navigator.sendBeacon(`${base}/leave`, new Blob([JSON.stringify({ clientId })], { type: "text/plain" }));
+    navigator.sendBeacon(`${base}/leave`, new Blob([JSON.stringify({ clientId, reconnecting })], { type: "text/plain" }));
   } catch {
     /* no beacon support: the socket's own disconnect is the fallback */
   }

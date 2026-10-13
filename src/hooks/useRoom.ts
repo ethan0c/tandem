@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { playChime } from "@/lib/chime";
+import { finishSession, rememberRoom } from "@/lib/last-room";
 import { clientId, tabId, getSocket, sendGoodbye, type AppSocket } from "@/lib/socket";
 import { CHAT_HISTORY, type ChatMessage, type Member, type PlaybackState, type Source, type SyncReason } from "@/lib/types";
 
@@ -46,6 +47,7 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     const socket = getSocket();
     socketRef.current = socket;
     let active = true;
+    let pageHiding = false;
 
     const push = (playback: PlaybackState, from: string, reason: SyncReason) =>
       setRemote({ playback, from, reason, seq: ++seqRef.current });
@@ -87,6 +89,7 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       // The same clientId every time, so a reconnect lands us back in our own seat.
       socket.emit("room:join", { roomId, name, clientId, tabId }, (ack) => {
         if (!active) return;
+        rememberRoom(roomId);
         if (dropped) playChime("reconnect");
         dropped = false;
         offsetRef.current = ack.serverNow - Date.now();
@@ -112,6 +115,10 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       setMembers((prev) => prev.filter((p) => p.id !== id));
       setHostId(h);
     };
+    const onReplaced = ({ id, member, hostId: h }: { id: string; member: Member; hostId: string | null }) => {
+      setMembers((prev) => [...prev.filter((m) => m.id !== id && m.id !== member.id), member]);
+      setHostId(h);
+    };
     const onSync = ({ playback, from, reason }: { playback: PlaybackState; from: string; reason: SyncReason }) =>
       push(playback, from, reason);
     const onSource = ({ source: s, playback, from }: { source: Source | null; playback: PlaybackState; from: string }) => {
@@ -134,15 +141,21 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     // Leaving the page: say goodbye so the server frees our seat at once instead of holding it
     // for a reconnect that is not coming. If the page comes back from the back/forward cache, rejoin.
     const onPageHide = () => {
-      socket.disconnect();
-      sendGoodbye();
+      pageHiding = true;
+      rememberRoom(roomId);
+      sendGoodbye(true);
+      socket.io.reconnection(false);
+      socket.io.engine?.close();
     };
     const onPageShow = () => {
-      if (!socket.active) socket.connect();
+      pageHiding = false;
+      socket.io.reconnection(true);
+      socket.connect();
     };
 
     socket.on("member:joined", onJoined);
     socket.on("member:left", onLeft);
+    socket.on("member:replaced", onReplaced);
     socket.on("sync:state", onSync);
     socket.on("source:changed", onSource);
     socket.on("chat:message", onMessage);
@@ -159,12 +172,15 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       window.removeEventListener("pageshow", onPageShow);
       socket.off("member:joined", onJoined);
       socket.off("member:left", onLeft);
+      socket.off("member:replaced", onReplaced);
       socket.off("sync:state", onSync);
       socket.off("source:changed", onSource);
       socket.off("chat:message", onMessage);
       socket.off("disconnect", onDisconnect);
       socket.off("connect", join);
       socket.disconnect();
+      socket.io.reconnection(true);
+      if (!pageHiding) finishSession(roomId);
       socketRef.current = null;
     };
   }, [roomId, name]);

@@ -74,6 +74,7 @@ export type ScreenSignal =
 export interface ServerToClientEvents {
   "member:joined": (member: Member) => void;
   "member:left": (payload: { id: string; hostId: string | null }) => void;
+  "member:replaced": (payload: { id: string; member: Member; hostId: string | null }) => void;
   "sync:state": (payload: {
     playback: PlaybackState;
     from: string;

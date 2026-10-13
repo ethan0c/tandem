@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { JoinCard, type JoinResult } from "@/components/room/JoinCard";
 import { useClientValue } from "@/hooks/useClientValue";
@@ -9,6 +9,7 @@ import { OverlaySession } from "./OverlaySession";
 /** The page the browser extension embeds in its floating panel. */
 export function Overlay({ roomId }: { roomId: string }) {
   const [session, setSession] = useState<JoinResult | null>(null);
+  useLayoutEffect(() => () => setSession(null), []);
   const rootRef = useRef<HTMLDivElement>(null);
   const embedded = useClientValue(() => window.parent !== window, false);
 

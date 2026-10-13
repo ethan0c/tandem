@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from "react"
 import type { AppSocket } from "@/lib/socket";
 import type { Member, SignalData } from "@/lib/types";
 import { ConnectionQuality, setCameraQuality } from "@/lib/connection-quality";
+import { rememberMedia } from "@/lib/last-room";
 
 export interface Peer {
   id: string;
@@ -74,6 +75,7 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
   const [micOn, setMicOn] = useState(() => localStream?.getAudioTracks()[0]?.enabled ?? true);
   const [camOn, setCamOn] = useState(() => localStream?.getVideoTracks()[0]?.enabled ?? true);
   const [poorConnection, setPoorConnection] = useState(false);
+  useEffect(() => { rememberMedia(camOn, micOn); }, [camOn, micOn]);
 
   useEffect(() => {
     const monitors = new Map<RTCPeerConnection, { quality: ConnectionQuality; applied: boolean | null }>();
