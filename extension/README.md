@@ -23,7 +23,8 @@ visible.
 ## Supported sites
 
 Domains are listed under `content_scripts.matches` in `manifest.json`. Any site with a plain HTML5 `<video>` (no DRM)
-should work once its domain is added. `http://127.0.0.1/*` is there for the local test page and can be removed.
+should work once its domain is added. For local testing against a page on `http://127.0.0.1`, add `"http://127.0.0.1/*"` to
+the list temporarily.
 
 ## How it talks to the app
 

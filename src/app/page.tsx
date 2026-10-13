@@ -8,7 +8,7 @@ import { StartRoom } from "@/components/landing/StartRoom";
 import { Preview } from "@/components/landing/Preview";
 
 const POSTERS = "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=1400&q=80";
-const FIGURE = "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1000&q=80";
+const TOGETHER = "https://images.unsplash.com/photo-1601933470096-0e34634ffcde?w=1200&q=80";
 
 const features = [
   {
@@ -62,11 +62,7 @@ export default function Home() {
         {/* Hero */}
         <section className="hero-bg relative">
           <div className="mx-auto flex max-w-6xl flex-col items-center px-5 pb-16 pt-20 text-center sm:pt-24">
-            <span className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-              <span className="size-1.5 rounded-full bg-brand-500 animate-pulse-soft" />
-              Watch party + video call, in one tab
-            </span>
-            <h1 className="animate-fade-up mt-6 max-w-3xl text-balance text-5xl font-bold tracking-tight text-zinc-900 [animation-delay:60ms] sm:text-6xl">
+            <h1 className="animate-fade-up max-w-3xl text-balance text-5xl font-bold tracking-tight text-zinc-900 [animation-delay:60ms] sm:text-6xl">
               Watch anime together,{" "}
               <span className="bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent">
                 face to face.
@@ -126,11 +122,11 @@ export default function Home() {
               </div>
             </div>
             <div className="relative min-h-72 overflow-hidden rounded-3xl border-2 border-zinc-200 border-b-[6px] md:col-span-2">
-              <Image src={FIGURE} alt="Anime figure under red light" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" />
+              <Image src={TOGETHER} alt="Two people laughing together at a laptop" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/30 to-transparent" />
               <div className="absolute right-5 top-5 w-28 overflow-hidden rounded-xl border border-white/20 bg-zinc-900/80 shadow-xl backdrop-blur">
                 <div className="relative aspect-[4/3]">
-                  <Image src="https://i.pravatar.cc/200?img=32" alt="Partner on camera" fill sizes="112px" className="object-cover" />
+                  <Image src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=225&fit=crop&crop=faces&q=80" alt="Partner on camera" fill sizes="112px" className="object-cover" />
                 </div>
               </div>
               <div className="absolute bottom-0 p-7 text-white">

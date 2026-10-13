@@ -2,8 +2,8 @@ import Image from "next/image";
 import { Mic, Pause, RotateCcw, RotateCw, Video, Volume2 } from "lucide-react";
 
 const STAGE = "https://images.unsplash.com/photo-1559628233-100c798642d4?w=1600&q=80";
-const PARTNER = "https://i.pravatar.cc/300?img=47";
-const ME = "https://i.pravatar.cc/200?img=12";
+const PARTNER = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=450&fit=crop&crop=faces&q=80";
+const ME = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=225&fit=crop&crop=faces&q=80";
 
 /** Static mock of the room UI used on the landing page. */
 export function Preview() {

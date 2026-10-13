@@ -3,24 +3,39 @@
   "name": "Tandem – watch together",
   "version": "0.1.0",
   "description": "Sync playback on anime sites with your partner and keep a video call floating on top.",
-  "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
-  "permissions": ["storage"],
-  "background": { "service_worker": "background.js" },
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_title": "Tandem",
     "default_popup": "popup.html",
-    "default_icon": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" }
+    "default_icon": {
+      "16": "icons/16.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
   },
   "content_scripts": [
     {
       "matches": [
         "*://*.miruro.tv/*",
         "*://*.miruro.to/*",
-        "*://*.miruro.online/*",
-        "http://127.0.0.1/*"
+        "*://*.miruro.online/*"
       ],
-      "js": ["content.js"],
-      "css": ["content.css"],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
       "run_at": "document_idle",
       "all_frames": true
     }
