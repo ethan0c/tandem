@@ -50,6 +50,8 @@ export function Preview() {
         />
         <div className="hidden lg:contents">
           <FloatingCall
+            poorConnection={false}
+            turnCameraOff={() => {}}
             containerRef={containerRef}
             localStream={null}
             peers={[]}

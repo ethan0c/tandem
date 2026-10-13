@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, Copy, LogOut, Mic, MicOff, Video, VideoOff } from "lucide-react";
 import { CallVolumeControl } from "@/components/CallVolumeControl";
+import { ConnectionNotice } from "@/components/ConnectionNotice";
 import { ChimeToggle } from "@/components/ChimeToggle";
 import { LogoMark } from "@/components/Logo";
 import { StreamVideo } from "@/components/room/StreamVideo";
@@ -127,6 +128,7 @@ export function OverlaySession({ roomId, name, localStream, embedded }: Props) {
         )}
       </div>
 
+      <ConnectionNotice poor={rtc.poorConnection} cameraOn={hasLocalVideo && rtc.camOn} onTurnCameraOff={rtc.turnCameraOff} />
       <div className="flex items-center gap-1.5 px-2.5 py-2">
         <Toggle on={rtc.micOn} onClick={rtc.toggleMic} disabled={!hasLocalAudio} label={rtc.micOn ? "Mute" : "Unmute"}>
           {rtc.micOn ? <Mic className="size-3.5" /> : <MicOff className="size-3.5" />}

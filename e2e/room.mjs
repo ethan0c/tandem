@@ -277,7 +277,7 @@ try {
     await heardChime(alice, aliceNotes);
     await waitHeader(alice, "Ready");
     if (await alice.getByText("Nothing playing yet").count()) throw new Error("Alice fell back to the empty state");
-    await alice.getByText("Sharing a browser tab").waitFor({ timeout: 2_000 });
+    await alice.getByRole("button", { name: "Stop sharing" }).waitFor({ timeout: 2_000 });
     // Bob kept the very same stream and it is still moving: nothing was torn down or rebuilt.
     if ((await stageTrackId(bob)) !== bobTrack) throw new Error("Bob's stream was rebuilt");
     await stageAdvances(bob, bobFrames);

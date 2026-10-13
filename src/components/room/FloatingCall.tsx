@@ -3,6 +3,7 @@
 import { useRef, useState, type RefObject } from "react";
 import { Check, Copy, Mic, MicOff, Minimize2, Maximize2, Video, VideoOff } from "lucide-react";
 import { CallVolumeControl } from "@/components/CallVolumeControl";
+import { ConnectionNotice } from "@/components/ConnectionNotice";
 import { useClientValue } from "@/hooks/useClientValue";
 import { useDraggable } from "@/hooks/useDraggable";
 import { useCallOutputVolume } from "@/lib/call-volume";
@@ -45,9 +46,11 @@ interface Props {
   toggleMic: () => void;
   toggleCam: () => void;
   roomUrl: string;
+  poorConnection: boolean;
+  turnCameraOff: () => void;
 }
 
-export function FloatingCall({ containerRef, localStream, peers, members, micOn, camOn, toggleMic, toggleCam, roomUrl }: Props) {
+export function FloatingCall({ containerRef, localStream, peers, members, micOn, camOn, toggleMic, toggleCam, roomUrl, poorConnection, turnCameraOff }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [minimized, setMinimized] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -231,6 +234,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
           )}
         </div>
       )}
+      <ConnectionNotice poor={poorConnection} cameraOn={hasLocalVideo && camOn} onTurnCameraOff={turnCameraOff} />
       <div className="flex items-center justify-between px-2 py-1.5">
         <div className="flex items-center gap-1.5">
           <CallButton onClick={toggleMic} active={micOn} disabled={!hasLocalAudio} label={micOn ? "Mute" : "Unmute"}>

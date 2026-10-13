@@ -155,6 +155,8 @@ export function Session({ roomId, name, localStream }: Props) {
         camOn={rtc.camOn}
         toggleMic={rtc.toggleMic}
         toggleCam={rtc.toggleCam}
+        poorConnection={rtc.poorConnection}
+        turnCameraOff={rtc.turnCameraOff}
         roomUrl={roomUrl}
       />
 

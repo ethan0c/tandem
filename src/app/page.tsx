@@ -24,7 +24,11 @@ const streamingSites: [name: string, slug: string, invert?: boolean][] = [
   ["Peacock", "peacock"],
 ];
 
-const sources = ["Miruro, with the extension", "A file you both have", "Sharing a tab"];
+const ways = [
+  ["Miruro, with the extension", "You both open the episode on Miruro. The extension keeps the two players in sync and adds the call."],
+  ["A file you both have", "Each of you opens your own copy of the video. Tandem lines up playback between them."],
+  ["Share a tab", "One of you shares the tab with audio. The other watches the stream, and either can pause."],
+];
 
 const faq = [
   {
@@ -108,7 +112,7 @@ export default function Home() {
       </section>
 
       {/* Works with */}
-      <section id="sources" className="scroll-mt-10 bg-ink pb-14 pt-10 sm:pb-20 sm:pt-16">
+      <section id="sources" className="scroll-mt-10 bg-ink pb-14 pt-4 sm:pb-20 sm:pt-6">
         <div data-reveal className="mx-auto site-width site-gutter">
           <h2 className="font-display text-3xl font-medium tracking-[-0.03em] sm:text-4xl">Works with</h2>
           <p className="mt-3 text-sm text-zinc-400">Watch on your usual site with the Tandem extension.</p>
@@ -127,9 +131,19 @@ export default function Home() {
             ))}
           </ul>
           <p className="mt-5 text-sm text-zinc-500">Support for these sites is experimental. Both viewers need access to the same episode; ads can interrupt sync.</p>
-          <ul className="source-chips mt-6 flex flex-wrap gap-3">
-            {sources.map((source) => (
-              <li key={source} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300">{source}</li>
+        </div>
+      </section>
+
+      {/* Three ways to watch */}
+      <section className="border-t border-white/10 bg-ink">
+        <div data-reveal className="mx-auto site-width site-gutter py-16 lg:py-20">
+          <h2 className="font-display text-3xl font-medium tracking-[-0.03em] sm:text-4xl">Three ways to watch</h2>
+          <ul className="mt-10 grid gap-10 md:grid-cols-3 md:gap-8">
+            {ways.map(([t, b]) => (
+              <li key={t} className="border-t border-white/15 pt-5">
+                <h3 className="font-display text-lg font-medium">{t}</h3>
+                <p className="mt-2 leading-relaxed text-zinc-400">{b}</p>
+              </li>
             ))}
           </ul>
         </div>
@@ -139,8 +153,7 @@ export default function Home() {
       <section id="sync" className="scroll-mt-20 border-t border-white/10 bg-ink">
         <div data-reveal className="mx-auto grid site-width gap-12 site-gutter py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28">
           <div>
-            <p className="font-sans text-[11px] font-medium uppercase tracking-[0.12em] text-zinc-500">How it works</p>
-            <h2 className="mt-4 font-display text-4xl font-medium leading-tight tracking-[-0.03em]">Pause, skip, and catch up together.</h2>
+            <h2 className="font-display text-4xl font-medium leading-tight tracking-[-0.03em]">Pause, skip, and catch up together.</h2>
             <p className="mt-5 max-w-sm leading-relaxed text-zinc-400">Tandem adjusts playback when one of you falls behind, including after buffering.</p>
           </div>
           <ol className="divide-y divide-white/10 border-y border-white/10">
@@ -162,24 +175,23 @@ export default function Home() {
       </section>
 
       {/* Extension */}
-      <section className="bg-ink pb-20 lg:pb-28">
-        <div data-reveal className="mx-auto site-width site-gutter">
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-ink-800 px-6 py-12 text-white sm:px-12 sm:py-16">
-            <p className="font-sans text-[11px] font-medium uppercase tracking-[0.12em] text-zinc-500">The extension</p>
-            <h2 className="mt-4 font-display text-4xl font-medium leading-[1] tracking-[-0.03em] text-white sm:text-5xl">
-              Watch on the site you use.
+      <section className="extension-shell relative overflow-hidden text-white">
+        <div data-reveal className="relative mx-auto grid site-width gap-10 site-gutter py-20 lg:grid-cols-[1.2fr_0.8fr] lg:items-end lg:py-28">
+          <div>
+            <h2 className="font-display text-4xl font-medium leading-[1] tracking-[-0.03em] sm:text-5xl lg:text-6xl">
+              Watch on the site you already use.
             </h2>
-            <p className="mt-5 max-w-md leading-relaxed text-zinc-400">
+            <p className="mt-6 max-w-lg text-lg leading-relaxed text-brand-100">
               Use the extension on Miruro, or try experimental support for Netflix, Prime Video, YouTube, Disney+, Hulu, Max, Crunchyroll, Apple TV+, Paramount+, and Peacock.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href={GITHUB}>
-                Get the extension
-              </ButtonLink>
-              <ButtonLink href="#faq" variant="ghost">
-                Which sites work?
-              </ButtonLink>
-            </div>
+          </div>
+          <div className="flex flex-wrap gap-3 lg:justify-end">
+            <ButtonLink href={GITHUB} variant="light" size="lg">
+              Get the extension
+            </ButtonLink>
+            <ButtonLink href="#faq" variant="ghost" size="lg">
+              Which sites work?
+            </ButtonLink>
           </div>
         </div>
       </section>
@@ -203,7 +215,7 @@ export default function Home() {
       </section>
 
       {/* Last call */}
-      <section className="border-y border-white/10 bg-ink text-white">
+      <section className="cta-shell border-y border-white/10 text-white">
         <div data-reveal className="mx-auto flex site-width flex-col items-start gap-8 site-gutter py-20 lg:flex-row lg:items-end lg:justify-between">
           <h2 className="font-display text-4xl font-medium leading-tight tracking-[-0.03em] sm:text-5xl">
             Start watching together.

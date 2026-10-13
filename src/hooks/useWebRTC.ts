@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { AppSocket } from "@/lib/socket";
 import type { Member, SignalData } from "@/lib/types";
+import { ConnectionQuality, setCameraQuality } from "@/lib/connection-quality";
 
 export interface Peer {
   id: string;
@@ -72,6 +73,42 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
 
   const [micOn, setMicOn] = useState(() => localStream?.getAudioTracks()[0]?.enabled ?? true);
   const [camOn, setCamOn] = useState(() => localStream?.getVideoTracks()[0]?.enabled ?? true);
+  const [poorConnection, setPoorConnection] = useState(false);
+
+  useEffect(() => {
+    const monitors = new Map<RTCPeerConnection, { quality: ConnectionQuality; applied: boolean | null }>();
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    async function poll() {
+      let poor = false;
+      const current = new Set(pcs.current.values());
+      for (const pc of monitors.keys()) if (!current.has(pc)) monitors.delete(pc);
+      for (const pc of current) {
+        if (cancelled) return;
+        if (pc.connectionState === "closed" || pc.connectionState === "new" || pc.connectionState === "connecting") continue;
+        const monitor = monitors.get(pc) ?? { quality: new ConnectionQuality(), applied: null };
+        monitors.set(pc, monitor);
+        try {
+          const stats = await pc.getStats();
+          if (cancelled) return;
+          const struggling = monitor.quality.sample(stats, pc.connectionState);
+          poor ||= struggling;
+          if (monitor.applied !== struggling) {
+            await setCameraQuality(pc, struggling);
+            monitor.applied = struggling;
+          }
+        } catch {
+          poor ||= monitor.quality.poor;
+        }
+      }
+      if (!cancelled) {
+        setPoorConnection(poor);
+        timer = setTimeout(poll, 2000);
+      }
+    }
+    timer = setTimeout(poll, 2000);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, []);
 
   const send = useCallback(
     (to: string, data: SignalData) => socketRef.current?.emit("rtc:signal", { to, data }),
@@ -248,5 +285,10 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
     setCamOn(next);
   }, [camOn]);
 
-  return { peers: Object.values(peers), micOn, camOn, toggleMic, toggleCam };
+  const turnCameraOff = useCallback(() => {
+    localRef.current?.getVideoTracks().forEach((track) => { track.enabled = false; });
+    setCamOn(false);
+  }, []);
+
+  return { peers: Object.values(peers), micOn, camOn, toggleMic, toggleCam, poorConnection, turnCameraOff };
 }

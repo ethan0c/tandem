@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 }
 
 @theme {
@@ -45,7 +45,7 @@ html, body {
 body {
   background: var(--color-ink);
   color: #fff;
-  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -148,7 +148,6 @@ html { scroll-behavior: smooth; }
 .room-link-field:focus-within { box-shadow: 0 0 0 4px rgb(255 255 255 / 0.08); }
 .btn3d svg { transition: transform 180ms ease; }
 .form-error { animation: fade-up 180ms ease-out both; }
-.source-chips li { transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease; }
 .landing nav:not(.hero-nav) a { position: relative; }
 .landing nav:not(.hero-nav) a::after {
   content: "";
@@ -180,7 +179,6 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   .btn3d-brand:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--btn-shadow); }
   .btn3d-brand:active { transform: translateY(4px); box-shadow: 0 0 0 var(--btn-shadow); }
   .btn3d-icon:hover svg { transform: translateX(2px); }
-  .source-chips li:hover { transform: translateY(-2px); border-color: rgb(255 255 255 / 0.25); }
   .room-preview:hover > div { border-color: rgb(255 255 255 / 0.2); }
   .landing nav:not(.hero-nav) a:hover::after { transform: scaleX(1); }
   details.faq > summary:hover { color: #d4d4d8; }
@@ -193,7 +191,7 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
     transition-duration: 0.01ms !important;
   }
   [data-visible="false"] { opacity: 1; transform: none; }
-  .btn3d-brand:hover, .source-chips li:hover { transform: none; }
+  .btn3d-brand:hover { transform: none; }
 }
 
 .tandem-loader { overflow: visible; }
@@ -225,29 +223,54 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 .hero-shell {
   display: flex;
   flex-direction: column;
-  background: var(--color-ink);
+  background:
+    radial-gradient(80% 55% at 50% -12%, rgb(139 92 246 / 0.55), transparent 70%),
+    radial-gradient(45% 40% at 8% 18%, rgb(67 56 202 / 0.4), transparent 70%),
+    radial-gradient(40% 40% at 92% 26%, rgb(192 38 211 / 0.22), transparent 70%),
+    linear-gradient(to bottom, #170a2e 0%, #0f0820 38%, var(--color-ink) 78%);
+}
+/* The extension section is the one solid purple surface on the page. */
+.extension-shell {
+  background:
+    radial-gradient(60% 80% at 100% 100%, rgb(217 70 239 / 0.35), transparent 70%),
+    radial-gradient(50% 70% at 0% 0%, rgb(99 102 241 / 0.45), transparent 70%),
+    linear-gradient(135deg, var(--color-brand-700), var(--color-brand-900));
+}
+.extension-shell .btn3d-ghost { background: rgb(255 255 255 / 0.12); border-color: rgb(255 255 255 / 0.2); }
+.cta-shell {
+  background:
+    radial-gradient(70% 90% at 50% 120%, rgb(124 58 237 / 0.35), transparent 70%),
+    var(--color-ink);
 }
 /* A curved horizon under the hero: the top sliver of a wide ellipse, faded at both ends. */
 .hero-horizon {
   position: relative;
-  height: 96px;
-  margin-top: clamp(40px, 6vh, 64px);
+  height: 200px;
+  margin-top: clamp(24px, 4vh, 40px);
   overflow: hidden;
   mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
   pointer-events: none;
 }
+/* Soft atmosphere above the line, fading up into the hero. */
+.hero-horizon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 100% at 50% 100%, rgb(139 92 246 / 0.22), transparent 70%);
+}
+/* The planet edge: the top of a wide ellipse, with a haze that fades to black well before the clip. */
 .hero-horizon::before {
   content: "";
   position: absolute;
   left: 50%;
-  top: 12px;
+  top: 36px;
   width: 160vw;
-  height: 600px;
+  height: 800px;
   transform: translateX(-50%);
   border-radius: 50%;
-  border-top: 2px solid var(--color-brand-500);
-  box-shadow: 0 -24px 60px -16px rgb(139 92 246 / 0.55);
-  background: linear-gradient(to bottom, rgb(139 92 246 / 0.07), transparent 20%);
+  border-top: 2px solid rgb(167 139 250 / 0.9);
+  box-shadow: 0 -16px 40px -8px rgb(139 92 246 / 0.5);
+  background: linear-gradient(to bottom, rgb(139 92 246 / 0.16), rgb(139 92 246 / 0.04) 60px, transparent 130px);
 }
 .site-header { min-height: 72px; flex-shrink: 0; }
 .hero-body { gap: clamp(40px, 6vh, 64px); padding-top: clamp(32px, 8vh, 88px); padding-bottom: 0; }
@@ -257,8 +280,8 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 .hero-nav a:hover, .hero-nav a:focus-visible { color: white; }
 .hero-nav a:focus-visible { outline: 2px solid rgb(255 255 255 / 0.5); outline-offset: 2px; }
 @media (max-width: 767px) {
-  .hero-horizon { height: 64px; margin-top: 32px; }
-  .hero-horizon::before { width: 280vw; }
+  .hero-horizon { height: 120px; margin-top: 24px; }
+  .hero-horizon::before { width: 280vw; top: 24px; }
   .site-header { min-height: 64px; }
   .hero-body { gap: 36px; padding-top: 28px; }
   .hero-title { font-size: clamp(2.4rem, 11vw, 3rem); }
