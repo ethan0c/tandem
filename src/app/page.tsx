@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { CodeXml, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { ButtonLink } from "@/components/Button";
 import { Footer } from "@/components/landing/Footer";
@@ -68,46 +68,41 @@ export default function Home() {
   return (
     <LandingMotion>
       {/* Theater */}
-      <section className="hero-shell bg-ink text-white">
-        <header className="hero-header mx-auto flex w-full site-width items-center justify-between gap-4 site-gutter">
+      <section className="hero-shell relative overflow-hidden bg-ink text-white">
+        <div aria-hidden="true" className="hero-glow" />
+        <header className="hero-header relative mx-auto flex site-width items-center justify-between gap-6 site-gutter">
           <Link href="/" aria-label="Tandem home" className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-brand-400 focus-visible:outline-offset-4">
-            <Logo size={26} light />
+            <Logo size={24} light />
           </Link>
-          <nav aria-label="Main navigation" className="hero-nav hidden items-center gap-1 rounded-xl border border-white/10 bg-white/5 p-1 text-xs text-zinc-300 md:flex">
-            <a href="#sync">How it works</a>
-            <a href="#sources">Works with</a>
-            <a href="#faq">Questions</a>
-          </nav>
-          <div className="flex items-center gap-2">
-            <a href={GITHUB} target="_blank" rel="noreferrer" aria-label="GitHub (opens in a new tab)" className="hero-github flex size-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-300">
-              <CodeXml className="size-4" />
+          <nav aria-label="Main navigation" className="hero-nav flex items-center gap-1 text-sm text-zinc-400">
+            <a href="#sync" className="hidden md:block">How it works</a>
+            <a href="#sources" className="hidden md:block">Works with</a>
+            <a href="#faq" className="hidden md:block">FAQ</a>
+            <a href={GITHUB} target="_blank" rel="noreferrer" className="hidden sm:flex items-center gap-1">
+              GitHub <ArrowUpRight className="size-3.5" />
             </a>
-            <ButtonLink href="#start" size="sm">
-              Create a room <ArrowUpRight className="size-3.5" />
-            </ButtonLink>
-          </div>
+            <span aria-hidden="true" className="mx-2 hidden h-5 w-px bg-white/10 md:block" />
+            <ButtonLink href="#start" size="sm">Create a room</ButtonLink>
+          </nav>
         </header>
 
-        <div className="hero-body mx-auto flex w-full site-width flex-1 flex-col items-center justify-center site-gutter">
+        <div className="hero-body relative mx-auto flex site-width flex-1 flex-col items-center site-gutter">
+          <div className="hero-intro flex flex-col items-center text-center">
+            <p className="hero-eyebrow rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
+              Free &middot; No signup &middot; Open source
+            </p>
+            <h1 className="hero-title mt-5 font-display font-bold tracking-[-0.035em]">
+              Watch anime <span className="text-brand-400">together.</span>
+            </h1>
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
+              A video call and synced playback in one room. Share a tab, open a file, or use the extension on your streaming site.
+            </p>
+            <div id="start" className="mt-7 flex w-full scroll-mt-24 justify-center">
+              <StartRoom tone="dark" />
+            </div>
+          </div>
           <div className="hero-preview w-full">
             <Preview />
-          </div>
-          <div className="hero-intro grid w-full items-center gap-5 md:grid-cols-[1fr_1.15fr] md:gap-10">
-            <div>
-              <h1 className="hero-title font-display font-bold tracking-[-0.03em]">
-                Watch anime<br />
-                <span className="text-brand-400">together.</span>
-              </h1>
-            </div>
-            <div className="min-w-0">
-              <p className="max-w-lg text-sm leading-relaxed text-zinc-300 sm:text-base">
-                A video call and synced playback, in one room. Share a tab, open a file, or use the extension on your streaming site.
-              </p>
-              <div id="start" className="mt-4 scroll-mt-24">
-                <StartRoom tone="dark" />
-              </div>
-              <p className="mt-2 text-xs text-zinc-400">No signup. Just send your partner the link.</p>
-            </div>
           </div>
         </div>
       </section>
