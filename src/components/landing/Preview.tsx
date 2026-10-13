@@ -12,17 +12,17 @@ export function Preview() {
       <div className="flex items-center justify-between border-b border-white/10 bg-ink px-4 py-2 text-[11px] text-zinc-400">
         <div className="flex items-center gap-2">
           <span className="size-1.5 rounded-full bg-brand-400" />
-          <span className="font-mono text-zinc-300">k3f9-x2qa</span>
+          <span className="font-sans text-zinc-300">k3f9-x2qa</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-emerald-300">in sync · 0.04s</span>
+          <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-emerald-300">In sync</span>
           <span className="hidden rounded-md bg-white/10 px-1.5 py-0.5 sm:inline">Ethan, Mia</span>
         </div>
       </div>
       <div className="relative aspect-video">
-        <Image src={STAGE} alt="Scene from the episode playing in the room" fill sizes="(max-width: 1100px) 100vw, 1100px" className="object-cover" priority />
+        <Image src={STAGE} alt="Example video in a watch room" fill sizes="(max-width: 1100px) 100vw, 1100px" className="object-cover" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/5 to-black/30" />
-        <div className="absolute left-4 top-4 rounded bg-black/50 px-2 py-1 font-mono text-[11px] text-white/90">EP 07 · The Promise</div>
+        <div className="absolute left-4 top-4 rounded bg-black/50 px-2 py-1 font-sans text-[11px] text-white/90">Example room</div>
         <div className="absolute bottom-16 right-4 w-32 overflow-hidden rounded-lg border border-white/15 bg-ink-800/90 shadow-xl sm:w-52">
           <div className="relative aspect-[4/3]">
             <Image src={PARTNER} alt="Partner on camera" fill sizes="208px" className="object-cover" />
@@ -46,7 +46,7 @@ export function Preview() {
             <span className="flex size-8 items-center justify-center rounded-full bg-brand-600"><Pause className="size-4" /></span>
             <RotateCcw className="size-4 text-zinc-300" />
             <RotateCw className="size-4 text-zinc-300" />
-            <span className="font-mono text-[11px] text-zinc-300">08:51 / 23:40</span>
+            <span className="font-sans text-[11px] text-zinc-300">08:51 / 23:40</span>
             <span className="ml-auto"><Volume2 className="size-4 text-zinc-300" /></span>
           </div>
         </div>

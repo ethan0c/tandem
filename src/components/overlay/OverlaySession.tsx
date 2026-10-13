@@ -156,7 +156,7 @@ export function OverlaySession({ roomId, name, localStream, embedded }: Props) {
 
       <div className="flex items-center justify-between border-t border-white/10 px-3 py-1.5 text-[11px]">
         <span className="flex items-center gap-1.5 text-zinc-400">
-          <LogoMark size={14} /> <span className="font-mono">{roomId}</span>
+          <LogoMark size={14} /> <span className="font-sans">{roomId}</span>
         </span>
         <span className={sync.tone}>{sync.text}</span>
       </div>

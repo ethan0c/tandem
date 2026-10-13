@@ -2,7 +2,6 @@
 
 @theme {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-display: var(--font-bricolage), var(--font-geist-sans), sans-serif;
 
   --color-ink: #120a1f;
@@ -47,17 +46,6 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-}
-
-.marquee {
-  display: flex;
-  width: max-content;
-  animation: marquee 40s linear infinite;
-}
-.marquee:hover { animation-play-state: paused; }
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
 }
 
 details.faq > summary { list-style: none; cursor: pointer; }

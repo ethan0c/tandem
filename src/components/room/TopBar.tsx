@@ -54,7 +54,7 @@ export function TopBar({ roomId, roomUrl, members, selfId, status, drift, isFull
         </Link>
         <button
           onClick={copy}
-          className="group flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-xs text-zinc-200 transition hover:bg-white/10"
+          className="group flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-sans text-xs text-zinc-200 transition hover:bg-white/10"
           title="Copy invite link"
         >
           {roomId}

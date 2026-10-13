@@ -9,7 +9,7 @@ const columns = [
     title: "Tandem",
     links: [
       { label: "Start a room", href: "/#start" },
-      { label: "How sync works", href: "/#sync" },
+      { label: "How it works", href: "/#sync" },
       { label: "Questions", href: "/#faq" },
       { label: "Privacy", href: "/privacy" },
     ],
@@ -39,7 +39,7 @@ export function Footer() {
           <div>
             <Logo size={30} light />
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-zinc-400">
-              A watch party for two. Synced playback, a face-to-face call, and nothing stored once you leave.
+              Watch anime with your partner, with synced playback and a video call.
             </p>
           </div>
           {columns.map((col) => (
@@ -63,7 +63,7 @@ export function Footer() {
             </div>
           ))}
         </div>
-        <div className="mt-14 flex flex-col gap-2 border-t border-white/10 pt-6 font-mono text-[11px] text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-2 border-t border-white/10 pt-6 font-sans text-[11px] text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
           <span>© 2026 tandem · MIT</span>
           <span>
             built by{" "}

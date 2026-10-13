@@ -63,7 +63,7 @@ export default function Privacy() {
       </header>
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-16">
         <h1 className="font-display text-4xl font-bold tracking-tight">Privacy</h1>
-        <p className="mt-3 font-mono text-xs text-zinc-500">Last updated 13 October 2026</p>
+        <p className="mt-3 font-sans text-xs text-zinc-500">Last updated 13 October 2026</p>
         {sections.map((s) => (
           <section key={s.title} className="mt-10">
             <h2 className="font-display text-xl font-bold">{s.title}</h2>

@@ -290,7 +290,7 @@ export function Player({
             </div>
             <h2 className="mt-4 text-lg font-semibold">{pickerName ?? "Your partner"} picked a file</h2>
             <p className="mt-1.5 break-all text-sm text-zinc-400">
-              Choose <span className="font-mono text-zinc-200">{source.name}</span> on your computer to watch together.
+              Choose <span className="font-sans text-zinc-200">{source.name}</span> on your computer to watch together.
             </p>
             <button
               onClick={() => fileInput.current?.click()}
@@ -380,7 +380,7 @@ export function Player({
           <IconButton onClick={() => videoRef.current && seekTo(videoRef.current.currentTime + 10)} label="Forward 10 seconds">
             <RotateCw className="size-4" />
           </IconButton>
-          <span className="ml-1 font-mono text-xs text-zinc-300">
+          <span className="ml-1 font-sans text-xs text-zinc-300">
             {formatTime(shown)} <span className="text-zinc-500">/</span> {formatTime(duration)}
           </span>
           <div className="ml-auto flex items-center gap-2">
