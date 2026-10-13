@@ -1,7 +1,5 @@
 /* Fonts are namespaced so they never clash with the host page's own font-face rules. */
-@font-face { font-family: "Tandem Geist"; src: url("chrome-extension://__MSG_@@extension_id__/fonts/geist.woff2") format("woff2"); font-weight: 100 900; }
-@font-face { font-family: "Tandem Geist Mono"; src: url("chrome-extension://__MSG_@@extension_id__/fonts/geist-mono.woff2") format("woff2"); font-weight: 100 900; }
-@font-face { font-family: "Tandem Bricolage"; src: url("chrome-extension://__MSG_@@extension_id__/fonts/bricolage-grotesque.woff2") format("woff2"); font-weight: 200 800; }
+@font-face { font-family: "Tandem Jakarta"; src: url("chrome-extension://__MSG_@@extension_id__/fonts/plus-jakarta-sans.woff2") format("woff2"); font-weight: 200 800; }
 
 /* Pseudo-fullscreen: the player fills the viewport while <html> is the real fullscreen element,
    so the Tandem overlay stays visible on top of it. */
@@ -29,9 +27,9 @@
   z-index: 2147483647;
   border-radius: 16px;
   overflow: hidden;
-  background: #120a1f;
+  background: #0a0a0a;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.15);
-  font-family: "Tandem Geist", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Tandem Jakarta", ui-sans-serif, system-ui, sans-serif;
   color: #fff;
 }
 #tandem-overlay-host .tandem-bar {
@@ -40,7 +38,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 6px 0 12px;
-  background: #1b1030;
+  background: #141414;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 12px;
   cursor: grab;
@@ -49,8 +47,8 @@
 #tandem-overlay-host .tandem-bar.dragging { cursor: grabbing; }
 #tandem-overlay-host .tandem-bar span { display: flex; align-items: center; gap: 7px; }
 #tandem-overlay-host .tandem-bar svg { display: block; }
-#tandem-overlay-host .tandem-bar b { font-family: "Tandem Bricolage", "Tandem Geist", sans-serif; font-size: 14px; font-weight: 700; letter-spacing: -0.02em; }
-#tandem-overlay-host .tandem-bar code { font-family: "Tandem Geist Mono", ui-monospace, monospace; font-size: 11px; color: #a1a1aa; }
+#tandem-overlay-host .tandem-bar b { font-size: 14px; font-weight: 500; letter-spacing: -0.045em; }
+#tandem-overlay-host .tandem-bar code { font-size: 11px; color: #a1a1aa; }
 #tandem-overlay-host .tandem-bar button {
   all: unset;
   width: 24px;
@@ -69,6 +67,6 @@
   width: 100%;
   height: 420px;
   border: 0;
-  background: #120a1f;
+  background: #0a0a0a;
   transition: height 150ms ease;
 }

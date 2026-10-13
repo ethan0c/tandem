@@ -191,18 +191,21 @@
     const label = document.createElement("span");
     const SVG = "http://www.w3.org/2000/svg";
     const mark = document.createElementNS(SVG, "svg");
-    mark.setAttribute("viewBox", "0 0 64 40");
-    mark.setAttribute("width", "20");
-    mark.setAttribute("height", "12.5");
-    for (const cx of [21, 43]) {
-      const ring = document.createElementNS(SVG, "circle");
-      ring.setAttribute("cx", cx);
-      ring.setAttribute("cy", 20);
-      ring.setAttribute("r", 15);
-      ring.setAttribute("fill", "none");
-      ring.setAttribute("stroke", "#a78bfa");
-      ring.setAttribute("stroke-width", 7);
-      mark.appendChild(ring);
+    // Same two linked frames as the web app's LogoMark (src/components/Logo.tsx).
+    mark.setAttribute("viewBox", "0 0 32 32");
+    mark.setAttribute("width", "18");
+    mark.setAttribute("height", "18");
+    for (const xy of [4, 12]) {
+      const frame = document.createElementNS(SVG, "rect");
+      frame.setAttribute("x", xy);
+      frame.setAttribute("y", xy);
+      frame.setAttribute("width", 16);
+      frame.setAttribute("height", 16);
+      frame.setAttribute("rx", 5);
+      frame.setAttribute("fill", "none");
+      frame.setAttribute("stroke", "#8b5cf6");
+      frame.setAttribute("stroke-width", 2.25);
+      mark.appendChild(frame);
     }
     const word = document.createElement("b");
     word.textContent = "tandem";

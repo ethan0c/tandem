@@ -1,43 +1,45 @@
-/* Mirrors the web app's theme (src/app/globals.css): cream + ink surfaces, brand violet, Geist + Bricolage Grotesque. */
-@font-face { font-family: "Geist"; src: url("fonts/geist.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
-@font-face { font-family: "Geist Mono"; src: url("fonts/geist-mono.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
-@font-face { font-family: "Bricolage Grotesque"; src: url("fonts/bricolage-grotesque.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
+/* Mirrors the web app's theme (src/app/globals.css): near-black surfaces, brand violet, Plus Jakarta Sans. */
+@font-face { font-family: "Plus Jakarta Sans"; src: url("fonts/plus-jakarta-sans.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
 
 :root {
-  --ink: #120a1f; --cream: #f7f5f1; --cream-200: #ebe7df;
-  --brand-50: #f5f3ff; --brand-300: #c4b5fd; --brand-400: #a78bfa; --brand-600: #7c3aed; --brand-700: #6d28d9; --brand-800: #5b21b6;
-  --sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --mono: "Geist Mono", ui-monospace, monospace;
-  --display: "Bricolage Grotesque", "Geist", sans-serif;
+  --ink: #0a0a0a; --ink-800: #141414; --ink-700: #1f1f1f;
+  --brand-300: #c4b5fd; --brand-400: #a78bfa; --brand-500: #8b5cf6; --brand-600: #7c3aed; --brand-800: #5b21b6;
+  --line: rgb(255 255 255 / 0.1);
+  --sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-body { width: 300px; margin: 0; padding: 14px; font: 13px/1.4 var(--sans); color: var(--ink); background: var(--cream); -webkit-font-smoothing: antialiased; }
-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-header span { font-family: var(--display); font-weight: 700; font-size: 20px; line-height: 1; letter-spacing: -0.025em; }
+body {
+  width: 300px; margin: 0; padding: 14px; font: 13px/1.45 var(--sans); color: #fff; -webkit-font-smoothing: antialiased;
+  background: radial-gradient(90% 60% at 50% 0%, rgb(139 92 246 / 0.14), transparent 70%), linear-gradient(to bottom, #0c0b10, #15131a);
+}
+header { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; }
+header span { font-weight: 500; font-size: 19px; line-height: 1; letter-spacing: -0.045em; }
 section { display: flex; flex-direction: column; gap: 10px; }
-.label { margin: 0; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #71717a; }
-.muted { margin: 0; color: #71717a; }
-.error { margin: 0; color: #dc2626; font-size: 12px; }
+.label { margin: 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #71717a; }
+.muted { margin: 0; color: #a1a1aa; }
+.error { margin: 0; color: #f87171; font-size: 12px; }
 .row { display: flex; gap: 8px; align-items: center; margin: 0; }
-code { flex: 1; font-family: var(--mono); font-size: 14px; background: var(--brand-50); color: var(--brand-800); padding: 7px 10px; border-radius: 10px; }
-input { width: 100%; height: 38px; padding: 0 10px; border: 2px solid var(--cream-200); border-radius: 10px; background: #fff; color: var(--ink); font: inherit; outline: none; }
-input:focus { border-color: var(--brand-400); }
+code { flex: 1; font-family: var(--sans); font-size: 13px; font-weight: 500; background: rgb(255 255 255 / 0.05); border: 1px solid var(--line); color: #e4e4e7; padding: 7px 10px; border-radius: 10px; }
+input { width: 100%; height: 38px; padding: 0 10px; border: 1px solid rgb(255 255 255 / 0.15); border-radius: 10px; background: rgb(255 255 255 / 0.05); color: #fff; font: inherit; outline: none; transition: border-color 200ms ease, box-shadow 200ms ease; }
+input::placeholder { color: #71717a; }
+input:focus { border-color: rgb(255 255 255 / 0.3); box-shadow: 0 0 0 4px rgb(255 255 255 / 0.08); }
 form input { flex: 1; min-width: 0; }
-.or { display: flex; align-items: center; gap: 8px; color: #a1a1aa; font-size: 11px; }
-.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--cream-200); }
+.or { display: flex; align-items: center; gap: 8px; color: #71717a; font-size: 11px; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
-/* Same as .btn3d in the web app. */
-.btn { all: unset; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 14px; font-family: var(--sans); font-weight: 700; letter-spacing: -0.01em; line-height: 1; cursor: pointer; border: 2px solid transparent; box-shadow: 0 4px 0 var(--sh); transition: transform 90ms ease, box-shadow 90ms ease, filter 150ms ease; white-space: nowrap; }
-.btn:hover { filter: brightness(1.06); }
-.btn:active { transform: translateY(4px); box-shadow: 0 0 0 var(--sh); }
-.btn:focus-visible { outline: 3px solid var(--brand-300); outline-offset: 2px; }
-.btn-sm { height: 34px; padding: 0 10px; border-radius: 11px; font-size: 12px; }
-.btn-brand { background: var(--brand-600); color: #fff; --sh: var(--brand-800); }
-.btn-dark { background: var(--ink); color: #fff; --sh: #000; }
-.btn-light { background: #fff; color: var(--ink); border-color: #e4e4e7; --sh: #d4d4d8; }
-.btn-danger { background: #ef4444; color: #fff; --sh: #991b1b; }
+/* Same as .btn3d in the web app: flat, except the brand button keeps a 3D press. */
+.btn { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 14px; font-family: var(--sans); font-weight: 500; letter-spacing: -0.01em; line-height: 1; cursor: pointer; border: 2px solid transparent; box-shadow: 0 var(--lift, 0px) 0 var(--sh, transparent); transition: transform 90ms ease, box-shadow 90ms ease, filter 150ms ease; white-space: nowrap; }
+.btn:hover { filter: brightness(1.08); }
+.btn:focus-visible { outline: 3px solid rgb(255 255 255 / 0.5); outline-offset: 2px; }
+.btn-sm { height: 34px; padding: 0 12px; border-radius: 11px; font-size: 12px; }
+.btn-brand { background: var(--brand-600); color: #fff; --sh: var(--brand-800); --lift: 4px; margin-bottom: 4px; }
+.btn-brand:active { transform: translateY(4px); box-shadow: 0 0 0 var(--sh); }
+.btn-dark { background: var(--ink-700); color: #fff; }
+.btn-light { background: #fff; color: var(--ink); }
+.btn-danger { background: #ef4444; color: #fff; }
 
-details { margin-top: 14px; border-top: 1px solid var(--cream-200); padding-top: 10px; }
-summary { cursor: pointer; color: #71717a; font-size: 12px; }
-details label { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; font-size: 12px; color: #52525b; }
+details { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+summary { cursor: pointer; color: #a1a1aa; font-size: 12px; }
+summary:hover { color: #d4d4d8; }
+details label { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; font-size: 12px; color: #a1a1aa; }
