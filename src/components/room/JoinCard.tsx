@@ -149,7 +149,7 @@ export function JoinCard({ roomId, onJoin }: { roomId: string; onJoin: (r: JoinR
           </label>
           <button
             type="submit"
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 text-sm font-semibold text-white shadow-glow transition hover:bg-brand-500 active:scale-[0.99]"
+            className="btn3d btn3d-brand btn3d-md w-full"
           >
             Join room <ArrowRight className="size-4" />
           </button>

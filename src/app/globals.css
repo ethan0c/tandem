@@ -85,3 +85,47 @@ input[type="range"].tandem-range:hover::-webkit-slider-thumb {
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
+
+/* ---------- 3D "press" buttons (Duolingo style) ---------- */
+.btn3d {
+  --btn-shadow: #000;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 0 0 var(--btn-shadow);
+  transform: translateY(0);
+  transition:
+    transform 90ms ease,
+    box-shadow 90ms ease,
+    background-color 150ms ease,
+    filter 150ms ease;
+}
+.btn3d:hover { filter: brightness(1.06); }
+.btn3d:active,
+.btn3d[data-pressed="true"] {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 var(--btn-shadow);
+}
+.btn3d:focus-visible { outline: 3px solid var(--color-brand-300); outline-offset: 2px; }
+.btn3d:disabled { opacity: 0.55; pointer-events: none; }
+
+.btn3d-brand { background: var(--color-brand-600); color: #fff; --btn-shadow: var(--color-brand-800); }
+.btn3d-dark { background: #18181b; color: #fff; --btn-shadow: #000; }
+.btn3d-light { background: #fff; color: var(--color-brand-700); border-color: #e4e4e7; --btn-shadow: #d4d4d8; }
+.btn3d-ghost { background: rgb(255 255 255 / 0.1); color: #fff; border-color: rgb(255 255 255 / 0.14); --btn-shadow: rgb(0 0 0 / 0.6); }
+.btn3d-danger { background: #ef4444; color: #fff; --btn-shadow: #991b1b; }
+
+.btn3d-sm { height: 2.25rem; padding: 0 0.9rem; font-size: 0.8125rem; border-radius: 0.7rem; }
+.btn3d-md { height: 2.75rem; padding: 0 1.25rem; font-size: 0.875rem; }
+.btn3d-lg { height: 3.25rem; padding: 0 1.6rem; font-size: 0.95rem; border-radius: 1rem; }
+.btn3d-icon { width: 2.5rem; height: 2.5rem; padding: 0; border-radius: 0.75rem; }

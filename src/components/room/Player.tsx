@@ -307,7 +307,7 @@ export function Player({
             </p>
             <button
               onClick={onOpenSource}
-              className="mt-5 inline-flex h-10 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold transition hover:bg-brand-500"
+              className="btn3d btn3d-brand btn3d-md mt-5"
             >
               Choose a video
             </button>
@@ -328,7 +328,7 @@ export function Player({
             </p>
             <button
               onClick={() => fileInput.current?.click()}
-              className="mt-5 inline-flex h-10 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold transition hover:bg-brand-500"
+              className="btn3d btn3d-brand btn3d-md mt-5"
             >
               Choose file
             </button>
@@ -371,7 +371,7 @@ export function Player({
           }}
           className="absolute inset-0 flex items-center justify-center bg-black/40"
         >
-          <span className="flex items-center gap-2 rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold shadow-glow">
+          <span className="btn3d btn3d-brand btn3d-lg">
             <Play className="size-4" /> Tap to start playback
           </span>
         </button>

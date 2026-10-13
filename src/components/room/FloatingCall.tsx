@@ -69,7 +69,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
                 <p className="text-xs text-zinc-300">Waiting for your partner…</p>
                 <button
                   onClick={copy}
-                  className="mt-1.5 inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-2.5 py-1 text-xs font-medium transition hover:bg-brand-500"
+                  className="btn3d btn3d-brand btn3d-sm mt-1.5 !h-8"
                 >
                   {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
                   {copied ? "Copied" : "Copy invite link"}

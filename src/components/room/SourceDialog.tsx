@@ -83,7 +83,7 @@ export function SourceDialog({ open, onClose, onUrl, onFile }: Props) {
               {error && <p className="text-xs text-red-300">{error}</p>}
               <button
                 type="submit"
-                className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-brand-600 text-sm font-semibold transition hover:bg-brand-500"
+                className="btn3d btn3d-brand btn3d-md w-full"
               >
                 Play for everyone
               </button>
