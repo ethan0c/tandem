@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { ConnectionQuality, setCameraQuality } from '../src/lib/connection-quality';
+import { ConnectionQuality, SHARE_TIERS, ShareAdaptation, setCameraQuality, setShareQuality } from '../src/lib/connection-quality';
 
 function report(...rows: Record<string, unknown>[]) {
   return new Map(rows.map((row) => [row.id, row])) as unknown as RTCStatsReport;
@@ -80,4 +80,49 @@ test('a brief interruption does not warn and unknown samples break the streak', 
   quality.sample(report(), 'connected');
   assert.equal(quality.sample(latency(1.2), 'connected'), false);
   assert.equal(quality.sample(latency(0.1), 'connected'), false);
+});
+
+const shareStats = (reason: string, rtt = 0.05) => report(
+  { id: 'pair', type: 'candidate-pair', nominated: true, state: 'succeeded', currentRoundTripTime: rtt },
+  { id: 'out', type: 'outbound-rtp', kind: 'video', qualityLimitationReason: reason },
+);
+
+test('screen share steps down under sustained CPU or bandwidth limits, not during warmup', () => {
+  const share = new ShareAdaptation();
+  for (let now = 0; now < 14_000; now += 2000) assert.equal(share.sample(shareStats('bandwidth'), now), 0);
+  for (let i = 0; i < 3; i++) share.sample(shareStats('cpu'), 16_000 + i * 2000);
+  assert.equal(share.sample(shareStats('cpu'), 22_000), 1);
+  for (let i = 0; i < 20; i++) share.sample(shareStats('bandwidth'), 24_000 + i * 2000);
+  assert.equal(share.tier, SHARE_TIERS.length - 1);
+});
+
+test('screen share steps back up and backs off after a failed try', () => {
+  const share = new ShareAdaptation(0);
+  let now = 0;
+  const run = (reason: string, n: number) => { for (let i = 0; i < n; i++) share.sample(shareStats(reason), now += 2000); };
+  run('cpu', 4);
+  assert.equal(share.tier, 1);
+  run('none', 15);
+  assert.equal(share.tier, 0);
+  run('cpu', 4);
+  assert.equal(share.tier, 1);
+  run('none', 29);
+  assert.equal(share.tier, 1, 'the failed step up doubles the wait');
+  run('none', 1);
+  assert.equal(share.tier, 0);
+  run('none', 30);
+  run('cpu', 4);
+  run('none', 15);
+  assert.equal(share.tier, 0, 'a step up that held resets the wait');
+});
+
+test('share steps scale the capture to the step height', async () => {
+  let latest: RTCRtpSendParameters | undefined;
+  const video = { track: { kind: 'video', getSettings: () => ({ height: 2160 }) }, getParameters: () => ({ encodings: [{}] }), setParameters: async (params: RTCRtpSendParameters) => { latest = params; } };
+  const pc = { getSenders: () => [video] } as unknown as RTCPeerConnection;
+  await setShareQuality(pc, 0);
+  assert.equal(latest?.encodings[0].scaleResolutionDownBy, 1);
+  await setShareQuality(pc, 2);
+  assert.equal(latest?.encodings[0].scaleResolutionDownBy, 2);
+  assert.equal(latest?.encodings[0].maxBitrate, 6_000_000);
 });

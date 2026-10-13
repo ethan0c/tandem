@@ -96,7 +96,7 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
           if (!Array.from(pcs.current.values()).includes(pc)) continue;
           const struggling = monitor.quality.sample(stats, pc.connectionState);
           poor ||= struggling;
-          // A hidden tab gets less CPU, and nobody is looking at our self-view: send the light camera.
+          // A hidden tab gets less CPU: send the light camera so the screen share keeps the encoder time.
           const light = monitor.quality.limited || document.visibilityState === "hidden";
           if (monitor.applied !== light) {
             await setCameraQuality(pc, light);
