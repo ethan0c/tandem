@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Film,
   FolderOpen,
-  Loader2,
   Maximize,
   Minimize,
   Pause,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 import { expectedTime, type PlaybackState, type Source, type SyncReason } from "@/lib/types";
 import type { RemotePlayback } from "@/hooks/useRoom";
+import { Loader } from "@/components/Loader";
 import { formatTime } from "@/lib/format";
 
 interface PlayerProps {
@@ -330,7 +330,7 @@ export function Player({
 
       {buffering && hasMedia && !blocked && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <Loader2 className="size-10 animate-spin text-white/80" />
+          <Loader label="Buffering…" size={48} />
         </div>
       )}
 

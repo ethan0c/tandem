@@ -35,7 +35,7 @@ export function StartRoom({ tone = "light" }: { tone?: "light" | "dark" | "brand
       </Button>
       <form onSubmit={join} className="flex flex-1 flex-col gap-1">
         <div
-          className={`flex h-[3.25rem] items-center rounded-2xl border-2 pl-4 pr-1.5 transition ${
+          className={`room-link-field flex h-[3.25rem] items-center rounded-2xl border-2 pl-4 pr-1.5 transition ${
             dark
               ? "border-white/20 bg-white/10 shadow-[0_4px_0_rgba(0,0,0,0.3)] focus-within:border-white/60"
               : "border-ink/15 bg-white shadow-[0_4px_0_#e4e4e7] focus-within:border-brand-400"
@@ -52,12 +52,13 @@ export function StartRoom({ tone = "light" }: { tone?: "light" | "dark" | "brand
               dark ? "text-white placeholder:text-white/60" : "text-ink placeholder:text-zinc-500"
             }`}
             aria-label="Room link or code"
+            aria-invalid={!!error}
           />
           <button type="submit" className={`btn3d ${dark ? "btn3d-ghost" : "btn3d-dark"} btn3d-icon !h-9 !w-9 !rounded-xl`} aria-label="Join room">
             <ArrowRight className="size-4" />
           </button>
         </div>
-        {error && <p className={`px-1 text-xs ${dark ? "text-red-200" : "text-red-600"}`}>{error}</p>}
+        {error && <p role="alert" className={`form-error px-1 text-xs ${dark ? "text-red-200" : "text-red-600"}`}>{error}</p>}
       </form>
     </div>
   );

@@ -1,9 +1,9 @@
-import { LogoMark } from "@/components/Logo";
+import { Loader } from "@/components/Loader";
 
 export default function Loading() {
   return (
     <div className="flex flex-1 items-center justify-center bg-ink">
-      <LogoMark size={40} className="animate-pulse-soft" />
+      <Loader label="Opening your room…" />
     </div>
   );
 }

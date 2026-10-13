@@ -14,7 +14,7 @@ export function Preview() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <figure>
+    <figure className="room-preview">
       <div
         ref={containerRef}
         inert

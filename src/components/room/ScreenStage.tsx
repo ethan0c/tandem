@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Film, Loader2, Maximize, Minimize, MonitorUp, Play, ScreenShareOff, Volume2, VolumeX } from "lucide-react";
+import { Film, Maximize, Minimize, MonitorUp, Play, ScreenShareOff, Volume2, VolumeX } from "lucide-react";
+
+import { Loader } from "@/components/Loader";
 
 interface Props {
   isSharer: boolean;
@@ -93,8 +95,7 @@ export function ScreenStage({
 
       {!isSharer && (!remoteScreen || waiting) && !blocked && (
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 text-sm text-zinc-300">
-          <Loader2 className="size-10 animate-spin text-white/80" />
-          Connecting to {who}&rsquo;s screen…
+          <Loader label={`Connecting to ${who}’s screen…`} size={48} />
         </div>
       )}
 
