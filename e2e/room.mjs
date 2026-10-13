@@ -1,4 +1,5 @@
-// End-to-end: two browsers join a room, the call connects, one shares a tab, a late joiner sees it.
+// End-to-end: two browsers join a room, the call connects, one shares a tab, each side survives a dropped
+// socket, a late joiner sees it.
 // Drives the installed Google Chrome with fake camera/mic and an auto-picked capture source.
 //
 //   BASE_URL=http://localhost:3000 node e2e/room.mjs
@@ -62,6 +63,38 @@ const liveVideos = (page) =>
       tracks: v.srcObject?.getTracks().map((t) => `${t.kind}:${t.readyState}`) ?? [],
     })),
   );
+/** The stage <video> is the only one with object-contain; camera tiles use object-cover. */
+const stageTrackId = (page) =>
+  page.evaluate(() => document.querySelector("video.object-contain")?.srcObject?.getVideoTracks()[0]?.id ?? null);
+const stageFrames = (page) =>
+  page.evaluate(() => document.querySelector("video.object-contain")?.getVideoPlaybackQuality().totalVideoFrames ?? 0);
+/** Wait until the stage video has decoded more frames than `before`: the picture is live, not frozen. */
+const stageAdvances = (page, before) =>
+  page.waitForFunction(
+    (b) => (document.querySelector("video.object-contain")?.getVideoPlaybackQuality().totalVideoFrames ?? 0) > b,
+    before,
+    { timeout: STEP_MS },
+  );
+const headerText = (page) => page.locator("header").innerText().catch(() => "");
+const waitHeader = (page, text) =>
+  page.waitForFunction((t) => document.querySelector("header")?.innerText.includes(t), text, { timeout: STEP_MS });
+
+/** Every browser's Socket.IO WebSocket goes through Playwright, so a test can cut it like a bad network would. */
+const sockets = new Map();
+async function routeSockets(ctx, name) {
+  await ctx.routeWebSocket(/\/socket\.io\//, (ws) => {
+    const server = ws.connectToServer();
+    sockets.set(name, { ws, server });
+  });
+}
+/** Drop one browser's socket on both ends. The server sees "transport close", not a goodbye. */
+async function dropSocket(name) {
+  const s = sockets.get(name);
+  if (!s) throw new Error(`no socket for ${name}`);
+  sockets.delete(name);
+  await s.ws.close({ code: 1001, reason: "e2e: network drop" });
+  await s.server.close({ code: 1001, reason: "e2e: network drop" });
+}
 
 const browser = await chromium.launch({
   channel: "chrome",
@@ -87,6 +120,7 @@ async function open(name) {
     screen: { width: SCREEN_W, height: SCREEN_H },
   });
   await ctx.addInitScript(pcSpy);
+  await routeSockets(ctx, name);
   const page = await ctx.newPage();
   page.on("pageerror", (e) => log(name, `pageerror: ${e.message}`));
   page.on("console", (m) => {
@@ -232,6 +266,36 @@ try {
       { timeout: 5_000 },
     );
     if ((await notice.getAttribute("aria-hidden")) !== "true") throw new Error("notice still shown");
+  });
+
+  await step("Alice's connection drops and comes back; her share survives on both sides", async () => {
+    const bobTrack = await stageTrackId(bob);
+    const bobFrames = await stageFrames(bob);
+    const aliceNotes = await notes(alice);
+    await dropSocket("Alice");
+    // The disconnect chime proves she noticed; then she is back in her own seat.
+    await heardChime(alice, aliceNotes);
+    await waitHeader(alice, "Ready");
+    if (await alice.getByText("Nothing playing yet").count()) throw new Error("Alice fell back to the empty state");
+    await alice.getByText("Sharing a browser tab").waitFor({ timeout: 2_000 });
+    // Bob kept the very same stream and it is still moving: nothing was torn down or rebuilt.
+    if ((await stageTrackId(bob)) !== bobTrack) throw new Error("Bob's stream was rebuilt");
+    await stageAdvances(bob, bobFrames);
+    await bob.getByText("is sharing").waitFor({ timeout: 2_000 });
+    // And Bob never saw her leave: still two members, no join/leave churn.
+    if ((await bob.locator("header span[title]").count()) !== 2) throw new Error(`Bob sees ${await headerText(bob)}`);
+  });
+
+  await step("Bob's connection drops and comes back; he keeps watching", async () => {
+    const bobTrack = await stageTrackId(bob);
+    const bobFrames = await stageFrames(bob);
+    const bobNotesBefore = await notes(bob);
+    await dropSocket("Bob");
+    await heardChime(bob, bobNotesBefore);
+    await waitHeader(bob, "Ready");
+    if ((await stageTrackId(bob)) !== bobTrack) throw new Error("Bob's stream was rebuilt");
+    await stageAdvances(bob, bobFrames);
+    if ((await alice.locator("header span[title]").count()) !== 2) throw new Error(`Alice sees ${await headerText(alice)}`);
   });
 
   await step("Carol joins late and sees the share too", async () => {

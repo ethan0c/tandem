@@ -51,8 +51,13 @@ set `NEXT_PUBLIC_TURN_*` where the site is built. Everything else works without 
   the same port.
 - **Socket.IO** carries room membership, playback sync (play / pause / seek), the shared video source, and WebRTC
   signaling. Rooms live in memory and are dropped ten minutes after the last person leaves.
+- **Reconnects are not departures.** Each tab picks a member id once per page load and joins with it, so when a
+  socket drops and comes back the server sees the same member and nothing is renegotiated. The server holds a
+  dropped member's seat (and their screen share) for a minute before treating it as a departure; a tab that is
+  closed says goodbye explicitly and is removed at once. If the server forgot a share anyway (it restarted, or
+  the sharer was away longer than that), the sharer announces it again on rejoin.
 - **WebRTC** connects browsers directly for audio and video. For each pair, only the member with the greater
-  socket id sends the offer, a rule both sides can apply without talking, so there is no negotiation glare. The
+  member id sends the offer, a rule both sides can apply without talking, so there is no negotiation glare. The
   offerer re-offers with an ICE restart if the connection fails. STUN is Google's public server; set
   `NEXT_PUBLIC_TURN_*` (see `.env.example`) if you need a relay for strict NATs.
 - **Sync model**: the server stamps every playback change with its own clock. Each client estimates its offset to
@@ -65,7 +70,7 @@ set `NEXT_PUBLIC_TURN_*` where the site is built. Everything else works without 
 
 | Source           | What happens                                                                            |
 | ---------------- | --------------------------------------------------------------------------------------- |
-| Share tab        | The sharer streams a tab (with tab audio) over WebRTC. DRM sites may appear black.     |
+| Share tab        | The sharer streams a tab (with tab audio) over WebRTC. DRM sites may appear black. A viewer keeps asking the sharer for a picture until one arrives and asks again if the link fails, so a lost message costs seconds, not the show. |
 | Local file       | Nothing is uploaded. Your partner is prompted to pick the same file on their machine.   |
 
 Streaming sites with protected or proprietary players cannot be driven from a web page. A browser extension that
