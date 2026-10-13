@@ -1,15 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "Tandem – watch together",
-  "version": "0.1.0",
-  "description": "Sync playback on anime sites with your partner and keep a video call floating on top.",
+  "name": "Tandem \u2013 watch together",
+  "version": "0.2.0",
+  "description": "Watch together with synced playback and a floating call. Expanded streaming-site support is experimental.",
   "icons": {
     "16": "icons/16.png",
     "48": "icons/48.png",
     "128": "icons/128.png"
   },
   "permissions": [
-    "storage"
+    "storage",
+    "scripting",
+    "activeTab"
   ],
   "background": {
     "service_worker": "background.js"
@@ -28,7 +30,20 @@
       "matches": [
         "*://*.miruro.tv/*",
         "*://*.miruro.to/*",
-        "*://*.miruro.online/*"
+        "*://*.miruro.online/*",
+        "*://*.netflix.com/*",
+        "*://*.primevideo.com/*",
+        "*://*.youtube.com/*",
+        "*://*.disneyplus.com/*",
+        "*://*.hulu.com/*",
+        "*://*.max.com/*",
+        "*://*.hbomax.com/*",
+        "*://*.crunchyroll.com/*",
+        "*://*.tv.apple.com/*",
+        "*://*.paramountplus.com/*",
+        "*://*.peacocktv.com/*",
+        "https://www.amazon.com/gp/video/*",
+        "https://www.amazon.com/gp/aw/d/*"
       ],
       "js": [
         "content.js"
@@ -46,10 +61,13 @@
         "fonts/*.woff2"
       ],
       "matches": [
-        "*://*.miruro.tv/*",
-        "*://*.miruro.to/*",
-        "*://*.miruro.online/*"
+        "https://*/*",
+        "http://*/*"
       ]
     }
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*"
   ]
 }

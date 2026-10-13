@@ -147,8 +147,8 @@ html { scroll-behavior: smooth; }
 .btn3d svg { transition: transform 180ms ease; }
 .form-error { animation: fade-up 180ms ease-out both; }
 .source-chips li { transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease; }
-.landing nav a { position: relative; }
-.landing nav a::after {
+.landing nav:not(.hero-nav) a { position: relative; }
+.landing nav:not(.hero-nav) a::after {
   content: "";
   position: absolute;
   left: 0;
@@ -160,7 +160,7 @@ html { scroll-behavior: smooth; }
   transform-origin: left;
   transition: transform 200ms ease;
 }
-.landing nav a:focus-visible::after { transform: scaleX(1); }
+.landing nav:not(.hero-nav) a:focus-visible::after { transform: scaleX(1); }
 details.faq { transition: background-color 200ms ease; }
 details.faq > summary { transition: color 200ms ease; }
 details.faq > summary:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: 3px; border-radius: 4px; }
@@ -181,7 +181,7 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   .btn3d-icon:hover svg { transform: translateX(2px); }
   .source-chips li:hover { transform: translateY(-2px); border-color: var(--color-brand-200); box-shadow: 0 4px 12px rgb(18 10 31 / 0.06); }
   .room-preview:hover > div { border-color: rgb(167 139 250 / 0.4); box-shadow: 0 40px 90px -20px rgb(0 0 0 / 0.85), 0 0 0 1px rgb(167 139 250 / 0.12); }
-  .landing nav a:hover::after { transform: scaleX(1); }
+  .landing nav:not(.hero-nav) a:hover::after { transform: scaleX(1); }
   details.faq > summary:hover { color: var(--color-brand-600); }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -213,3 +213,50 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 @media (prefers-reduced-motion: reduce) {
   .tandem-loader circle { animation: none; stroke-dasharray: none; }
 }
+
+/* Bare brand marks use the same raised feel as the buttons. */
+.service-logo {
+  filter: drop-shadow(0 3px 0 rgb(18 10 31 / 0.16));
+  transition: transform 200ms ease, filter 200ms ease;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .service-logos li:hover .service-logo {
+    transform: translateY(-3px);
+    filter: drop-shadow(0 6px 0 rgb(18 10 31 / 0.12));
+  }
+}
+
+
+.hero-shell { display: flex; flex-direction: column; min-height: 100svh; }
+.hero-header { min-height: 64px; border-bottom: 1px solid rgb(255 255 255 / 0.08); }
+.hero-body { gap: 24px; padding-top: 20px; padding-bottom: 28px; }
+.hero-title { font-size: clamp(2.25rem, 4.8vw, 4rem); line-height: 0.98; }
+.hero-preview { max-width: min(100%, calc((100svh - 360px) * 16 / 9)); }
+.hero-nav a { padding: 8px 12px; border-radius: 8px; transition: color 180ms ease, background-color 180ms ease; }
+.hero-nav a:hover, .hero-nav a:focus-visible { background: rgb(255 255 255 / 0.1); color: white; }
+.hero-nav a:focus-visible, .hero-github:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: 2px; }
+.hero-github { transition: background-color 180ms ease, color 180ms ease; }
+.hero-github:hover { background: rgb(255 255 255 / 0.1); color: white; }
+@media (max-width: 767px) {
+  .hero-header { min-height: 60px; }
+  .hero-body { gap: 20px; padding-top: 16px; padding-bottom: 24px; }
+  .hero-preview { max-width: min(100%, max(260px, calc((100svh - 420px) * 16 / 9))); }
+  .hero-title { font-size: clamp(2.15rem, 7vw, 3rem); }
+  .hero-intro { gap: 14px; }
+}
+/* Short landscape windows keep the actions alongside the player. */
+@media (min-width: 768px) and (max-height: 600px) {
+  .hero-body { flex-direction: row; gap: 28px; }
+  .hero-preview { flex: 1; max-width: 55%; }
+  .hero-intro { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+  .hero-title { font-size: 2.5rem; }
+}
+
+@media (max-width: 767px) {
+  .hero-body .btn3d-lg, .hero-body .room-link-field { height: 44px; }
+  .hero-preview header > div:last-child { display: none; }
+}
+
+/* Shared fluid gutters keep every section aligned at any window width. */
+.site-width { width: 100%; }
+.site-gutter { padding-inline: clamp(20px, 4vw, 96px); }

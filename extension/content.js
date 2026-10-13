@@ -23,11 +23,35 @@
   let observer = null;
   let lastDriftSent = 0;
 
+  let scanTimer = null;
+  let pendingScan = null;
+  let linkedVideo = false;
+  let pageUrl = location.href;
+  let mediaSource = "";
+
+  function videoArea(v) {
+    const rect = v.getBoundingClientRect();
+    const style = getComputedStyle(v);
+    if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") return 0;
+    return Math.max(0, Math.min(rect.right, innerWidth) - Math.max(rect.left, 0)) *
+      Math.max(0, Math.min(rect.bottom, innerHeight) - Math.max(rect.top, 0));
+  }
+
   function pickVideo() {
-    const vids = Array.from(document.querySelectorAll("video"));
-    if (!vids.length) return null;
-    vids.sort((a, b) => b.clientWidth * b.clientHeight - a.clientWidth * a.clientHeight);
-    return vids[0];
+    const videos = [];
+    const visit = (root) => {
+      videos.push(...root.querySelectorAll("video"));
+      for (const element of root.querySelectorAll("*")) {
+        if (element.shadowRoot) visit(element.shadowRoot);
+      }
+    };
+    visit(document);
+    return videos.filter((v) => videoArea(v) > 0)
+      .sort((a, b) => videoArea(b) - videoArea(a))[0] ?? null;
+  }
+
+  function reportPlayer() {
+    relay({ to: "top", type: "tandem:status", hasVideo: !!video, area: video ? videoArea(video) : 0 });
   }
 
   function expected() {
@@ -36,7 +60,7 @@
   }
 
   function onUserEvent(e) {
-    if (!video || Date.now() < suppressUntil) return;
+    if (!video || Date.now() < suppressUntil || !Number.isFinite(video.currentTime)) return;
     const playing = !video.paused && !video.ended;
     const time = video.currentTime;
     state = { playing, time, localUpdatedAt: Date.now() };
@@ -48,23 +72,27 @@
 
   function attach(v) {
     if (video === v) return;
+    if (video) state = null;
     detach();
     video = v;
+    mediaSource = v.currentSrc;
     EVENTS.forEach((ev) => v.addEventListener(ev, onUserEvent));
-    relay({ to: "top", type: "tandem:status", hasVideo: true });
+    v.addEventListener("loadedmetadata", applyState);
+    reportPlayer();
     if (state) applyState();
   }
 
   function detach() {
     if (!video) return;
     EVENTS.forEach((ev) => video.removeEventListener(ev, onUserEvent));
+    video.removeEventListener("loadedmetadata", applyState);
     video.playbackRate = 1;
     video = null;
-    relay({ to: "top", type: "tandem:status", hasVideo: false });
+    reportPlayer();
   }
 
   function applyState() {
-    if (!video || !state) return;
+    if (!video || !state || video.readyState < 1) return;
     suppressUntil = Date.now() + 1000;
     const exp = expected();
     if (Math.abs(video.currentTime - exp) > 0.5) video.currentTime = exp;
@@ -100,18 +128,27 @@
     const rescan = () => {
       const v = pickVideo();
       if (v) attach(v);
-      else if (video && !document.contains(video)) detach();
+      else if (video) detach();
     };
     rescan();
-    let pending = null;
     observer = new MutationObserver(() => {
-      if (pending) return;
-      pending = setTimeout(() => {
-        pending = null;
+      if (pendingScan) return;
+      pendingScan = setTimeout(() => {
+        pendingScan = null;
         rescan();
       }, 300);
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });
+    scanTimer = setInterval(() => {
+      // SPA episode changes and reused media elements must not seek to the previous episode.
+      if (location.href !== pageUrl || (video && video.currentSrc !== mediaSource)) {
+        pageUrl = location.href;
+        mediaSource = video?.currentSrc ?? "";
+        state = null;
+      }
+      rescan();
+      reportPlayer();
+    }, 1500);
     driftTimer = setInterval(driftTick, 500);
   }
 
@@ -119,6 +156,10 @@
     active = false;
     observer?.disconnect();
     observer = null;
+    clearInterval(scanTimer);
+    clearTimeout(pendingScan);
+    scanTimer = null;
+    pendingScan = null;
     clearInterval(driftTimer);
     driftTimer = null;
     detach();
@@ -297,7 +338,7 @@
         sendResponse({ ok: true });
         break;
       case "tandem:get":
-        sendResponse({ roomId, appOrigin, hasVideo: !!video });
+        sendResponse({ roomId, appOrigin, hasVideo: linkedVideo });
         break;
       // relayed from other frames
       case "tandem:session":
@@ -306,15 +347,18 @@
         break;
       case "tandem:apply":
         if (!active) startController();
+        if (!msg.state || typeof msg.state.playing !== "boolean" ||
+          !Number.isFinite(msg.state.time) || msg.state.time < 0 || !Number.isFinite(msg.state.localUpdatedAt)) return;
         state = msg.state;
         applyState();
         break;
       case "tandem:probe":
-        if (active) relay({ to: "top", type: "tandem:status", hasVideo: !!video });
+        if (active) reportPlayer();
         break;
       case "tandem:event":
       case "tandem:status":
       case "tandem:drift":
+        if (msg.type === "tandem:status") linkedVideo = !!msg.hasVideo;
         if (IS_TOP && iframe?.contentWindow) iframe.contentWindow.postMessage(msg, appOrigin);
         break;
     }
@@ -323,6 +367,7 @@
   /* ------------------------------------------------------------------ */
   /* Boot                                                                */
   /* ------------------------------------------------------------------ */
+  relay({ to: "top", type: "tandem:controller-ready" });
   if (IS_TOP) {
     chrome.storage.sync.get("appOrigin").then(({ appOrigin: saved }) => {
       if (saved) appOrigin = saved;

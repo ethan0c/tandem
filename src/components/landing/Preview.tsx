@@ -18,7 +18,7 @@ export function Preview() {
       <div
         ref={containerRef}
         inert
-        className="relative flex aspect-video min-h-64 overflow-hidden rounded-xl border border-white/10 bg-black text-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/5"
+        className="relative flex aspect-video overflow-hidden rounded-xl border border-white/10 bg-black text-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/5"
       >
         <TopBar
           roomId="k3f9-x2qa"
@@ -62,7 +62,7 @@ export function Preview() {
           />
         </div>
       </div>
-      <figcaption className="mt-3 text-center text-xs text-zinc-500">Room preview</figcaption>
+      <figcaption className="sr-only">Room preview</figcaption>
     </figure>
   );
 }

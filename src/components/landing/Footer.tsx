@@ -34,7 +34,7 @@ const columns = [
 export function Footer() {
   return (
     <footer className="bg-ink text-white">
-      <div className="mx-auto max-w-6xl px-5 pb-10 pt-16">
+      <div className="mx-auto site-width site-gutter pb-10 pt-16">
         <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div>
             <Logo size={30} light />

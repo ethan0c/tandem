@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import { CodeXml, ArrowUpRight } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { ButtonLink } from "@/components/Button";
 import { Footer } from "@/components/landing/Footer";
@@ -7,6 +9,19 @@ import { LandingMotion } from "@/components/landing/LandingMotion";
 import { Preview } from "@/components/landing/Preview";
 
 const GITHUB = "https://github.com/ethan0c";
+
+const streamingSites = [
+  ["Netflix", "netflix"],
+  ["Prime Video", "primevideo"],
+  ["YouTube", "youtube"],
+  ["Disney+", "disneyplus"],
+  ["Hulu", "hulu"],
+  ["Max", "max"],
+  ["Crunchyroll", "crunchyroll"],
+  ["Apple TV+", "appletv"],
+  ["Paramount+", "paramountplus"],
+  ["Peacock", "peacock"],
+];
 
 const sources = ["Miruro, with the extension", "A file you both have", "Sharing a tab"];
 
@@ -20,12 +35,12 @@ const faq = [
     a: "Yes, if you choose a local file. Each person opens their own copy, and Tandem keeps playback in sync. With tab sharing, only the person sharing needs the video. Select Share tab audio in the browser picker so your partner can hear it.",
   },
   {
-    q: "Does it work with Netflix or Crunchyroll?",
-    a: "Tandem does not support their players directly. Sharing a protected video can produce a black screen. Use a local file or a tab without copy protection instead.",
+    q: "Does it work with Netflix or Prime Video?",
+    a: "The extension has experimental support for Netflix and Prime Video, plus other major streaming sites. Each person needs their own access to the same episode. Compatibility varies, especially with ads. Tab sharing can still show a black screen for protected video.",
   },
   {
     q: "What does the extension do?",
-    a: "It syncs playback on Miruro and adds a floating call window. Both people need the extension to watch this way, and either person can pause or skip.",
+    a: "It syncs the video player on the page and adds a floating call. Both people need the extension and access to the same episode. Miruro is included; support for other streaming sites is experimental.",
   },
   {
     q: "Which browser should we use?",
@@ -53,63 +68,74 @@ export default function Home() {
   return (
     <LandingMotion>
       {/* Theater */}
-      <section className="bg-ink text-white">
-        <header className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          <Link href="/" aria-label="Tandem home">
-            <Logo size={28} light />
+      <section className="hero-shell bg-ink text-white">
+        <header className="hero-header mx-auto flex w-full site-width items-center justify-between gap-4 site-gutter">
+          <Link href="/" aria-label="Tandem home" className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-brand-400 focus-visible:outline-offset-4">
+            <Logo size={26} light />
           </Link>
-          <nav className="hidden items-center gap-7 text-sm text-zinc-300 md:flex">
-            <a href="#sync" className="transition hover:text-white">How it works</a>
-            <a href="#sources" className="transition hover:text-white">Sources</a>
-            <a href="#faq" className="transition hover:text-white">Questions</a>
-            <a href={GITHUB} target="_blank" rel="noreferrer" className="transition hover:text-white">GitHub</a>
+          <nav aria-label="Main navigation" className="hero-nav hidden items-center gap-1 rounded-xl border border-white/10 bg-white/5 p-1 text-xs text-zinc-300 md:flex">
+            <a href="#sync">How it works</a>
+            <a href="#sources">Works with</a>
+            <a href="#faq">Questions</a>
           </nav>
-          <ButtonLink href="#start" size="sm">
-            Create a room
-          </ButtonLink>
+          <div className="flex items-center gap-2">
+            <a href={GITHUB} target="_blank" rel="noreferrer" aria-label="GitHub (opens in a new tab)" className="hero-github flex size-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-zinc-300">
+              <CodeXml className="size-4" />
+            </a>
+            <ButtonLink href="#start" size="sm">
+              Create a room <ArrowUpRight className="size-3.5" />
+            </ButtonLink>
+          </div>
         </header>
 
-        <div className="mx-auto max-w-6xl px-5 pb-0 pt-14 sm:pt-20">
-          <div className="hero-intro grid items-end gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="hero-body mx-auto flex w-full site-width flex-1 flex-col items-center justify-center site-gutter">
+          <div className="hero-preview w-full">
+            <Preview />
+          </div>
+          <div className="hero-intro grid w-full items-center gap-5 md:grid-cols-[1fr_1.15fr] md:gap-10">
             <div>
-              <h1 className="font-display text-[2.75rem] font-bold leading-[0.95] tracking-[-0.03em] sm:text-7xl">
-                Watch anime
-                <br />
+              <h1 className="hero-title font-display font-bold tracking-[-0.03em]">
+                Watch anime<br />
                 <span className="text-brand-400">together.</span>
               </h1>
             </div>
-            <div className="lg:pb-2">
-              <p className="max-w-md text-lg leading-relaxed text-zinc-300">
-                Watch with your partner on a video call. When either of you pauses or skips, the other player follows.
-                Share a tab, open a file you both have, or use the extension on Miruro.
+            <div className="min-w-0">
+              <p className="max-w-lg text-sm leading-relaxed text-zinc-300 sm:text-base">
+                A video call and synced playback, in one room. Share a tab, open a file, or use the extension on your streaming site.
               </p>
-              <div id="start" className="mt-7 scroll-mt-24">
+              <div id="start" className="mt-4 scroll-mt-24">
                 <StartRoom tone="dark" />
               </div>
-              <p className="mt-3 font-sans text-[11px] text-zinc-500">No signup. Create a room and send them the link.</p>
+              <p className="mt-2 text-xs text-zinc-400">No signup. Just send your partner the link.</p>
             </div>
-          </div>
-          <div className="hero-preview mt-14 translate-y-10 sm:translate-y-16">
-            <Preview />
           </div>
         </div>
       </section>
 
       {/* Works with */}
-      <section id="sources" className="scroll-mt-10 border-b border-cream-200 bg-cream pb-10 pt-24 sm:pt-32">
-        <div className="mx-auto max-w-6xl px-5">
-          <p className="font-sans text-[11px] font-medium text-zinc-500">Works with</p>
+      <section id="sources" className="scroll-mt-10 border-b border-cream-200 bg-cream py-14 sm:py-20">
+        <div data-reveal className="mx-auto site-width site-gutter">
+          <h2 className="font-display text-3xl font-bold text-ink sm:text-4xl">Works with</h2>
+          <p className="mt-3 text-sm text-zinc-600">Watch on your usual site with the Tandem extension.</p>
+          <ul className="service-logos my-10 grid grid-cols-2 items-center gap-x-8 gap-y-10 sm:grid-cols-3 sm:gap-y-14 lg:grid-cols-5">
+            {streamingSites.map(([name, slug]) => (
+              <li key={slug} className="flex h-24 items-center justify-center sm:h-28">
+                <Image src={`/logos/${slug}.svg`} alt={name} width={200} height={96} className="service-logo h-20 w-full max-w-44 object-contain sm:h-24" />
+              </li>
+            ))}
+          </ul>
+          <p className="mt-5 text-sm text-zinc-500">Support for these sites is experimental. Both viewers need access to the same episode; ads can interrupt sync.</p>
+          <ul className="source-chips mt-6 flex flex-wrap gap-3">
+            {sources.map((source) => (
+              <li key={source} className="rounded-full border border-cream-200 bg-white px-4 py-2 text-sm text-zinc-700">{source}</li>
+            ))}
+          </ul>
         </div>
-        <ul data-reveal className="source-chips mx-auto mt-4 flex max-w-6xl flex-wrap gap-3 px-5">
-          {sources.map((source) => (
-            <li key={source} className="rounded-full border border-cream-200 bg-white px-4 py-2 text-sm text-zinc-700">{source}</li>
-          ))}
-        </ul>
       </section>
 
       {/* How it works */}
       <section id="sync" className="scroll-mt-20 bg-white">
-        <div data-reveal className="mx-auto grid max-w-6xl gap-12 px-5 py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28">
+        <div data-reveal className="mx-auto grid site-width gap-12 site-gutter py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28">
           <div>
             <p className="font-sans text-[11px] font-medium text-zinc-500">How it works</p>
             <h2 className="mt-4 font-display text-4xl font-bold leading-tight text-ink">Pause, skip, and catch up together.</h2>
@@ -134,21 +160,21 @@ export default function Home() {
       </section>
 
       {/* Extension */}
-      <section className="border-y border-brand-100 bg-brand-50">
-        <div data-reveal className="mx-auto max-w-6xl px-5 py-16">
+      <section className="bg-brand-700 text-white">
+        <div data-reveal className="mx-auto site-width site-gutter py-16">
           <div>
-            <p className="font-sans text-[11px] font-medium text-zinc-500">The extension</p>
-            <h2 className="mt-4 font-display text-4xl font-bold leading-[1] tracking-[-0.03em] text-ink sm:text-5xl">
-              Watch together on Miruro.
+            <p className="font-sans text-[11px] font-medium text-brand-200">The extension</p>
+            <h2 className="mt-4 font-display text-4xl font-bold leading-[1] tracking-[-0.03em] text-white sm:text-5xl">
+              Watch on the site you use.
             </h2>
-            <p className="mt-5 max-w-md leading-relaxed text-zinc-600">
-              The extension syncs your Miruro players and keeps the call over the video, including in fullscreen.
+            <p className="mt-5 max-w-md leading-relaxed text-brand-100">
+              Use the extension on Miruro, or try experimental support for Netflix, Prime Video, YouTube, Disney+, Hulu, Max, Crunchyroll, Apple TV+, Paramount+, and Peacock.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href={GITHUB} variant="dark">
+              <ButtonLink href={GITHUB} variant="light">
                 Get the extension
               </ButtonLink>
-              <ButtonLink href="#faq" variant="light">
+              <ButtonLink href="#faq" variant="ghost">
                 Which sites work?
               </ButtonLink>
             </div>
@@ -158,7 +184,7 @@ export default function Home() {
 
       {/* FAQ */}
       <section id="faq" className="scroll-mt-20 bg-cream">
-        <div data-reveal className="mx-auto grid max-w-6xl gap-10 px-5 py-20 lg:grid-cols-[0.6fr_1.4fr] lg:py-28">
+        <div data-reveal className="mx-auto grid site-width gap-10 site-gutter py-20 lg:grid-cols-[0.6fr_1.4fr] lg:py-28">
           <h2 className="font-display text-4xl font-bold leading-[1] tracking-[-0.03em] text-ink">Questions</h2>
           <div className="divide-y divide-cream-200 border-y border-cream-200">
             {faq.map(({ q, a }) => (
@@ -176,7 +202,7 @@ export default function Home() {
 
       {/* Last call */}
       <section className="border-b border-white/10 bg-ink text-white">
-        <div data-reveal className="mx-auto flex max-w-6xl flex-col items-start gap-8 px-5 py-20 lg:flex-row lg:items-end lg:justify-between">
+        <div data-reveal className="mx-auto flex site-width flex-col items-start gap-8 site-gutter py-20 lg:flex-row lg:items-end lg:justify-between">
           <h2 className="font-display text-4xl font-bold leading-tight tracking-[-0.03em] sm:text-5xl">
             Start watching together.
           </h2>

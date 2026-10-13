@@ -25,14 +25,49 @@ async function main() {
     chrome.storage.sync.set({ appOrigin: v });
   });
 
+  if (!tab?.id || !/^https?:\/\//.test(tab.url || "")) {
+    $("#unsupported").hidden = false;
+    $("#access-message").textContent = "Open a video website first, then click Tandem.";
+    $("#enable").hidden = true;
+    return;
+  }
+
   let status = null;
   try {
     status = await chrome.tabs.sendMessage(tab.id, { type: "tandem:get" }, { frameId: 0 });
   } catch {
     $("#unsupported").hidden = false;
+    $("#enable").addEventListener("click", async () => {
+      const origin = `${new URL(tab.url).origin}/*`;
+      try {
+        const granted = await chrome.permissions.request({ origins: [origin] });
+        if (!granted) throw new Error("Site access was not granted.");
+        const id = `tandem-${new URL(tab.url).origin.replace(/[^a-z0-9]/gi, "-")}`;
+        const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [id] });
+        if (!existing.length) {
+          await chrome.scripting.registerContentScripts([{
+            id, matches: [origin], js: ["content.js"], css: ["content.css"],
+            allFrames: true, runAt: "document_idle", persistAcrossSessions: true,
+          }]);
+        }
+        // activeTab covers the current top frame; cross-origin frames require their own access.
+        try {
+          await chrome.scripting.insertCSS({ target: { tabId: tab.id, allFrames: true }, files: ["content.css"] });
+          await chrome.scripting.executeScript({ target: { tabId: tab.id, allFrames: true }, files: ["content.js"] });
+        } catch {
+          await chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ["content.css"] });
+          await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
+        }
+        window.location.reload();
+      } catch (error) {
+        $("#access-error").hidden = false;
+        $("#access-error").textContent = error.message || "Could not enable Tandem here. Try reloading the page.";
+      }
+    });
     return;
   }
 
+  $("#compatibility").hidden = /(^|\.)miruro\.(tv|to|online)$/.test(new URL(tab.url).hostname);
   const send = (msg) => chrome.tabs.sendMessage(tab.id, msg, { frameId: 0 });
 
   if (status?.roomId) {
@@ -59,7 +94,11 @@ async function main() {
     await send({ type: "tandem:open", roomId, appOrigin: origin });
     window.close();
   };
-  $("#create").addEventListener("click", () => open(newRoomId()));
+  const showError = (error) => {
+    $("#error").hidden = false;
+    $("#error").textContent = error.message || "Could not open the room. Reload the page and try again.";
+  };
+  $("#create").addEventListener("click", () => open(newRoomId()).catch(showError));
   $("#join").addEventListener("submit", (e) => {
     e.preventDefault();
     const code = parseRoomCode($("#code").value);
@@ -68,8 +107,12 @@ async function main() {
       $("#error").textContent = "Paste a room link or an 8-character code.";
       return;
     }
-    open(code);
+    open(code).catch(showError);
   });
 }
 
-main();
+main().catch((error) => {
+  $("#unsupported").hidden = false;
+  $("#access-error").hidden = false;
+  $("#access-error").textContent = error.message || "Could not connect to this tab.";
+});

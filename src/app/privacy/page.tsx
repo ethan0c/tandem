@@ -31,8 +31,8 @@ const sections = [
   {
     title: "The browser extension",
     body: [
-      "The extension runs only on the supported sites listed in its manifest (miruro.tv and its mirrors). On those pages it reads and controls the video player (play, pause, seek, current time) to keep your room in sync, and shows the floating call panel, which is this website loaded in a frame.",
-      "It stores one setting with Chrome sync storage: the Tandem app URL. The current room code is kept in the tab's session storage so a reload keeps you in the room, and it is cleared when you leave. The extension does not read your browsing history or any page outside the supported sites.",
+      "The extension runs on the streaming sites listed in its manifest, including Miruro and the experimental streaming services. You can also grant access to another website through the extension popup. On those pages it reads and controls the video player (play, pause, seek, current time) to keep your room in sync, and shows the floating call panel, which is this website loaded in a frame.",
+      "It stores one setting with Chrome sync storage: the Tandem app URL. The current room code is kept in the tab's session storage so a reload keeps you in the room, and it is cleared when you leave. The extension does not read your browsing history. It reads the active tab URL to create invites and request access to a site. Additional site permissions and content-script registrations are managed by your browser and remain until removed.",
     ],
   },
   {
