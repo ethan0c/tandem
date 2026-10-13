@@ -168,7 +168,9 @@ try {
       await bob.waitForTimeout(3000);
     }
     const stats = await bob.evaluate(async () => {
-      const pc = window.__pcs.find((p) => p.connectionState === "connected" && p.getReceivers().some((r) => r.track?.kind === "video"));
+      // The connection that carries the stage video's track (not the camera call).
+      const track = document.querySelector("video.object-contain")?.srcObject?.getVideoTracks()[0];
+      const pc = window.__pcs.find((p) => p.getReceivers().some((r) => r.track === track));
       if (!pc) return null;
       const out = [];
       for (const s of (await pc.getStats()).values()) {

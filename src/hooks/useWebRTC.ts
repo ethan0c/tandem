@@ -24,6 +24,23 @@ export function iceServers(): RTCIceServer[] {
   return servers;
 }
 
+/** Best quality per bit first; VP8 last because it blurs high-resolution content. */
+const CODEC_ORDER = ["video/VP9", "video/AV1", "video/H264", "video/VP8"];
+
+/** Put our preferred video codecs first in the offer so the answer picks one of them. */
+export function preferCodecs(pc: RTCPeerConnection) {
+  const caps = RTCRtpSender.getCapabilities?.("video");
+  if (!caps) return;
+  const rank = (mime: string) => {
+    const i = CODEC_ORDER.indexOf(mime);
+    return i === -1 ? CODEC_ORDER.length : i;
+  };
+  const ranked = [...caps.codecs].sort((a, b) => rank(a.mimeType) - rank(b.mimeType));
+  for (const t of pc.getTransceivers()) {
+    if (t.sender.track?.kind === "video") t.setCodecPreferences?.(ranked);
+  }
+}
+
 interface Options {
   socketRef: RefObject<AppSocket | null>;
   selfId: string | null;
@@ -74,6 +91,7 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
   const negotiate = useCallback(
     async (id: string, pc: RTCPeerConnection, iceRestart = false) => {
       try {
+        if (!iceRestart) preferCodecs(pc);
         const offer = await pc.createOffer(iceRestart ? { iceRestart: true } : undefined);
         await pc.setLocalDescription(offer);
         send(id, { type: "offer", sdp: offer });

@@ -3,30 +3,13 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { AppSocket } from "@/lib/socket";
 import type { Member, ScreenSignal, Source } from "@/lib/types";
-import { iceServers } from "./useWebRTC";
+import { iceServers, preferCodecs } from "./useWebRTC";
 
 /**
  * Ceiling, not a target: the encoder uses what the link can carry. 20 Mbps covers 4K at 30 fps in
  * VP9; Chrome's own default is ~4 Mbps, which turns anything above 1080p to mush.
  */
 const MAX_BITRATE = 20_000_000;
-
-/** Best quality per bit first; VP8 last because it blurs high-resolution content. */
-const CODEC_ORDER = ["video/VP9", "video/AV1", "video/H264", "video/VP8"];
-
-/** Put the sharer's preferred codecs first so the viewer's answer picks one of them. */
-function preferCodecs(pc: RTCPeerConnection) {
-  const caps = RTCRtpSender.getCapabilities?.("video");
-  if (!caps) return;
-  const ranked = [...caps.codecs].sort((a, b) => {
-    const ia = CODEC_ORDER.indexOf(a.mimeType);
-    const ib = CODEC_ORDER.indexOf(b.mimeType);
-    return (ia === -1 ? CODEC_ORDER.length : ia) - (ib === -1 ? CODEC_ORDER.length : ib);
-  });
-  for (const t of pc.getTransceivers()) {
-    if (t.sender.track?.kind === "video") t.setCodecPreferences?.(ranked);
-  }
-}
 
 interface Options {
   socketRef: RefObject<AppSocket | null>;
