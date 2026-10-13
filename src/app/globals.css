@@ -223,6 +223,7 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 .hero-shell {
   display: flex;
   flex-direction: column;
+  min-height: 100svh;
   background:
     radial-gradient(80% 55% at 50% -12%, rgb(139 92 246 / 0.55), transparent 70%),
     radial-gradient(45% 40% at 8% 18%, rgb(67 56 202 / 0.4), transparent 70%),
@@ -244,46 +245,54 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 }
 /* A curved horizon under the hero: the top sliver of a wide ellipse, faded at both ends. */
 .hero-horizon {
-  position: relative;
-  height: 200px;
-  margin-top: clamp(24px, 4vh, 40px);
+  --line: 150px; /* distance from the hero's bottom edge up to the planet's edge */
+  position: absolute;
+  inset: auto 0 0;
+  height: 320px;
   overflow: hidden;
   mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
   pointer-events: none;
 }
-/* Soft atmosphere above the line, fading up into the hero. */
+/* Atmosphere centred on the line itself, so it fades out in every direction before the band's edges. */
 .hero-horizon::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(60% 100% at 50% 100%, rgb(139 92 246 / 0.22), transparent 70%);
+  background: radial-gradient(55% var(--line) at 50% calc(100% - var(--line)), rgb(139 92 246 / 0.28), transparent 100%);
 }
-/* The planet edge: the top of a wide ellipse, with a haze that fades to black well before the clip. */
+/* The planet edge: the top of a wide ellipse. The haze inside reaches pure black exactly at the hero's bottom. */
 .hero-horizon::before {
   content: "";
   position: absolute;
   left: 50%;
-  top: 36px;
+  top: calc(100% - var(--line));
   width: 160vw;
   height: 800px;
   transform: translateX(-50%);
   border-radius: 50%;
   border-top: 2px solid rgb(167 139 250 / 0.9);
   box-shadow: 0 -16px 40px -8px rgb(139 92 246 / 0.5);
-  background: linear-gradient(to bottom, rgb(139 92 246 / 0.16), rgb(139 92 246 / 0.04) 60px, transparent 130px);
+  background: linear-gradient(to bottom, rgb(139 92 246 / 0.16), rgb(139 92 246 / 0.04) 50%, transparent 100%);
+  background-size: 100% var(--line);
+  background-repeat: no-repeat;
 }
 .site-header { min-height: 72px; flex-shrink: 0; }
-.hero-body { gap: clamp(40px, 6vh, 64px); padding-top: clamp(32px, 8vh, 88px); padding-bottom: 0; }
-.hero-title { font-size: clamp(2.5rem, 6vw, 4.75rem); line-height: 1; }
-.hero-preview { max-width: 1080px; }
+.hero-body { gap: clamp(24px, 4vh, 40px); padding-top: clamp(16px, 4vh, 40px); padding-bottom: clamp(24px, 4vh, 40px); min-height: 0; }
+.hero-title { font-size: clamp(2.5rem, 5vw, 4.25rem); line-height: 1; }
+/* The preview takes whatever height is left in the viewport, keeping 16:9, so the whole hero fits above the fold. */
+.hero-preview { flex: 1; min-height: 0; max-width: 1080px; container-type: size; display: flex; align-items: flex-end; justify-content: center; }
+.hero-preview > figure { width: min(100cqw, 100cqh * 16 / 9); min-width: min(100cqw, 560px); }
 .hero-nav a { padding: 8px 12px; border-radius: 8px; transition: color 180ms ease; }
 .hero-nav a:hover, .hero-nav a:focus-visible { color: white; }
 .hero-nav a:focus-visible { outline: 2px solid rgb(255 255 255 / 0.5); outline-offset: 2px; }
 @media (max-width: 767px) {
-  .hero-horizon { height: 120px; margin-top: 24px; }
-  .hero-horizon::before { width: 280vw; top: 24px; }
+  .hero-shell { min-height: 0; }
+  .hero-horizon { --line: 96px; height: 200px; }
+  .hero-horizon::before { width: 280vw; }
+  .hero-preview { flex: none; container-type: normal; display: block; }
+  .hero-preview > figure { width: 100%; min-width: 0; }
   .site-header { min-height: 64px; }
-  .hero-body { gap: 36px; padding-top: 28px; }
+  .hero-body { gap: 28px; padding-top: 24px; padding-bottom: 32px; }
   .hero-title { font-size: clamp(2.4rem, 11vw, 3rem); }
   .hero-body .btn3d-lg, .hero-body .room-link-field { height: 48px; }
   .hero-body .btn3d-lg { font-size: 0.95rem; }

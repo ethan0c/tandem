@@ -373,6 +373,8 @@ try {
     if ((await bob.getByLabel("Call volume").inputValue()) !== "0.3") throw new Error("call volume not remembered");
     const w = Math.round((await bob.getByRole("button", { name: /^Resize call/ }).locator("..").boundingBox()).width);
     if (Math.abs(w - globalThis.bobCallWidth) > 2) throw new Error(`call size not remembered: ${globalThis.bobCallWidth} -> ${w}`);
+    // His old page said goodbye as it left, so nobody is left holding a ghost: Alice, Carol and the new Bob.
+    await alice.waitForFunction(() => document.querySelectorAll("header span[title]").length === 3, null, { timeout: 5_000 });
     for (const p of [alice, bob]) {
       await p.waitForFunction(
         () => Array.from(document.querySelectorAll("video")).some((v) => !v.muted && v.videoWidth > 0 && !v.paused),

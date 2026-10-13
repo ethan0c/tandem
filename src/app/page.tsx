@@ -74,7 +74,7 @@ export default function Home() {
     <LandingMotion>
       {/* Theater */}
       <section className="hero-shell relative overflow-hidden text-white">
-        <header className="relative">
+        <header className="relative z-10">
           <HeaderFrame>
             <Link href="/" aria-label="Tandem home" className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-brand-400 focus-visible:outline-offset-4">
               <Logo size={24} />
@@ -92,15 +92,15 @@ export default function Home() {
           </HeaderFrame>
         </header>
 
-        <div className="hero-body relative mx-auto flex site-width flex-1 flex-col items-center site-gutter">
+        <div className="hero-body relative z-10 mx-auto flex site-width flex-1 flex-col items-center site-gutter">
           <div className="hero-intro flex flex-col items-center text-center">
-            <h1 className="hero-title font-display font-medium tracking-[-0.04em]">
+            <h1 className="hero-title font-display font-bold tracking-[-0.04em]">
               Watch anime together.
             </h1>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
               A video call and synced playback in one room. Share a tab, open a file, or use the extension on your streaming site.
             </p>
-            <div id="start" className="mt-7 flex w-full scroll-mt-24 justify-center">
+            <div id="start" className="mt-6 flex w-full scroll-mt-24 justify-center">
               <StartRoom tone="dark" />
             </div>
           </div>
@@ -108,11 +108,12 @@ export default function Home() {
             <Preview />
           </div>
         </div>
+        {/* The planet sits behind the lower part of the preview, so the showcase stands on the horizon. */}
         <div aria-hidden="true" className="hero-horizon" />
       </section>
 
       {/* Works with */}
-      <section id="sources" className="scroll-mt-10 bg-ink pb-14 pt-4 sm:pb-20 sm:pt-6">
+      <section id="sources" className="scroll-mt-10 bg-ink pb-14 pt-16 sm:pb-20 sm:pt-24">
         <div data-reveal className="mx-auto site-width site-gutter">
           <h2 className="font-display text-3xl font-medium tracking-[-0.03em] sm:text-4xl">Works with</h2>
           <p className="mt-3 text-sm text-zinc-400">Watch on your usual site with the Tandem extension.</p>

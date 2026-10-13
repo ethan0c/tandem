@@ -1,4 +1,4 @@
-import { createServer } from "node:http";
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
 import type {
@@ -64,6 +64,10 @@ function scheduleCleanup(id: string) {
 
 app.prepare().then(() => {
   const httpServer = createServer((req, res) => {
+    if (req.url === "/leave" && (req.method === "POST" || req.method === "OPTIONS")) {
+      handleLeave(req, res);
+      return;
+    }
     handle(req, res);
   });
 
@@ -87,6 +91,49 @@ app.prepare().then(() => {
       io.to(roomId).emit("source:changed", { source: null, playback: room.playback, from: clientId });
     }
     if (room.members.length === 0) scheduleCleanup(roomId);
+  };
+
+  /**
+   * A page that is closing says goodbye with a beacon (see `sendGoodbye` in src/lib/socket.ts), because
+   * a socket frame sent during unload may never arrive. Frees the member's seat at once.
+   */
+  const handleLeave = (req: IncomingMessage, res: ServerResponse) => {
+    const origin = req.headers.origin;
+    const allowed = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim()) ?? [];
+    if (origin && (!process.env.CORS_ORIGIN || allowed.includes(origin))) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    }
+    if (req.method === "OPTIONS") {
+      res.writeHead(204).end();
+      return;
+    }
+    let body = "";
+    req.on("data", (chunk: Buffer) => {
+      if (body.length < 1024) body += chunk.toString("utf8", 0, 1024 - body.length);
+    });
+    req.on("end", () => {
+      let clientId: unknown;
+      try {
+        clientId = (JSON.parse(body) as { clientId?: unknown }).clientId;
+      } catch {
+        /* not ours */
+      }
+      if (typeof clientId !== "string" || !clientId) {
+        res.writeHead(400).end();
+        return;
+      }
+      const pending = pendingLeave.get(clientId);
+      if (pending) {
+        clearTimeout(pending.timer);
+        pendingLeave.delete(clientId);
+      }
+      const sid = socketOf.get(clientId);
+      const roomId = pending?.roomId ?? (sid ? io.sockets.sockets.get(sid)?.data.roomId : undefined);
+      socketOf.delete(clientId);
+      if (roomId) leave(roomId, clientId);
+      res.writeHead(204).end();
+    });
   };
 
   io.on("connection", (socket) => {

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { playChime } from "@/lib/chime";
-import { clientId, getSocket, type AppSocket } from "@/lib/socket";
+import { clientId, getSocket, sendGoodbye, type AppSocket } from "@/lib/socket";
 import type { Member, PlaybackState, Source, SyncReason } from "@/lib/types";
 
 export type RoomStatus = "connecting" | "joined" | "disconnected";
@@ -111,7 +111,10 @@ export function useRoom(roomId: string, name: string | null) {
     };
     // Leaving the page: say goodbye so the server frees our seat at once instead of holding it
     // for a reconnect that is not coming. If the page comes back from the back/forward cache, rejoin.
-    const onPageHide = () => socket.disconnect();
+    const onPageHide = () => {
+      socket.disconnect();
+      sendGoodbye();
+    };
     const onPageShow = () => {
       if (!socket.active) socket.connect();
     };

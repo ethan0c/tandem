@@ -14,6 +14,22 @@ export const clientId = nanoid(12);
 let socket: AppSocket | null = null;
 
 /**
+ * Tell the server this page is gone, in a way that survives unload. A frame written to the socket
+ * while the page is closing may never leave the browser; a beacon is queued by the browser itself
+ * and delivered after the page has gone. The server frees our seat at once instead of holding it
+ * for a reconnect that is not coming.
+ */
+export function sendGoodbye() {
+  const base = (process.env.NEXT_PUBLIC_SOCKET_URL ?? "").replace(/\/$/, "");
+  try {
+    // text/plain keeps this a "simple" request: no CORS preflight, so it is sent cross-origin too.
+    navigator.sendBeacon(`${base}/leave`, new Blob([JSON.stringify({ clientId })], { type: "text/plain" }));
+  } catch {
+    /* no beacon support: the socket's own disconnect is the fallback */
+  }
+}
+
+/**
  * One socket per tab, created lazily on first use.
  * Talks to the page's own origin unless NEXT_PUBLIC_SOCKET_URL points at a separately hosted
  * `server.ts` (needed when the site itself is on a static/serverless host such as Vercel).
