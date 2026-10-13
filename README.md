@@ -39,7 +39,7 @@ npm start
 
 | Source           | What happens                                                                            |
 | ---------------- | --------------------------------------------------------------------------------------- |
-| Direct link      | MP4 / WebM / HLS (`.m3u8`, via hls.js). Everyone loads the same URL.                   |
+| Share tab        | The sharer streams a tab (with tab audio) over WebRTC. DRM sites may appear black.     |
 | Local file       | Nothing is uploaded. Your partner is prompted to pick the same file on their machine.   |
 
 Streaming sites with protected or proprietary players cannot be driven from a web page. A browser extension that
