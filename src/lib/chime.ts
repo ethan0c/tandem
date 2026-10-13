@@ -6,7 +6,7 @@ import { useSyncExternalStore } from "react";
  * Small UI chimes synthesized with Web Audio, so there are no sound files to load.
  * Each chime is a few soft sine notes with a quick attack and an exponential fade.
  */
-export type Chime = "join" | "leave" | "shareStart" | "shareStop" | "disconnect" | "reconnect";
+export type Chime = "join" | "leave" | "shareStart" | "shareStop" | "disconnect" | "reconnect" | "message";
 
 /** [frequency Hz, start offset s, duration s] per note. */
 const NOTES: Record<Chime, [number, number, number][]> = {
@@ -16,6 +16,7 @@ const NOTES: Record<Chime, [number, number, number][]> = {
   shareStop: [[783.99, 0, 0.16], [523.25, 0.08, 0.3]],
   disconnect: [[440, 0, 0.22], [349.23, 0.12, 0.4]], // A4 → F4, lower and longer
   reconnect: [[523.25, 0, 0.14], [783.99, 0.07, 0.28]],
+  message: [[880, 0, 0.1], [1174.66, 0.05, 0.18]], // A5 → D6, a short tap
 };
 
 /** Quiet on purpose: chimes sit under the show and the call, never over them. */

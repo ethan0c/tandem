@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { playChime } from "@/lib/chime";
 import { clientId, getSocket, sendGoodbye, type AppSocket } from "@/lib/socket";
-import type { Member, PlaybackState, Source, SyncReason } from "@/lib/types";
+import { CHAT_HISTORY, type ChatMessage, type Member, type PlaybackState, type Source, type SyncReason } from "@/lib/types";
 
 export type RoomStatus = "connecting" | "joined" | "disconnected";
 
@@ -23,6 +23,7 @@ export function useRoom(roomId: string, name: string | null) {
   const [members, setMembers] = useState<Member[]>([]);
   const [source, setSource] = useState<Source | null>(null);
   const [remote, setRemote] = useState<RemotePlayback | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const socketRef = useRef<AppSocket | null>(null);
   const offsetRef = useRef(0);
   const seqRef = useRef(0);
@@ -78,6 +79,8 @@ export function useRoom(roomId: string, name: string | null) {
         setSelfId(ack.selfId);
         setHostId(ack.state.hostId);
         setMembers(ack.state.members);
+        // The room's recent chat: everything we missed while away, or the history for a late joiner.
+        setMessages(ack.state.chat ?? []);
         currentSource = ack.state.source;
         setSource(ack.state.source);
         push(ack.state.playback, "server", "resync");
@@ -104,6 +107,10 @@ export function useRoom(roomId: string, name: string | null) {
       setSource(s);
       push(playback, from, "resync");
     };
+    const onMessage = (m: ChatMessage) => {
+      if (m.from !== clientId) playChime("message");
+      setMessages((prev) => (prev.some((p) => p.id === m.id) ? prev : [...prev, m].slice(-CHAT_HISTORY)));
+    };
     const onDisconnect = () => {
       dropped = true;
       playChime("disconnect");
@@ -123,6 +130,7 @@ export function useRoom(roomId: string, name: string | null) {
     socket.on("member:left", onLeft);
     socket.on("sync:state", onSync);
     socket.on("source:changed", onSource);
+    socket.on("chat:message", onMessage);
     socket.on("disconnect", onDisconnect);
     socket.on("connect", join);
     window.addEventListener("pagehide", onPageHide);
@@ -137,6 +145,7 @@ export function useRoom(roomId: string, name: string | null) {
       socket.off("member:left", onLeft);
       socket.off("sync:state", onSync);
       socket.off("source:changed", onSource);
+      socket.off("chat:message", onMessage);
       socket.off("disconnect", onDisconnect);
       socket.off("connect", join);
       socket.disconnect();
@@ -152,6 +161,11 @@ export function useRoom(roomId: string, name: string | null) {
     socketRef.current?.emit("source:set", s);
   }, []);
 
+  const sendMessage = useCallback((text: string) => {
+    const clean = text.trim();
+    if (clean) socketRef.current?.emit("chat:send", { text: clean });
+  }, []);
+
   return {
     status,
     selfId,
@@ -159,6 +173,8 @@ export function useRoom(roomId: string, name: string | null) {
     members,
     source,
     remote,
+    messages,
+    sendMessage,
     serverNow,
     emitSync,
     changeSource,

@@ -1,11 +1,14 @@
+import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
-import type {
-  ClientToServerEvents,
-  PlaybackState,
-  RoomState,
-  ServerToClientEvents,
+import {
+  CHAT_HISTORY,
+  CHAT_MAX_LENGTH,
+  type ClientToServerEvents,
+  type PlaybackState,
+  type RoomState,
+  type ServerToClientEvents,
 } from "./src/lib/types";
 
 const port = parseInt(process.env.PORT || "3000", 10);
@@ -32,7 +35,13 @@ const pendingLeave = new Map<string, { roomId: string; timer: NodeJS.Timeout }>(
 interface SocketData {
   roomId?: string;
   clientId?: string;
+  /** Send times of this socket's recent chat messages, for the flood check. */
+  chatTimes?: number[];
 }
+
+/** No more than this many chat messages per socket in any `CHAT_BURST_MS` window. */
+const CHAT_BURST = 8;
+const CHAT_BURST_MS = 5_000;
 
 function freshPlayback(): PlaybackState {
   return { playing: false, time: 0, updatedAt: Date.now() };
@@ -41,7 +50,7 @@ function freshPlayback(): PlaybackState {
 function getRoom(id: string): RoomState {
   let room = rooms.get(id);
   if (!room) {
-    room = { id, hostId: null, members: [], source: null, playback: freshPlayback() };
+    room = { id, hostId: null, members: [], source: null, playback: freshPlayback(), chat: [] };
     rooms.set(id, room);
   }
   const timer = cleanupTimers.get(id);
@@ -187,6 +196,26 @@ app.prepare().then(() => {
       room.source = source?.kind === "screen" ? { ...source, sharerId: clientId } : source;
       room.playback = freshPlayback();
       io.to(roomId).emit("source:changed", { source: room.source, playback: room.playback, from: clientId });
+    });
+
+    socket.on("chat:send", (payload) => {
+      const { roomId, clientId } = socket.data;
+      if (!roomId || !clientId) return;
+      const room = rooms.get(roomId);
+      const member = room?.members.find((m) => m.id === clientId);
+      if (!room || !member) return;
+      const text = typeof payload?.text === "string" ? payload.text.trim().slice(0, CHAT_MAX_LENGTH) : "";
+      if (!text) return;
+      const now = Date.now();
+      const recent = (socket.data.chatTimes ?? []).filter((t) => now - t < CHAT_BURST_MS);
+      if (recent.length >= CHAT_BURST) return;
+      recent.push(now);
+      socket.data.chatTimes = recent;
+      // The name comes from the seat, never from the payload.
+      const message = { id: randomUUID(), from: clientId, name: member.name, text, at: now };
+      room.chat.push(message);
+      if (room.chat.length > CHAT_HISTORY) room.chat.splice(0, room.chat.length - CHAT_HISTORY);
+      io.to(roomId).emit("chat:message", message);
     });
 
     socket.on("rtc:signal", ({ to, data }) => {

@@ -24,12 +24,31 @@ export interface Member {
   name: string;
 }
 
+/** One line of room chat. The server stamps everything but the text, so a name cannot be forged. */
+export interface ChatMessage {
+  id: string;
+  /** Member id of the sender. */
+  from: string;
+  /** The sender's display name at the time, kept so the line still reads after they leave. */
+  name: string;
+  text: string;
+  /** Server clock (ms since epoch). */
+  at: number;
+}
+
+/** The longest message the server accepts, in characters. */
+export const CHAT_MAX_LENGTH = 500;
+/** How many recent messages a room keeps for people who join or reconnect. */
+export const CHAT_HISTORY = 100;
+
 export interface RoomState {
   id: string;
   hostId: string | null;
   members: Member[];
   source: Source | null;
   playback: PlaybackState;
+  /** Recent chat, oldest first. Lives only as long as the room does. */
+  chat: ChatMessage[];
 }
 
 export interface JoinAck {
@@ -67,6 +86,7 @@ export interface ServerToClientEvents {
   }) => void;
   "rtc:signal": (payload: { from: string; data: SignalData }) => void;
   "screen:signal": (payload: { from: string; data: ScreenSignal }) => void;
+  "chat:message": (message: ChatMessage) => void;
 }
 
 export interface ClientToServerEvents {
@@ -83,6 +103,7 @@ export interface ClientToServerEvents {
   "source:set": (source: Source | null) => void;
   "rtc:signal": (payload: { to: string; data: SignalData }) => void;
   "screen:signal": (payload: { to: string; data: ScreenSignal }) => void;
+  "chat:send": (payload: { text: string }) => void;
 }
 
 /** Where the media should be right now, given a playback state and the server clock. */

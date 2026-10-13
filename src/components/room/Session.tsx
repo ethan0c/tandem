@@ -6,6 +6,7 @@ import { useReleaseStream } from "@/hooks/useReleaseStream";
 import { useRoom } from "@/hooks/useRoom";
 import { useScreenShare } from "@/hooks/useScreenShare";
 import { useWebRTC } from "@/hooks/useWebRTC";
+import { ChatPanel } from "./ChatPanel";
 import { FloatingCall } from "./FloatingCall";
 import { Player } from "./Player";
 import { ScreenStage } from "./ScreenStage";
@@ -41,6 +42,9 @@ export function Session({ roomId, name, localStream }: Props) {
   const [drift, setDrift] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const [active, setActive] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
+  // How many messages had arrived the last time the chat was open; the rest are unread.
+  const [seenCount, setSeenCount] = useState(0);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const origin = useClientValue(() => window.location.origin, "");
   const roomUrl = origin ? `${origin}/room/${roomId}` : "";
@@ -60,6 +64,24 @@ export function Session({ roomId, name, localStream }: Props) {
       if (idleTimer.current) clearTimeout(idleTimer.current);
     };
   }, []);
+
+  const messageCount = room.messages.length;
+  useEffect(() => {
+    if (chatOpen) setSeenCount(messageCount);
+  }, [chatOpen, messageCount]);
+  const unread = chatOpen ? 0 : Math.max(0, messageCount - seenCount);
+  const toggleChat = useCallback(() => setChatOpen((o) => !o), []);
+
+  // "c" opens and closes the chat, unless you are typing somewhere.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      if (e.key === "c" && !e.metaKey && !e.ctrlKey && !e.altKey) toggleChat();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [toggleChat]);
 
   // Fullscreen handling on the whole room, so the floating camera stays visible.
   useEffect(() => {
@@ -87,7 +109,7 @@ export function Session({ roomId, name, localStream }: Props) {
   // A live share always counts as playing, so the chrome auto-hides.
   const screenSharerId = room.source?.kind === "screen" ? room.source.sharerId : null;
   const isScreen = !!screenSharerId;
-  const chromeVisible = active || (!playing && !isScreen) || sourceOpen;
+  const chromeVisible = active || (!playing && !isScreen) || sourceOpen || chatOpen;
   const pickerName =
     room.remote && room.remote.from !== room.selfId
       ? (room.members.find((m) => m.id === room.remote?.from)?.name ?? null)
@@ -110,6 +132,7 @@ export function Session({ roomId, name, localStream }: Props) {
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullscreen}
         visible={chromeVisible}
+        chat={{ open: chatOpen, unread, onToggle: toggleChat }}
       />
 
       {room.source?.kind === "screen" ? (
@@ -158,6 +181,14 @@ export function Session({ roomId, name, localStream }: Props) {
         poorConnection={rtc.poorConnection}
         turnCameraOff={rtc.turnCameraOff}
         roomUrl={roomUrl}
+      />
+
+      <ChatPanel
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        messages={room.messages}
+        selfId={room.selfId}
+        onSend={room.sendMessage}
       />
 
       <SourceDialog

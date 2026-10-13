@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Check, Copy, LogOut, Maximize, Minimize } from "lucide-react";
+import { Check, Copy, LogOut, Maximize, MessageSquare, Minimize } from "lucide-react";
 import { ChimeToggle } from "@/components/ChimeToggle";
 import { HeaderFrame } from "@/components/HeaderFrame";
 import { Logo } from "@/components/Logo";
@@ -19,9 +19,11 @@ interface Props {
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   visible: boolean;
+  /** Chat controls; left out where there is no chat (the landing-page preview). */
+  chat?: { open: boolean; unread: number; onToggle: () => void };
 }
 
-export function TopBar({ roomId, roomUrl, members, selfId, status, drift, isFullscreen, onToggleFullscreen, visible }: Props) {
+export function TopBar({ roomId, roomUrl, members, selfId, status, drift, isFullscreen, onToggleFullscreen, visible, chat }: Props) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -79,6 +81,27 @@ export function TopBar({ roomId, roomUrl, members, selfId, status, drift, isFull
               </span>
             ))}
           </div>
+          {chat && (
+            <button
+              onClick={chat.onToggle}
+              aria-label={chat.open ? "Close chat" : "Open chat"}
+              aria-pressed={chat.open}
+              title="Chat (c)"
+              className={`relative flex size-8 items-center justify-center rounded-lg transition hover:bg-white/10 ${
+                chat.open ? "bg-white/10 text-white" : "text-zinc-300 hover:text-white"
+              }`}
+            >
+              <MessageSquare className="size-4" />
+              {chat.unread > 0 && (
+                <span
+                  data-testid="chat-unread"
+                  className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-semibold text-white"
+                >
+                  {chat.unread > 9 ? "9+" : chat.unread}
+                </span>
+              )}
+            </button>
+          )}
           <ChimeToggle className="flex size-8 items-center justify-center rounded-lg text-zinc-300 transition hover:bg-white/10 hover:text-white" />
           <button
             onClick={onToggleFullscreen}

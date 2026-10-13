@@ -7,7 +7,7 @@ Copy each field into the Developer Dashboard (Store listing tab and Privacy tab)
 | Field | Value |
 |---|---|
 | Title | Tandem – watch together *(comes from manifest)* |
-| Summary | Sync playback on anime sites with your partner and keep a video call floating on top. *(comes from manifest)* |
+| Summary | Watch your favorite shows together with a video call beside the video. Some streaming sites may not work yet. *(comes from manifest)* |
 | Description | Paste the contents of `description.txt` |
 | Category | Entertainment |
 | Language | English |
@@ -25,12 +25,14 @@ Copy each field into the Developer Dashboard (Store listing tab and Privacy tab)
 
 **Single purpose**
 
-> Tandem syncs video playback between two people watching the same episode on supported anime sites and shows their video call in a floating panel over the player.
+> Tandem syncs video playback between two people watching the same episode on a streaming site and shows their video call in a floating panel over the player.
 
 **Permission justifications**
 
 - `storage`: Saves one setting, the Tandem app URL, so the popup and the content script use the same server. Nothing else is stored with this permission.
-- Host permissions (content script on `*.miruro.tv`, `*.miruro.to`, `*.miruro.online`): The content script has to read and control the page's HTML5 `<video>` element (play, pause, seek, current time) to keep both viewers in sync, and inject the floating call panel. It runs only on these domains.
+- `activeTab` and `scripting`: When the user presses **Enable on this site** in the popup on a site that is not listed in the manifest, Tandem injects its own packaged `content.js` and `content.css` into that tab and registers them for that site, so invite links keep working after a reload. Nothing runs on a site until the user turns it on there.
+- Host permissions (content script on Miruro, Netflix, Prime Video, YouTube, Disney+, Hulu, Max, Crunchyroll, Apple TV+, Paramount+ and Peacock): The content script has to read and control the page's HTML5 `<video>` element (play, pause, seek, current time) to keep both viewers in sync, and inject the floating call panel. It does not read page content beyond the video element.
+- Optional host permissions (`https://*/*`, `http://*/*`): Requested for one origin at a time, only when the user presses **Enable on this site** for that site. Never requested up front.
 - Remote code: **No.** All JavaScript ships in the package. The floating panel is an iframe of the Tandem web app, which is a web page, not executed extension code.
 
 **Data usage** (tick these)
@@ -48,7 +50,7 @@ Certify all three:
 
 ## Test instructions tab (for the reviewer)
 
-1. Install the extension and open any episode on https://www.miruro.tv/.
+1. Install the extension and open any video on https://www.youtube.com/ (or an episode on https://www.miruro.tv/).
 2. Click the Tandem toolbar icon, then **Create a room**. A floating panel appears in the bottom-right corner.
 3. Click **Copy invite** and open the copied link in a second Chrome profile with the extension installed.
 4. Play, pause or seek in one window. The other window follows.
