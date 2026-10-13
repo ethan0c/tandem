@@ -67,8 +67,17 @@ const browser = await chromium.launch({
   ],
 });
 
+// The sharer asks for a capture as large as their display (× DPR), so the display size decides
+// the ceiling. Default to a 4K display.
+const SCREEN_W = Number(process.env.SCREEN_W ?? 3840);
+const SCREEN_H = Number(process.env.SCREEN_H ?? 2160);
+
 async function open(name) {
-  const ctx = await browser.newContext({ permissions: ["camera", "microphone"] });
+  const ctx = await browser.newContext({
+    permissions: ["camera", "microphone"],
+    viewport: { width: 1280, height: 720 },
+    screen: { width: SCREEN_W, height: SCREEN_H },
+  });
   await ctx.addInitScript(pcSpy);
   const page = await ctx.newPage();
   page.on("pageerror", (e) => log(name, `pageerror: ${e.message}`));
@@ -93,10 +102,12 @@ async function join(page, name) {
 const sessions = [];
 try {
   // The tab that gets shared: a title the picker flag can match, with something moving in it.
-  // 4K by default, to prove the share is not downscaled on the way to viewers. Run again with
-  // SHARE_W=1280 SHARE_H=720 to prove a small tab is not upscaled either.
+  // 4K by default, to prove the share is not downscaled on the way to viewers. Chrome captures a
+  // tab at exactly the requested size, so the expected size is min(tab, sharer's display).
   const SHARE_W = Number(process.env.SHARE_W ?? 3840);
   const SHARE_H = Number(process.env.SHARE_H ?? 2160);
+  const EXPECT_W = Math.min(SHARE_W, SCREEN_W);
+  const EXPECT_H = Math.min(SHARE_H, SCREEN_H);
   const shareCtx = await browser.newContext({ viewport: { width: SHARE_W, height: SHARE_H } });
   const sharePage = await shareCtx.newPage();
   await sharePage.setContent(
@@ -150,14 +161,14 @@ try {
     await bob.getByText("Connecting to").waitFor({ state: "detached", timeout: 2_000 });
   });
 
-  await step(`Bob receives the share at its real size (${SHARE_W}×${SHARE_H}, not scaled)`, async () => {
+  await step(`Bob receives the share at ${EXPECT_W}×${EXPECT_H} (tab ${SHARE_W}×${SHARE_H}, display ${SCREEN_W}×${SCREEN_H})`, async () => {
     // The stage <video> is the only one with object-contain; camera tiles use object-cover.
     const dims = () =>
       bob.evaluate(() => {
         const v = document.querySelector("video.object-contain");
         return v ? [v.videoWidth, v.videoHeight] : [0, 0];
       });
-    const minW = Math.floor(SHARE_W * 0.9);
+    const minW = Math.floor(EXPECT_W * 0.9);
     const t0 = Date.now();
     let w = 0;
     let h = 0;
@@ -193,7 +204,7 @@ try {
     );
     log("Alice", `video m-lines: ${JSON.stringify(sdp)}`);
     if (w < minW) throw new Error(`received ${w}×${h}, wanted ≥ ${minW} wide`);
-    if (w > SHARE_W || h > SHARE_H) throw new Error(`received ${w}×${h}: upscaled beyond the ${SHARE_W}×${SHARE_H} tab`);
+    if (w > EXPECT_W || h > EXPECT_H) throw new Error(`received ${w}×${h}: larger than the ${EXPECT_W}×${EXPECT_H} ceiling`);
     log("Bob", `share arrives at ${w}×${h}`);
   });
 

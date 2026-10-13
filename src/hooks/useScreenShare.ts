@@ -184,18 +184,17 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
   /** Must be called from a click: browsers only open the picker on a user gesture. */
   const start = useCallback(async () => {
     setError(null);
+    // Chrome captures a shared tab at exactly the requested size (its tab capture uses a fixed
+    // resolution; the default is 1080p), and `min` constraints are not allowed. So ask for the
+    // largest a tab on this display can be, up to 4K: a maximised tab is captured 1:1 and nothing
+    // is ever downscaled. Windows and whole screens are captured at native size up to this.
+    const dpr = window.devicePixelRatio || 1;
+    const capW = Math.min(Math.round(window.screen.width * dpr), 3840);
+    const capH = Math.min(Math.round(window.screen.height * dpr), 2160);
     let stream: MediaStream;
     try {
       stream = await navigator.mediaDevices.getDisplayMedia({
-        // Chrome caps screen capture at 1080p unless asked for more, and treats a bare `ideal` as
-        // a fixed target (it would upscale a small tab). A range with a tiny min and a non-fixed
-        // aspect ratio selects Chrome's "any size within limit" policy: native size up to 4K, never
-        // upscaled. See media_stream_constraints_util_video_content.cc in Chromium.
-        video: {
-          frameRate: { ideal: 30, max: 60 },
-          width: { min: 2, ideal: 3840, max: 3840 },
-          height: { min: 2, ideal: 2160, max: 2160 },
-        },
+        video: { frameRate: { ideal: 30, max: 60 }, width: { ideal: capW }, height: { ideal: capH } },
         audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
         // Chrome-only hints: offer tabs first, hide the Tandem tab (no hall of mirrors), allow tab audio.
         preferCurrentTab: false,

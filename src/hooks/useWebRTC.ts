@@ -24,8 +24,12 @@ export function iceServers(): RTCIceServer[] {
   return servers;
 }
 
-/** Best quality per bit first; VP8 last because it blurs high-resolution content. */
-const CODEC_ORDER = ["video/VP9", "video/AV1", "video/H264", "video/VP8"];
+/**
+ * H.264 first: it is hardware-encoded on nearly every machine (VideoToolbox, NVENC, QuickSync),
+ * which is what keeps a 4K share smooth. VP9 is the best software fallback; VP8 last, it blurs
+ * high-resolution content.
+ */
+const CODEC_ORDER = ["video/H264", "video/VP9", "video/AV1", "video/VP8"];
 
 /** Put our preferred video codecs first in the offer so the answer picks one of them. */
 export function preferCodecs(pc: RTCPeerConnection) {
