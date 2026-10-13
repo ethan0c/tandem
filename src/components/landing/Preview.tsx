@@ -6,6 +6,7 @@ import { Player } from "@/components/room/Player";
 import { FloatingCall } from "@/components/room/FloatingCall";
 
 const noop = () => {};
+const preview = { poster: "/haikyu.png", time: 531, duration: 1420 };
 const members = [{ id: "preview", name: "You" }];
 
 /** Render the real room components with local sample state and no live session. */
@@ -17,7 +18,7 @@ export function Preview() {
       <div
         ref={containerRef}
         inert
-        className="relative flex h-[540px] overflow-hidden rounded-xl border border-white/10 bg-black text-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/5"
+        className="relative flex aspect-video min-h-64 overflow-hidden rounded-xl border border-white/10 bg-black text-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/5"
       >
         <TopBar
           roomId="k3f9-x2qa"
@@ -31,6 +32,7 @@ export function Preview() {
           visible
         />
         <Player
+          preview={preview}
           source={null}
           localFile={null}
           remote={null}

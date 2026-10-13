@@ -91,7 +91,7 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section id="sync" className="scroll-mt-20 bg-cream">
+      <section id="sync" className="scroll-mt-20 bg-white">
         <div className="mx-auto grid max-w-6xl gap-12 px-5 py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28">
           <div>
             <p className="font-sans text-[11px] font-medium text-zinc-500">How it works</p>
@@ -117,7 +117,7 @@ export default function Home() {
       </section>
 
       {/* Extension */}
-      <section className="bg-cream">
+      <section className="border-y border-brand-100 bg-brand-50">
         <div className="mx-auto max-w-6xl px-5 py-16">
           <div>
             <p className="font-sans text-[11px] font-medium text-zinc-500">The extension</p>
@@ -140,7 +140,7 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="scroll-mt-20 border-t border-cream-200 bg-cream">
+      <section id="faq" className="scroll-mt-20 bg-cream">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 lg:grid-cols-[0.6fr_1.4fr] lg:py-28">
           <h2 className="font-display text-4xl font-bold leading-[1] tracking-[-0.03em] text-ink">Questions</h2>
           <div className="divide-y divide-cream-200 border-y border-cream-200">
@@ -158,13 +158,13 @@ export default function Home() {
       </section>
 
       {/* Last call */}
-      <section className="bg-brand-600 text-white">
+      <section className="border-b border-white/10 bg-ink text-white">
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-8 px-5 py-20 lg:flex-row lg:items-end lg:justify-between">
           <h2 className="font-display text-4xl font-bold leading-tight tracking-[-0.03em] sm:text-5xl">
             Start watching together.
           </h2>
           <div className="w-full max-w-xl">
-            <StartRoom tone="brand" />
+            <StartRoom tone="dark" />
           </div>
         </div>
       </section>

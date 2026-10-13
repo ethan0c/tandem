@@ -19,6 +19,7 @@ import type { RemotePlayback } from "@/hooks/useRoom";
 import { formatTime } from "@/lib/format";
 
 interface PlayerProps {
+  preview?: { poster: string; time: number; duration: number };
   source: Source | null;
   localFile: File | null;
   remote: RemotePlayback | null;
@@ -36,6 +37,7 @@ interface PlayerProps {
 }
 
 export function Player({
+  preview,
   source,
   localFile,
   remote,
@@ -66,7 +68,7 @@ export function Player({
   const [error, setError] = useState<string | null>(null);
 
   const needsFile = source?.kind === "file" && !localFile;
-  const hasMedia = !!source && !needsFile;
+  const hasMedia = !!preview || (!!source && !needsFile);
 
   const stamp = useCallback(
     (p: boolean, t: number) => {
@@ -119,6 +121,7 @@ export function Player({
 
   // Drift correction: nudge playback rate for small drift, hard-seek for large drift.
   useEffect(() => {
+    if (preview) return;
     const id = setInterval(() => {
       const v = videoRef.current;
       const st = stateRef.current;
@@ -144,7 +147,7 @@ export function Player({
       }
     }, 500);
     return () => clearInterval(id);
-  }, [hasMedia, serverNow, onDrift]);
+  }, [hasMedia, serverNow, onDrift, preview]);
 
   const togglePlay = useCallback(() => {
     const v = videoRef.current;
@@ -184,6 +187,7 @@ export function Player({
 
   // Keyboard shortcuts.
   useEffect(() => {
+    if (preview) return;
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
@@ -216,12 +220,13 @@ export function Player({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [togglePlay, seekTo, toggleMute, onToggleFullscreen]);
+  }, [togglePlay, seekTo, toggleMute, onToggleFullscreen, preview]);
 
   useEffect(() => onPlayingChange(playing), [playing, onPlayingChange]);
 
-  const shown = scrub ?? currentTime;
-  const pct = duration > 0 ? (shown / duration) * 100 : 0;
+  const shown = preview?.time ?? scrub ?? currentTime;
+  const shownDuration = preview?.duration ?? duration;
+  const pct = shownDuration > 0 ? (shown / shownDuration) * 100 : 0;
   const controlsVisible = chromeVisible || !playing;
 
   return (
@@ -232,6 +237,8 @@ export function Player({
       <video
         ref={videoRef}
         playsInline
+        poster={preview?.poster}
+        aria-label={preview ? "Haikyu episode preview" : undefined}
         preload="auto"
         className="absolute inset-0 h-full w-full"
         onClick={togglePlay}
@@ -261,7 +268,7 @@ export function Player({
       />
 
       {/* Empty state */}
-      {!source && (
+      {!source && !preview && (
         <div className="absolute inset-0 flex items-center justify-center p-6">
           <div className="max-w-sm rounded-2xl border border-white/10 bg-ink-800/70 p-8 text-center backdrop-blur">
             <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-brand-600/20 text-brand-300">
@@ -353,10 +360,10 @@ export function Player({
         <input
           type="range"
           min={0}
-          max={duration || 0}
+          max={shownDuration || 0}
           step={0.1}
           value={shown}
-          disabled={!duration}
+          disabled={!shownDuration}
           onChange={(e) => setScrub(parseFloat(e.target.value))}
           onPointerUp={() => {
             if (scrub !== null) seekTo(scrub);
@@ -381,7 +388,7 @@ export function Player({
             <RotateCw className="size-4" />
           </IconButton>
           <span className="ml-1 font-sans text-xs text-zinc-300">
-            {formatTime(shown)} <span className="text-zinc-500">/</span> {formatTime(duration)}
+            {formatTime(shown)} <span className="text-zinc-500">/</span> {formatTime(shownDuration)}
           </span>
           <div className="ml-auto flex items-center gap-2">
             <div className="group flex items-center gap-1">
