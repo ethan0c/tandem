@@ -7,7 +7,7 @@
   window.__tandemLoaded = true;
 
   const IS_TOP = window === window.top;
-  const DEFAULT_ORIGIN = "http://localhost:3000";
+  const DEFAULT_ORIGIN = "https://www.ilovemygf.site";
   const SESSION_KEY = "tandem:room";
 
   const relay = (msg) => chrome.runtime.sendMessage(msg).catch(() => {});

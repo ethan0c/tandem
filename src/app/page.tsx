@@ -1,237 +1,258 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, MonitorPlay, MonitorUp, PictureInPicture2, Puzzle, ShieldCheck, Timer, Video } from "lucide-react";
-import { Logo } from "@/components/Logo";
+import { Logo, LogoMark } from "@/components/Logo";
 import { ButtonLink } from "@/components/Button";
 import { Footer } from "@/components/landing/Footer";
 import { StartRoom } from "@/components/landing/StartRoom";
 import { Preview } from "@/components/landing/Preview";
 
-const POSTERS = "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=1400&q=80";
+const GITHUB = "https://github.com/ethan0c";
 const TOGETHER = "https://images.unsplash.com/photo-1601933470096-0e34634ffcde?w=1200&q=80";
+const POSTERS = "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=1400&q=80";
 
-const features = [
-  {
-    icon: Timer,
-    title: "Frame-tight sync",
-    body: "Play, pause and seek are mirrored instantly. Drift correction quietly nudges playback so you never fall out of step.",
-  },
-  {
-    icon: Video,
-    title: "Face to face",
-    body: "A peer-to-peer video call runs right inside the room. Your voice and camera go straight to each other, not through a server.",
-  },
-  {
-    icon: PictureInPicture2,
-    title: "Floating camera",
-    body: "The anime fills the screen. Your partner's camera floats in a draggable window on top, even in fullscreen.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "No accounts, no tracking",
-    body: "Rooms are just links. Nothing is stored once everyone leaves, and shared tabs stream peer to peer.",
-  },
+const sources = ["Miruro, with the extension", "Direct MP4 and WebM links", "HLS streams", "A file you both have", "Sharing a tab"];
+
+const log = [
+  ["21:02", "you", "created the room"],
+  ["21:03", "mia", "joined · camera on"],
+  ["21:03", "you", "pasted haikyu-s2e11.mp4"],
+  ["21:03", "▶", "play · both at 0:00"],
+  ["21:14", "⏸", "mia paused at 11:20"],
+  ["21:16", "▶", "play · drift 0.03s"],
+  ["21:27", "⏭", "you skipped the opening · mia followed"],
+  ["21:49", "■", "episode over · still on the call"],
 ];
 
-const steps = [
-  { n: "1", title: "Create a room", body: "One click gives you a private link. No sign-up." },
-  { n: "2", title: "Share the link", body: "Send it to your person. They pick a name and turn on their camera." },
-  { n: "3", title: "Press play", body: "Share the tab you're watching in, or pick the same file. Everyone sees it live." },
+const faq = [
+  {
+    q: "Does it work on Crunchyroll or Netflix?",
+    a: "No. Their players use DRM, which no browser extension can drive. Tandem works with Miruro through the extension, and with any direct video link or file in the web app.",
+  },
+  {
+    q: "What exactly does the extension do?",
+    a: "It finds the video element on the page, mirrors your play, pause and seek to your partner, applies theirs to your player, and floats the call window on top. It needs no account and only stores the app URL.",
+  },
+  {
+    q: "Do you ever see or store the video?",
+    a: "Never. The server only relays timestamps and call signaling. Video comes from each person's own source, and the call runs peer to peer between your two browsers.",
+  },
+  {
+    q: "Why is drift correction needed?",
+    a: "Two computers never play at exactly the same speed, and buffering stalls one side. Tandem checks twice a second and speeds one player up or slows it down by a few percent until you match. You never notice it.",
+  },
+  {
+    q: "More than two people?",
+    a: "Yes, it works, but the call is a mesh, so each camera streams to every viewer. It is built and tuned for two.",
+  },
+  {
+    q: "Is it free?",
+    a: "Yes, and open source. Run it yourself or use the hosted version.",
+  },
 ];
 
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-20 border-b border-zinc-100 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
+      {/* Theater */}
+      <section className="bg-ink text-white">
+        <header className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
           <Link href="/" aria-label="Tandem home">
-            <Logo size={30} />
+            <Logo size={28} light />
           </Link>
-          <nav className="hidden items-center gap-7 text-sm font-medium text-zinc-600 md:flex">
-            <a href="#features" className="transition hover:text-zinc-900">Features</a>
-            <a href="#how" className="transition hover:text-zinc-900">How it works</a>
-            <a href="#faq" className="transition hover:text-zinc-900">Sources</a>
+          <nav className="hidden items-center gap-7 text-sm text-zinc-300 md:flex">
+            <a href="#sync" className="transition hover:text-white">How it syncs</a>
+            <a href="#sources" className="transition hover:text-white">Sources</a>
+            <a href="#faq" className="transition hover:text-white">Questions</a>
+            <a href={GITHUB} target="_blank" rel="noreferrer" className="transition hover:text-white">GitHub</a>
           </nav>
           <ButtonLink href="#start" size="sm">
-            Start a room
+            Create a room
           </ButtonLink>
-        </div>
-      </header>
+        </header>
 
-      <main className="flex-1">
-        {/* Hero */}
-        <section className="hero-bg relative">
-          <div className="mx-auto flex max-w-6xl flex-col items-center px-5 pb-16 pt-20 text-center sm:pt-24">
-            <h1 className="animate-fade-up max-w-3xl text-balance text-5xl font-bold tracking-tight text-zinc-900 [animation-delay:60ms] sm:text-6xl">
-              Watch anime together,{" "}
-              <span className="bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent">
-                face to face.
-              </span>
-            </h1>
-            <p className="animate-fade-up mt-5 max-w-xl text-balance text-lg leading-relaxed text-zinc-600 [animation-delay:120ms]">
-              Tandem keeps your playback perfectly in step and puts your partner&apos;s camera right on top of the
-              show. No downloads, no accounts, just a link.
-            </p>
-            <div id="start" className="animate-fade-up mt-9 w-full max-w-xl scroll-mt-24 [animation-delay:160ms]">
-              <StartRoom />
-              <p className="mt-4 text-xs text-zinc-500">Free and open source. Works in Chrome, Edge, Safari and Firefox.</p>
+        <div className="mx-auto max-w-6xl px-5 pb-0 pt-14 sm:pt-20">
+          <div className="grid items-end gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+            <div>
+              <h1 className="font-display text-[2.75rem] font-extrabold leading-[0.95] tracking-[-0.03em] sm:text-7xl">
+                Same episode.
+                <br />
+                Same second.
+                <br />
+                <span className="text-brand-400">Same couch, almost.</span>
+              </h1>
             </div>
-            <div className="mt-16 w-full">
-              <Preview />
-            </div>
-          </div>
-        </section>
-
-        {/* Features */}
-        <section id="features" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20">
-          <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Features</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
-              Everything a long-distance movie night needs
-            </h2>
-            <p className="mt-3 text-zinc-600">Built for two people who want to feel like they are on the same couch.</p>
-          </div>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2">
-            {features.map(({ icon: Icon, title, body }) => (
-              <div
-                key={title}
-                className="group rounded-2xl border-2 border-zinc-200 border-b-[6px] bg-white p-6 transition hover:-translate-y-0.5 hover:border-brand-200 hover:border-b-brand-300"
-              >
-                <div className="flex size-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 shadow-[0_3px_0_var(--color-brand-200)] transition group-hover:bg-brand-600 group-hover:text-white group-hover:shadow-[0_3px_0_var(--color-brand-800)]">
-                  <Icon className="size-5" />
-                </div>
-                <h3 className="mt-4 text-base font-bold text-zinc-900">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-600">{body}</p>
+            <div className="lg:pb-2">
+              <p className="max-w-md text-lg leading-relaxed text-zinc-300">
+                Tandem locks two video players to the same frame and keeps your partner&apos;s camera floating over the
+                show. Paste a link, or use the extension on Miruro.
+              </p>
+              <div id="start" className="mt-7 scroll-mt-24">
+                <StartRoom tone="dark" />
               </div>
+              <p className="mt-3 font-mono text-[11px] text-zinc-500">no account · no app · nothing stored</p>
+            </div>
+          </div>
+          <div className="mt-14 translate-y-10 sm:translate-y-16">
+            <Preview />
+          </div>
+        </div>
+      </section>
+
+      {/* Works with */}
+      <section id="sources" className="scroll-mt-10 border-b border-cream-200 bg-cream pb-10 pt-24 sm:pt-32">
+        <div className="mx-auto max-w-6xl px-5">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">Works with</p>
+        </div>
+        <div className="mt-4 overflow-hidden" aria-hidden="true">
+          <div className="marquee gap-0">
+            {[...sources, ...sources].map((s, i) => (
+              <span key={i} className="flex items-center gap-6 pr-6 font-display text-2xl font-bold text-ink sm:text-3xl">
+                {s}
+                <LogoMark size={22} />
+              </span>
             ))}
           </div>
-        </section>
+        </div>
+        <ul className="sr-only">
+          {sources.map((s) => (
+            <li key={s}>{s}</li>
+          ))}
+        </ul>
+      </section>
 
-        {/* Showcase */}
-        <section className="border-y border-zinc-100 bg-zinc-50/70">
-          <div className="mx-auto grid max-w-6xl gap-6 px-5 py-20 md:grid-cols-5">
-            <div className="relative min-h-72 overflow-hidden rounded-3xl border-2 border-zinc-200 border-b-[6px] md:col-span-3">
-              <Image src={POSTERS} alt="A wall of anime posters" fill sizes="(max-width: 768px) 100vw, 60vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/85 via-zinc-950/20 to-transparent" />
-              <div className="absolute bottom-0 p-7 text-white">
-                <p className="text-xs font-semibold uppercase tracking-wider text-brand-300">Your library, your rules</p>
-                <h3 className="mt-2 max-w-md text-2xl font-bold">Share a tab or play a file you both have</h3>
-                <p className="mt-2 max-w-md text-sm text-zinc-300">
-                  Stream the tab your show is in, or play a 4GB episode sitting on both your drives.
-                </p>
-              </div>
-            </div>
-            <div className="relative min-h-72 overflow-hidden rounded-3xl border-2 border-zinc-200 border-b-[6px] md:col-span-2">
-              <Image src={TOGETHER} alt="Two people laughing together at a laptop" fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/30 to-transparent" />
-              <div className="absolute right-5 top-5 w-28 overflow-hidden rounded-xl border border-white/20 bg-zinc-900/80 shadow-xl backdrop-blur">
-                <div className="relative aspect-[4/3]">
-                  <Image src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=225&fit=crop&crop=faces&q=80" alt="Partner on camera" fill sizes="112px" className="object-cover" />
-                </div>
-              </div>
-              <div className="absolute bottom-0 p-7 text-white">
-                <p className="text-xs font-semibold uppercase tracking-wider text-brand-300">Always on top</p>
-                <h3 className="mt-2 text-2xl font-bold">Their face, over the show</h3>
-                <p className="mt-2 text-sm text-zinc-300">Drag the call anywhere. It stays put in fullscreen.</p>
-              </div>
-            </div>
+      {/* How it syncs */}
+      <section id="sync" className="scroll-mt-20 bg-cream">
+        <div className="mx-auto grid max-w-6xl gap-12 px-5 py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">How it stays in sync</p>
+            <p className="mt-6 font-display text-[6rem] font-extrabold leading-none tracking-[-0.04em] text-ink sm:text-[8rem]">
+              0.1<span className="text-brand-600">s</span>
+            </p>
+            <p className="mt-2 max-w-xs text-sm text-zinc-600">
+              Typical gap between two players on a normal connection. Shorter than a blink.
+            </p>
           </div>
-        </section>
-
-        {/* How it works */}
-        <section id="how" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20">
-          <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">How it works</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">Three steps, under a minute</h2>
-          <ol className="mt-10 grid gap-6 md:grid-cols-3">
-            {steps.map((s) => (
-              <li key={s.n} className="rounded-2xl border-2 border-zinc-200 border-b-[6px] bg-white p-6">
-                <span className="flex size-9 items-center justify-center rounded-xl bg-brand-600 text-sm font-bold text-white shadow-[0_3px_0_var(--color-brand-800)]">
-                  {s.n}
-                </span>
-                <h3 className="mt-4 font-bold text-zinc-900">{s.title}</h3>
-                <p className="mt-1.5 text-sm text-zinc-600">{s.body}</p>
+          <ol className="divide-y divide-cream-200 border-y border-cream-200">
+            {[
+              ["The server stamps every change", "Play, pause, seek. Each one is recorded with the server's clock, not yours, so both browsers agree on when it happened."],
+              ["Each browser learns its clock offset", "A few pings on join tell the page how far its clock is from the server's. From then on it can compute where the video should be at any instant."],
+              ["Twice a second, a nudge", "If you are a little behind, your player runs at 108% speed until you catch up. A little ahead, 92%. More than a second and a half out, it seeks. You hear nothing change."],
+            ].map(([t, b], i) => (
+              <li key={t} className="grid gap-3 py-7 sm:grid-cols-[3rem_1fr]">
+                <span className="font-mono text-sm text-brand-600">0{i + 1}</span>
+                <div>
+                  <h3 className="font-display text-xl font-bold text-ink">{t}</h3>
+                  <p className="mt-2 max-w-lg leading-relaxed text-zinc-600">{b}</p>
+                </div>
               </li>
             ))}
           </ol>
-        </section>
+        </div>
+      </section>
 
-        {/* Sources */}
-        <section id="faq" className="border-t border-zinc-100 bg-zinc-50/70">
-          <div className="mx-auto max-w-6xl scroll-mt-20 px-5 py-20">
-            <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Sources</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">Where does the video come from?</h2>
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
-              <SourceCard icon={MonitorUp} title="Share a tab" tag="Works today">
-                Pick the browser tab your show is playing in and tick &ldquo;Share tab audio&rdquo;. Everyone in the
-                room watches it live. DRM services like Netflix may show up black.
-              </SourceCard>
-              <SourceCard icon={MonitorPlay} title="A file you both have" tag="Works today">
-                Pick a local file. Your partner is prompted to pick the same one on their machine. Nothing is uploaded,
-                so a 4GB episode starts instantly.
-              </SourceCard>
-              <SourceCard icon={Puzzle} title="Streaming sites" tag="With the extension">
-                Sites like Miruro run their own player, which a web page cannot control. The Tandem browser extension
-                syncs that player and floats your call on top. Load it from the{" "}
-                <a href="https://github.com/ethan0c" target="_blank" rel="noreferrer" className="font-medium text-brand-700 underline">
-                  extension folder
-                </a>{" "}
-                in the repo.
-              </SourceCard>
+      {/* A night on Tandem */}
+      <section className="bg-ink text-white">
+        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 lg:grid-cols-2 lg:py-28">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">A night on Tandem</p>
+            <h2 className="mt-4 font-display text-4xl font-extrabold leading-[1] tracking-[-0.03em] sm:text-5xl">
+              One link. Then you just watch.
+            </h2>
+            <p className="mt-5 max-w-md leading-relaxed text-zinc-400">
+              The room keeps nothing. No history, no account, no &ldquo;continue watching&rdquo;. When the last person
+              leaves, it is gone.
+            </p>
+            <div className="relative mt-10 aspect-[4/3] overflow-hidden rounded-xl border border-white/10">
+              <Image src={TOGETHER} alt="Two people laughing together at a laptop" fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
+              <div className="absolute bottom-3 left-3 rounded bg-black/60 px-2 py-1 font-mono text-[11px] text-zinc-200">
+                the call stays up after the credits
+              </div>
             </div>
           </div>
-        </section>
+          <div className="rounded-xl border border-white/10 bg-ink-800 p-1">
+            <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 font-mono text-[11px] text-zinc-500">
+              <span>room · k3f9-x2qa</span>
+              <span>tue 21:02 → 21:49</span>
+            </div>
+            <ul className="divide-y divide-white/5 font-mono text-[13px]">
+              {log.map(([t, who, what]) => (
+                <li key={t + what} className="grid grid-cols-[3.5rem_2.5rem_1fr] gap-2 px-4 py-3">
+                  <span className="text-zinc-500">{t}</span>
+                  <span className={who.length > 1 ? "text-brand-300" : "text-zinc-200"}>{who}</span>
+                  <span className="text-zinc-300">{what}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
 
-        {/* CTA */}
-        <section className="mx-auto max-w-6xl px-5 py-20">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 px-6 py-14 text-center text-white shadow-[0_8px_0_var(--color-brand-950)] sm:px-12">
-            <div className="pointer-events-none absolute -left-20 -top-20 size-72 rounded-full bg-white/10 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-24 -right-10 size-80 rounded-full bg-brand-400/30 blur-3xl" />
-            <h2 className="relative text-balance text-3xl font-bold tracking-tight sm:text-4xl">Tonight&apos;s episode is waiting.</h2>
-            <p className="relative mx-auto mt-3 max-w-md text-balance text-brand-100">
-              Open a room, send the link, and press play together. It takes less time than picking what to watch.
+      {/* Extension */}
+      <section className="bg-cream">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-20 lg:grid-cols-[1fr_1fr] lg:py-28">
+          <div className="relative aspect-[5/4] overflow-hidden rounded-xl border border-cream-200">
+            <Image src={POSTERS} alt="A wall of anime posters" fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
+          </div>
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">The extension</p>
+            <h2 className="mt-4 font-display text-4xl font-extrabold leading-[1] tracking-[-0.03em] text-ink sm:text-5xl">
+              Your site, their player, our sync.
+            </h2>
+            <p className="mt-5 max-w-md leading-relaxed text-zinc-600">
+              Streaming sites run their own player, and a web page cannot touch it. The Tandem extension can. It
+              drives the player on the page and drops the call window on top, so you watch on the site you already
+              use, in full quality, both of you in control.
             </p>
-            <div className="relative mt-8 flex justify-center">
-              <ButtonLink href="#start" variant="light" size="lg">
-                Create a free room <ArrowRight className="size-4" />
+            <ul className="mt-6 space-y-2 text-sm text-zinc-700">
+              <li className="flex gap-3"><span className="text-brand-600">—</span> Miruro today. Any site with a plain HTML5 player is a one-line addition.</li>
+              <li className="flex gap-3"><span className="text-brand-600">—</span> Invite links are the episode URL with the room on the end.</li>
+              <li className="flex gap-3"><span className="text-brand-600">—</span> The player&apos;s fullscreen still works, with the call on top.</li>
+            </ul>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <ButtonLink href={GITHUB} variant="dark">
+                Get the extension
+              </ButtonLink>
+              <ButtonLink href="#faq" variant="light">
+                Which sites work?
               </ButtonLink>
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="scroll-mt-20 border-t border-cream-200 bg-cream">
+        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 lg:grid-cols-[0.6fr_1.4fr] lg:py-28">
+          <h2 className="font-display text-4xl font-extrabold leading-[1] tracking-[-0.03em] text-ink">Questions</h2>
+          <div className="divide-y divide-cream-200 border-y border-cream-200">
+            {faq.map(({ q, a }) => (
+              <details key={q} className="faq group">
+                <summary className="flex items-center justify-between gap-6 py-5 font-display text-lg font-bold text-ink">
+                  {q}
+                  <span className="faq-plus shrink-0 font-mono text-xl font-normal text-brand-600 transition">+</span>
+                </summary>
+                <p className="max-w-2xl pb-6 leading-relaxed text-zinc-600">{a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Last call */}
+      <section className="bg-brand-600 text-white">
+        <div className="mx-auto flex max-w-6xl flex-col items-start gap-8 px-5 py-20 sm:flex-row sm:items-end sm:justify-between">
+          <h2 className="font-display text-5xl font-extrabold leading-[0.95] tracking-[-0.03em] sm:text-7xl">
+            Tonight,
+            <br />
+            then.
+          </h2>
+          <div className="w-full max-w-xl">
+            <StartRoom tone="dark" />
+          </div>
+        </div>
+      </section>
 
       <Footer />
-    </div>
-  );
-}
-
-function SourceCard({
-  icon: Icon,
-  title,
-  tag,
-  children,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  tag: string;
-  children: React.ReactNode;
-}) {
-  const soon = tag.startsWith("With");
-  return (
-    <div className="rounded-2xl border-2 border-zinc-200 border-b-[6px] bg-white p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex size-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-          <Icon className="size-5" />
-        </div>
-        <span
-          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-            soon ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
-          }`}
-        >
-          {tag}
-        </span>
-      </div>
-      <h3 className="mt-4 font-bold text-zinc-900">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-zinc-600">{children}</p>
     </div>
   );
 }

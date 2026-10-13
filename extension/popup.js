@@ -17,10 +17,10 @@ function parseRoomCode(input) {
 
 async function main() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  const { appOrigin = "http://localhost:3000" } = await chrome.storage.sync.get("appOrigin");
+  const { appOrigin = "https://www.ilovemygf.site" } = await chrome.storage.sync.get("appOrigin");
   $("#origin").value = appOrigin;
   $("#origin").addEventListener("change", () => {
-    const v = $("#origin").value.trim().replace(/\/+$/, "") || "http://localhost:3000";
+    const v = $("#origin").value.trim().replace(/\/+$/, "") || "https://www.ilovemygf.site";
     $("#origin").value = v;
     chrome.storage.sync.set({ appOrigin: v });
   });
@@ -54,7 +54,7 @@ async function main() {
 
   $("#idle").hidden = false;
   const open = async (roomId) => {
-    const origin = $("#origin").value.trim().replace(/\/+$/, "") || "http://localhost:3000";
+    const origin = $("#origin").value.trim().replace(/\/+$/, "") || "https://www.ilovemygf.site";
     await chrome.storage.sync.set({ appOrigin: origin });
     await send({ type: "tandem:open", roomId, appOrigin: origin });
     window.close();
