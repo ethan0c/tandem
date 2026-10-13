@@ -52,6 +52,16 @@ const waitChat = (page, texts) =>
     { timeout: STEP_MS },
   );
 const unread = (page) => page.getByTestId("chat-unread").textContent().catch(() => null);
+/** The top bar hides while the mouse is idle during playback; a nudge brings it back. */
+async function wake(page) {
+  await page.mouse.move(600, 400);
+  await page.mouse.move(620, 410);
+}
+async function openChat(page) {
+  await wake(page);
+  await page.getByRole("button", { name: "Open chat" }).click();
+  await page.getByRole("heading", { name: "Chat" }).waitFor({ timeout: 5_000 });
+}
 
 const browser = await chromium.launch({
   channel: "chrome",
@@ -150,7 +160,7 @@ try {
     for (const p of [alice, carol]) {
       await p.getByTestId("chat-unread").waitFor({ timeout: STEP_MS });
       if ((await unread(p)) !== "1") throw new Error(`badge shows ${await unread(p)}`);
-      await p.getByRole("button", { name: "Open chat" }).click();
+      await openChat(p);
       await waitChat(p, ["GOAL!!!"]);
       await p.getByTestId("chat-unread").waitFor({ state: "detached", timeout: 2_000 });
     }
@@ -203,7 +213,7 @@ try {
     dave = await open("Dave");
     people.set("Dave", dave);
     await dave.getByText("is sharing").waitFor({ timeout: STEP_MS });
-    await dave.getByRole("button", { name: "Open chat" }).click();
+    await openChat(dave);
     await waitChat(dave, ["GOAL!!!", "no way, offside?", "VAR says it stands 🎉", "spaced out", "replay incoming", "look at the keeper"]);
     // And his call connects to all three of them.
     await dave.waitForFunction(() => window.__pcs.filter((pc) => pc.connectionState === "connected").length >= 3, null, { timeout: STEP_MS });
@@ -232,7 +242,7 @@ try {
     await bob.getByLabel("Your name").fill("Bob");
     await bob.getByRole("button", { name: "Join room" }).click();
     await bob.getByText("Ready", { exact: true }).waitFor({ timeout: STEP_MS });
-    await bob.getByRole("button", { name: "Open chat" }).click();
+    await openChat(bob);
     await bob.waitForFunction(() => document.querySelectorAll('[data-testid="chat-message"]').length === 6, null, { timeout: STEP_MS });
     log("Bob", `after reload: ${JSON.stringify(await chatTexts(bob))}`);
   });

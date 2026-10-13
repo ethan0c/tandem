@@ -21,7 +21,18 @@ interface Props {
 
 export function Session({ roomId, name, localStream }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const room = useRoom(roomId, name);
+  const [active, setActive] = useState(true);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Chrome (top bar + controls) hides after a few idle seconds while playing.
+  const bump = useCallback(() => {
+    setActive(true);
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => setActive(false), 2800);
+  }, []);
+
+  // A chat message brings the chrome back briefly, so the unread badge is seen while something plays.
+  const room = useRoom(roomId, name, { onMessage: bump });
   const rtc = useWebRTC({
     socketRef: room.socketRef,
     selfId: room.selfId,
@@ -41,23 +52,15 @@ export function Session({ roomId, name, localStream }: Props) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [drift, setDrift] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [active, setActive] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
   // How many messages had arrived when the chat was last open or closed; anything after is unread.
   const [seenCount, setSeenCount] = useState(0);
-  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const origin = useClientValue(() => window.location.origin, "");
   const roomUrl = origin ? `${origin}/room/${roomId}` : "";
 
   // Stop local media when leaving the room.
   useReleaseStream(localStream);
 
-  // Chrome (top bar + controls) hides after a few idle seconds while playing.
-  const bump = useCallback(() => {
-    setActive(true);
-    if (idleTimer.current) clearTimeout(idleTimer.current);
-    idleTimer.current = setTimeout(() => setActive(false), 2800);
-  }, []);
   useEffect(() => {
     idleTimer.current = setTimeout(() => setActive(false), 2800);
     return () => {

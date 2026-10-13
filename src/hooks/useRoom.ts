@@ -16,7 +16,12 @@ export interface RemotePlayback {
   seq: number;
 }
 
-export function useRoom(roomId: string, name: string | null) {
+interface Options {
+  /** Called for every chat message that arrives, including our own echo. */
+  onMessage?: (message: ChatMessage) => void;
+}
+
+export function useRoom(roomId: string, name: string | null, options?: Options) {
   const [status, setStatus] = useState<RoomStatus>("connecting");
   const [selfId, setSelfId] = useState<string | null>(null);
   const [hostId, setHostId] = useState<string | null>(null);
@@ -27,6 +32,11 @@ export function useRoom(roomId: string, name: string | null) {
   const socketRef = useRef<AppSocket | null>(null);
   const offsetRef = useRef(0);
   const seqRef = useRef(0);
+  // The latest callback, so the socket listener never has to be re-registered.
+  const onMessageRef = useRef(options?.onMessage);
+  useEffect(() => {
+    onMessageRef.current = options?.onMessage;
+  });
 
   /** Server clock estimate: local clock + measured offset. */
   const serverNow = useCallback(() => Date.now() + offsetRef.current, []);
@@ -110,6 +120,7 @@ export function useRoom(roomId: string, name: string | null) {
     const onMessage = (m: ChatMessage) => {
       if (m.from !== clientId) playChime("message");
       setMessages((prev) => (prev.some((p) => p.id === m.id) ? prev : [...prev, m].slice(-CHAT_HISTORY)));
+      onMessageRef.current?.(m);
     };
     const onDisconnect = () => {
       dropped = true;
