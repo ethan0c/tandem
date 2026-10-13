@@ -138,6 +138,8 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
       offeredTo.current.add(m.id);
       const pc = createPc(m.id);
       attachLocal(pc);
+      // negotiate() only touches state asynchronously, and only when the offer fails.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       void negotiate(m.id, pc);
     }
     for (const id of Array.from(pcs.current.keys())) {
