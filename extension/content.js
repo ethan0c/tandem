@@ -148,10 +148,26 @@
     const bar = document.createElement("div");
     bar.className = "tandem-bar";
     const label = document.createElement("span");
-    label.textContent = "tandem · ";
+    const SVG = "http://www.w3.org/2000/svg";
+    const mark = document.createElementNS(SVG, "svg");
+    mark.setAttribute("viewBox", "0 0 64 40");
+    mark.setAttribute("width", "20");
+    mark.setAttribute("height", "12.5");
+    for (const cx of [21, 43]) {
+      const ring = document.createElementNS(SVG, "circle");
+      ring.setAttribute("cx", cx);
+      ring.setAttribute("cy", 20);
+      ring.setAttribute("r", 15);
+      ring.setAttribute("fill", "none");
+      ring.setAttribute("stroke", "#a78bfa");
+      ring.setAttribute("stroke-width", 7);
+      mark.appendChild(ring);
+    }
+    const word = document.createElement("b");
+    word.textContent = "tandem";
     const code = document.createElement("code");
     code.textContent = id;
-    label.appendChild(code);
+    label.append(mark, word, code);
     const close = document.createElement("button");
     close.title = "Leave room";
     close.textContent = "×";

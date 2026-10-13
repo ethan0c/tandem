@@ -1,3 +1,8 @@
+/* Fonts are namespaced so they never clash with the host page's own font-face rules. */
+@font-face { font-family: "Tandem Geist"; src: url("chrome-extension://__MSG_@@extension_id__/fonts/geist.woff2") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "Tandem Geist Mono"; src: url("chrome-extension://__MSG_@@extension_id__/fonts/geist-mono.woff2") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "Tandem Bricolage"; src: url("chrome-extension://__MSG_@@extension_id__/fonts/bricolage-grotesque.woff2") format("woff2"); font-weight: 200 800; }
+
 /* Pseudo-fullscreen: the player fills the viewport while <html> is the real fullscreen element,
    so the Tandem overlay stays visible on top of it. */
 .tandem-pseudo-fs {
@@ -24,27 +29,28 @@
   z-index: 2147483647;
   border-radius: 16px;
   overflow: hidden;
-  background: #09090b;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.12);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #120a1f;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.15);
+  font-family: "Tandem Geist", ui-sans-serif, system-ui, sans-serif;
   color: #fff;
 }
 #tandem-overlay-host .tandem-bar {
-  height: 32px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 6px 0 12px;
-  background: linear-gradient(90deg, #7c3aed, #6d28d9);
+  background: #1b1030;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
   cursor: grab;
   user-select: none;
 }
 #tandem-overlay-host .tandem-bar.dragging { cursor: grabbing; }
-#tandem-overlay-host .tandem-bar span { display: flex; align-items: center; gap: 8px; }
-#tandem-overlay-host .tandem-bar code { font-family: ui-monospace, monospace; font-weight: 500; opacity: 0.9; }
+#tandem-overlay-host .tandem-bar span { display: flex; align-items: center; gap: 7px; }
+#tandem-overlay-host .tandem-bar svg { display: block; }
+#tandem-overlay-host .tandem-bar b { font-family: "Tandem Bricolage", "Tandem Geist", sans-serif; font-size: 14px; font-weight: 700; letter-spacing: -0.02em; }
+#tandem-overlay-host .tandem-bar code { font-family: "Tandem Geist Mono", ui-monospace, monospace; font-size: 11px; color: #a1a1aa; }
 #tandem-overlay-host .tandem-bar button {
   all: unset;
   width: 24px;
@@ -53,15 +59,16 @@
   display: grid;
   place-items: center;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1;
+  color: #d4d4d8;
 }
-#tandem-overlay-host .tandem-bar button:hover { background: rgba(255, 255, 255, 0.18); }
+#tandem-overlay-host .tandem-bar button:hover { background: rgba(239, 68, 68, 0.15); color: #fff; }
 #tandem-overlay-host iframe {
   display: block;
   width: 100%;
   height: 420px;
   border: 0;
-  background: #09090b;
+  background: #120a1f;
   transition: height 150ms ease;
 }

@@ -120,7 +120,7 @@ export function ScreenStage({
             chromeVisible ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
-          <div className="max-w-md rounded-2xl border border-white/10 bg-zinc-900/85 px-4 py-3 text-sm shadow-xl backdrop-blur">
+          <div className="max-w-md rounded-2xl border border-white/10 bg-ink-800/85 px-4 py-3 text-sm shadow-xl backdrop-blur">
             <p className="flex items-center gap-2 font-medium">
               <MonitorUp className="size-4 text-brand-300" /> You&rsquo;re sharing {label}
             </p>

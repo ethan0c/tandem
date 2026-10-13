@@ -29,7 +29,7 @@ export function SourceDialog({ open, onClose, onFile, onScreen, screenError }: P
   return (
     <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-zinc-900 text-white shadow-2xl"
+        className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-ink-800 text-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -82,7 +82,7 @@ export function SourceDialog({ open, onClose, onFile, onScreen, screenError }: P
               </p>
               <button
                 onClick={() => fileInput.current?.click()}
-                className="flex h-28 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 bg-zinc-800/60 text-sm text-zinc-300 transition hover:border-brand-400 hover:bg-brand-500/10"
+                className="flex h-28 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 bg-ink-700/60 text-sm text-zinc-300 transition hover:border-brand-400 hover:bg-brand-500/10"
               >
                 <FolderOpen className="size-5 text-brand-300" />
                 Choose a video file

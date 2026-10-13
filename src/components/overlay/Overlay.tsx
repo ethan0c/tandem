@@ -24,7 +24,7 @@ export function Overlay({ roomId }: { roomId: string }) {
   }, []);
 
   return (
-    <div ref={rootRef} className="w-full bg-zinc-950 text-white">
+    <div ref={rootRef} className="w-full bg-ink text-white">
       {!embedded && (
         <div className="border-b border-amber-400/20 bg-amber-950/60 px-3 py-2 text-[11px] text-amber-200">
           This panel is meant to be opened by the Tandem browser extension on a streaming site.{" "}

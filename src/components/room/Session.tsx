@@ -99,7 +99,7 @@ export function Session({ roomId, name, localStream }: Props) {
       ref={containerRef}
       onMouseMove={bump}
       onTouchStart={bump}
-      className="relative flex h-dvh flex-col overflow-hidden bg-zinc-950 text-white"
+      className="relative flex h-dvh flex-col overflow-hidden bg-ink text-white"
     >
       <TopBar
         roomId={roomId}

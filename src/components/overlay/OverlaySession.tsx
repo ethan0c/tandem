@@ -91,8 +91,8 @@ export function OverlaySession({ roomId, name, localStream, embedded }: Props) {
             : { text: `Correcting · ${drift > 0 ? "+" : "-"}${Math.abs(drift).toFixed(1)}s`, tone: "text-amber-300" };
 
   return (
-    <div className="flex flex-col bg-zinc-950 text-white">
-      <div className="relative aspect-[4/3] bg-zinc-900">
+    <div className="flex flex-col bg-ink text-white">
+      <div className="relative aspect-[4/3] bg-ink-800">
         {peer ? (
           <>
             <StreamVideo stream={peer.stream} className="h-full w-full object-cover" />
@@ -114,7 +114,7 @@ export function OverlaySession({ roomId, name, localStream, embedded }: Props) {
           </div>
         )}
         {peer && (
-          <div className="absolute bottom-2 right-2 h-14 w-[4.7rem] overflow-hidden rounded-lg border border-white/20 bg-zinc-900 shadow">
+          <div className="absolute bottom-2 right-2 h-14 w-[4.7rem] overflow-hidden rounded-lg border border-white/20 bg-ink-800 shadow">
             {hasLocalVideo && rtc.camOn ? (
               <StreamVideo stream={localStream} muted mirror className="h-full w-full object-cover" />
             ) : (
@@ -136,8 +136,8 @@ export function OverlaySession({ roomId, name, localStream, embedded }: Props) {
             <span
               key={m.id}
               title={m.name}
-              className={`flex size-6 items-center justify-center rounded-full border-2 border-zinc-950 text-[10px] font-semibold ${
-                m.id === room.selfId ? "bg-brand-600" : "bg-zinc-700"
+              className={`flex size-6 items-center justify-center rounded-full border-2 border-ink text-[10px] font-semibold ${
+                m.id === room.selfId ? "bg-brand-600" : "bg-brand-900"
               }`}
             >
               {m.name.slice(0, 1).toUpperCase()}

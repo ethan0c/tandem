@@ -52,12 +52,12 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
         visibility: pos ? "visible" : "hidden",
         touchAction: "none",
       }}
-      className={`absolute z-30 overflow-hidden rounded-2xl border border-white/15 bg-zinc-900/90 text-white shadow-2xl shadow-black/50 backdrop-blur transition-[width] ${
+      className={`absolute z-30 overflow-hidden rounded-2xl border border-white/15 bg-ink-800/90 text-white shadow-2xl shadow-black/50 backdrop-blur transition-[width] ${
         dragging ? "cursor-grabbing" : "cursor-grab"
       } ${minimized ? "w-44" : "w-56 sm:w-72"}`}
     >
       {!minimized && (
-        <div className="relative aspect-[4/3] bg-zinc-800">
+        <div className="relative aspect-[4/3] bg-ink-700">
           {peers.length === 0 ? (
             <>
               {hasLocalVideo && camOn ? (
@@ -80,7 +80,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
             <>
               <div className={`grid h-full ${peers.length > 1 ? "grid-cols-2 grid-rows-2 gap-0.5" : ""}`}>
                 {peers.map((p) => (
-                  <div key={p.id} className="relative h-full overflow-hidden bg-zinc-800">
+                  <div key={p.id} className="relative h-full overflow-hidden bg-ink-700">
                     <StreamVideo stream={p.stream} className="h-full w-full object-cover" />
                     <span className="absolute left-2 top-2 rounded-md bg-black/55 px-1.5 py-0.5 text-[11px] font-medium">
                       {nameOf(p.id)}
@@ -88,7 +88,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
                   </div>
                 ))}
               </div>
-              <div className="absolute bottom-2 right-2 h-14 w-[4.7rem] overflow-hidden rounded-lg border border-white/20 bg-zinc-900 shadow">
+              <div className="absolute bottom-2 right-2 h-14 w-[4.7rem] overflow-hidden rounded-lg border border-white/20 bg-ink-800 shadow">
                 {hasLocalVideo && camOn ? (
                   <StreamVideo stream={localStream} muted mirror className="h-full w-full object-cover" />
                 ) : (
@@ -123,7 +123,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
 
 function Placeholder({ label, small = false }: { label: string; small?: boolean }) {
   return (
-    <div className="flex h-full items-center justify-center bg-zinc-800 text-zinc-400">
+    <div className="flex h-full items-center justify-center bg-ink-700 text-zinc-400">
       <span
         className={`flex items-center justify-center rounded-full bg-brand-600/25 font-semibold text-brand-200 ${
           small ? "size-7 text-xs" : "size-14 text-lg"

@@ -263,7 +263,7 @@ export function Player({
       {/* Empty state */}
       {!source && (
         <div className="absolute inset-0 flex items-center justify-center p-6">
-          <div className="max-w-sm rounded-2xl border border-white/10 bg-zinc-900/70 p-8 text-center backdrop-blur">
+          <div className="max-w-sm rounded-2xl border border-white/10 bg-ink-800/70 p-8 text-center backdrop-blur">
             <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-brand-600/20 text-brand-300">
               <Film className="size-6" />
             </div>
@@ -284,7 +284,7 @@ export function Player({
       {/* Partner picked a local file we have not chosen yet */}
       {needsFile && source?.kind === "file" && (
         <div className="absolute inset-0 flex items-center justify-center p-6">
-          <div className="max-w-sm rounded-2xl border border-white/10 bg-zinc-900/70 p-8 text-center backdrop-blur">
+          <div className="max-w-sm rounded-2xl border border-white/10 bg-ink-800/70 p-8 text-center backdrop-blur">
             <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-brand-600/20 text-brand-300">
               <FolderOpen className="size-6" />
             </div>

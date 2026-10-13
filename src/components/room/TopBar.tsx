@@ -67,8 +67,8 @@ export function TopBar({ roomId, roomUrl, members, selfId, status, drift, isFull
             <span
               key={m.id}
               title={m.name}
-              className={`flex size-7 items-center justify-center rounded-full border-2 border-zinc-950 text-[11px] font-semibold ${
-                m.id === selfId ? "bg-brand-600" : "bg-zinc-700"
+              className={`flex size-7 items-center justify-center rounded-full border-2 border-ink text-[11px] font-semibold ${
+                m.id === selfId ? "bg-brand-600" : "bg-brand-900"
               }`}
             >
               {m.name.slice(0, 1).toUpperCase()}

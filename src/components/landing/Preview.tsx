@@ -9,7 +9,7 @@ const ME = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h
 export function Preview() {
   return (
     <div className="overflow-hidden rounded-xl border border-white/10 bg-black shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/5">
-      <div className="flex items-center justify-between border-b border-white/10 bg-zinc-950 px-4 py-2 text-[11px] text-zinc-400">
+      <div className="flex items-center justify-between border-b border-white/10 bg-ink px-4 py-2 text-[11px] text-zinc-400">
         <div className="flex items-center gap-2">
           <span className="size-1.5 rounded-full bg-brand-400" />
           <span className="font-mono text-zinc-300">k3f9-x2qa</span>
@@ -23,7 +23,7 @@ export function Preview() {
         <Image src={STAGE} alt="Scene from the episode playing in the room" fill sizes="(max-width: 1100px) 100vw, 1100px" className="object-cover" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/5 to-black/30" />
         <div className="absolute left-4 top-4 rounded bg-black/50 px-2 py-1 font-mono text-[11px] text-white/90">EP 07 · The Promise</div>
-        <div className="absolute bottom-16 right-4 w-32 overflow-hidden rounded-lg border border-white/15 bg-zinc-900/90 shadow-xl sm:w-52">
+        <div className="absolute bottom-16 right-4 w-32 overflow-hidden rounded-lg border border-white/15 bg-ink-800/90 shadow-xl sm:w-52">
           <div className="relative aspect-[4/3]">
             <Image src={PARTNER} alt="Partner on camera" fill sizes="208px" className="object-cover" />
             <div className="absolute left-2 top-2 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-medium text-white">Mia</div>

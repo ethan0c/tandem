@@ -97,8 +97,8 @@ export function JoinCard({
     <div
       className={
         compact
-          ? "flex flex-col bg-zinc-950 text-white"
-          : "flex flex-1 flex-col items-center justify-center bg-zinc-950 px-5 py-10 text-white"
+          ? "flex flex-col bg-ink text-white"
+          : "flex flex-1 flex-col items-center justify-center bg-ink px-5 py-10 text-white"
       }
     >
       {!compact && (
@@ -113,11 +113,11 @@ export function JoinCard({
         onSubmit={join}
         className={
           compact
-            ? "relative w-full overflow-hidden bg-zinc-950"
-            : "relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 shadow-2xl shadow-black/40 backdrop-blur"
+            ? "relative w-full overflow-hidden bg-ink"
+            : "relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-ink-800/80 shadow-2xl shadow-black/40 backdrop-blur"
         }
       >
-        <div className={`relative bg-zinc-800 ${compact ? "aspect-video" : "aspect-[4/3]"}`}>
+        <div className={`relative bg-ink-700 ${compact ? "aspect-video" : "aspect-[4/3]"}`}>
           {stream && hasVideo && camOn ? (
             <StreamVideo stream={stream} muted mirror className="h-full w-full object-cover" />
           ) : (
@@ -167,7 +167,7 @@ export function JoinCard({
               maxLength={32}
               placeholder="What should we call you?"
               autoFocus
-              className="h-11 w-full rounded-xl border border-white/10 bg-zinc-800 px-3.5 text-sm text-white placeholder:text-zinc-500 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20"
+              className="h-11 w-full rounded-xl border border-white/10 bg-ink-700 px-3.5 text-sm text-white placeholder:text-zinc-500 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20"
             />
           </label>
           <button
