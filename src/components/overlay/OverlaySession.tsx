@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Check, Copy, LogOut, Mic, MicOff, Video, VideoOff } from "lucide-react";
+import { ChimeToggle } from "@/components/ChimeToggle";
 import { LogoMark } from "@/components/Logo";
 import { StreamVideo } from "@/components/room/StreamVideo";
 import { useReleaseStream } from "@/hooks/useReleaseStream";
@@ -130,6 +131,7 @@ export function OverlaySession({ roomId, name, localStream, embedded }: Props) {
         <Toggle on={rtc.camOn} onClick={rtc.toggleCam} disabled={!hasLocalVideo} label={rtc.camOn ? "Camera off" : "Camera on"}>
           {rtc.camOn ? <Video className="size-3.5" /> : <VideoOff className="size-3.5" />}
         </Toggle>
+        <ChimeToggle className="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 [&_svg]:size-3.5" />
         <div className="ml-auto flex -space-x-1.5">
           {room.members.map((m) => (
             <span

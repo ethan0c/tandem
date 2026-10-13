@@ -33,7 +33,15 @@ const pcSpy = `
   window.RTCPeerConnection = class extends Orig {
     constructor(...a) { super(...a); window.__pcs.push(this); }
   };
+  // Counts chime notes (each chime is a few oscillators).
+  window.__notes = 0;
+  const start = OscillatorNode.prototype.start;
+  OscillatorNode.prototype.start = function (...a) { window.__notes++; return start.apply(this, a); };
 `;
+const notes = (page) => page.evaluate(() => window.__notes);
+/** Wait until the page has played more chime notes than `before`. */
+const heardChime = (page, before) =>
+  page.waitForFunction((b) => window.__notes > b, before, { timeout: 5_000 });
 const pcStates = (page) =>
   page.evaluate(() =>
     window.__pcs.map((pc) => ({
@@ -145,11 +153,19 @@ try {
     }
   });
 
+  await step("Alice heard a chime when Bob joined", async () => {
+    if ((await notes(alice)) === 0 && (await notes(bob)) === 0) throw new Error("no chime on either side");
+  });
+
+  let bobNotes = 0;
   await step("Alice shares a tab", async () => {
+    bobNotes = await notes(bob);
     await alice.getByRole("button", { name: "Choose a video" }).click();
     await alice.getByRole("button", { name: "Choose a tab to share" }).click();
     await alice.getByText("You’re sharing").waitFor({ timeout: STEP_MS });
   });
+
+  await step("Bob heard the share-start chime", () => heardChime(bob, bobNotes));
 
   await step("Bob sees Alice's share playing", async () => {
     await bob.getByText("is sharing").waitFor({ timeout: STEP_MS });
@@ -209,7 +225,9 @@ try {
   });
 
   await step("Carol joins late and sees the share too", async () => {
+    const aliceNotes = await notes(alice);
     const carol = await open("Carol");
+    await heardChime(alice, aliceNotes);
     sessions.push(carol);
     await carol.getByText("Ready", { exact: true }).waitFor({ timeout: STEP_MS });
     await carol.getByText("is sharing").waitFor({ timeout: STEP_MS });
@@ -224,15 +242,30 @@ try {
     });
   });
 
-  await step("Alice stops sharing; viewers return to the empty state", async () => {
+  await step("Alice stops sharing; viewers return to the empty state and hear it", async () => {
+    const before = await notes(bob);
     await alice.getByRole("button", { name: "Stop sharing" }).click();
     for (const p of sessions) await p.getByText("Nothing playing yet").waitFor({ timeout: STEP_MS });
+    await heardChime(bob, before);
+  });
+
+  await step("Muting chimes silences them and is remembered", async () => {
+    await bob.getByRole("button", { name: "Turn sounds off" }).click();
+    const before = await notes(bob);
+    await alice.getByRole("button", { name: "Choose a video" }).click();
+    await alice.getByRole("button", { name: "Choose a tab to share" }).click();
+    await bob.getByText("is sharing").waitFor({ timeout: STEP_MS });
+    await bob.waitForTimeout(800);
+    if ((await notes(bob)) !== before) throw new Error("chime played while muted");
+    await alice.getByRole("button", { name: "Stop sharing" }).click();
+    await bob.getByText("Nothing playing yet").waitFor({ timeout: STEP_MS });
   });
 
   await step("Bob reloads and reconnects; Alice still sees him", async () => {
     await bob.reload({ waitUntil: "domcontentloaded" });
     await join(bob, "Bob");
     await bob.getByText("Ready", { exact: true }).waitFor({ timeout: STEP_MS });
+    await bob.getByRole("button", { name: "Turn sounds on" }).waitFor({ timeout: 2_000 });
     for (const p of [alice, bob]) {
       await p.waitForFunction(
         () => Array.from(document.querySelectorAll("video")).some((v) => !v.muted && v.videoWidth > 0 && !v.paused),

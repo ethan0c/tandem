@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Check, Copy, LogOut, Maximize, Minimize } from "lucide-react";
+import { ChimeToggle } from "@/components/ChimeToggle";
 import { Logo } from "@/components/Logo";
 import type { Member } from "@/lib/types";
 import type { RoomStatus } from "@/hooks/useRoom";
@@ -75,6 +76,7 @@ export function TopBar({ roomId, roomUrl, members, selfId, status, drift, isFull
             </span>
           ))}
         </div>
+        <ChimeToggle className="flex size-8 items-center justify-center rounded-lg text-zinc-300 transition hover:bg-white/10 hover:text-white" />
         <button
           onClick={onToggleFullscreen}
           className="flex size-8 items-center justify-center rounded-lg transition hover:bg-white/10"

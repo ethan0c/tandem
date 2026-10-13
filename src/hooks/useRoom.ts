@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { playChime } from "@/lib/chime";
 import { getSocket, type AppSocket } from "@/lib/socket";
 import type { Member, PlaybackState, Source, SyncReason } from "@/lib/types";
 
@@ -63,13 +64,20 @@ export function useRoom(roomId: string, name: string | null) {
         ping();
       });
 
+    // Set once a connection drops, so the next successful join plays the "back" chime.
+    let dropped = false;
+    // Mirror of `source` for deciding which chime a change deserves.
+    let currentSource: Source | null = null;
     const join = () => {
       setStatus("connecting");
       socket.emit("room:join", { roomId, name }, (ack) => {
+        if (dropped) playChime("reconnect");
+        dropped = false;
         offsetRef.current = ack.serverNow - Date.now();
         setSelfId(ack.selfId);
         setHostId(ack.state.hostId);
         setMembers(ack.state.members);
+        currentSource = ack.state.source;
         setSource(ack.state.source);
         push(ack.state.playback, "server", "resync");
         setStatus("joined");
@@ -77,18 +85,29 @@ export function useRoom(roomId: string, name: string | null) {
       });
     };
 
-    const onJoined = (m: Member) => setMembers((prev) => [...prev.filter((p) => p.id !== m.id), m]);
+    const onJoined = (m: Member) => {
+      playChime("join");
+      setMembers((prev) => [...prev.filter((p) => p.id !== m.id), m]);
+    };
     const onLeft = ({ id, hostId: h }: { id: string; hostId: string | null }) => {
+      playChime("leave");
       setMembers((prev) => prev.filter((p) => p.id !== id));
       setHostId(h);
     };
     const onSync = ({ playback, from, reason }: { playback: PlaybackState; from: string; reason: SyncReason }) =>
       push(playback, from, reason);
     const onSource = ({ source: s, playback, from }: { source: Source | null; playback: PlaybackState; from: string }) => {
+      if (s?.kind === "screen" && currentSource?.kind !== "screen") playChime("shareStart");
+      else if (!s && currentSource?.kind === "screen") playChime("shareStop");
+      currentSource = s;
       setSource(s);
       push(playback, from, "resync");
     };
-    const onDisconnect = () => setStatus("disconnected");
+    const onDisconnect = () => {
+      dropped = true;
+      playChime("disconnect");
+      setStatus("disconnected");
+    };
 
     socket.on("member:joined", onJoined);
     socket.on("member:left", onLeft);
