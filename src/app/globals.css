@@ -205,25 +205,6 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   .btn3d-brand:hover { transform: none; }
 }
 
-.tandem-loader { overflow: visible; }
-.tandem-loader circle {
-  stroke-dasharray: 72 22;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: tandem-ring 1.8s linear infinite;
-}
-.tandem-loader circle:nth-child(2) {
-  stroke: var(--color-brand-500);
-  animation-direction: reverse;
-  animation-delay: -0.9s;
-}
-@keyframes tandem-ring {
-  to { transform: rotate(360deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .tandem-loader circle { animation: none; stroke-dasharray: none; }
-}
-
 .service-logo { transition: transform 200ms ease, opacity 200ms ease; opacity: 0.9; }
 .service-logo[data-invert] { filter: invert(1); }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {

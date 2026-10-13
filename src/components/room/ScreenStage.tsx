@@ -104,7 +104,7 @@ export function ScreenStage({
 
       {!isSharer && (!remoteScreen || waiting) && !blocked && (
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 text-sm text-zinc-300">
-          <Loader label={`Connecting to ${who}’s screen…`} size={48} />
+          <Loader label={`Connecting to ${who}’s screen…`} />
         </div>
       )}
 

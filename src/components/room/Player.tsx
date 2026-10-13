@@ -330,7 +330,7 @@ export function Player({
 
       {buffering && hasMedia && !blocked && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <Loader label="Loading video…" size={48} />
+          <Loader label="Loading video…" />
         </div>
       )}
 
