@@ -82,7 +82,11 @@ export function Session({ roomId, name, localStream }: Props) {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
-      if (e.key === "c" && !e.metaKey && !e.ctrlKey && !e.altKey) toggleChat();
+      if (e.key === "c" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        // Otherwise the "c" lands in the message box that gets focus as the chat opens.
+        e.preventDefault();
+        toggleChat();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
