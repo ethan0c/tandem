@@ -1,0 +1,7 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;overflow:hidden;background:transparent}svg{display:block}</style></head>
+<!-- LogoTile from src/components/Logo.tsx. icon.html?size=128&pad=8&stroke=2.25: pad leaves Chrome's recommended transparent margin, and small sizes use a heavier stroke so the frames stay legible. -->
+<body><script>
+  const q = new URLSearchParams(location.search);
+  const size = +q.get("size"), pad = +(q.get("pad") ?? 0), stroke = q.get("stroke") ?? "2.25";
+  document.body.innerHTML = `<svg width="${size}" height="${size}" viewBox="${-pad * 64 / (size - 2 * pad)} ${-pad * 64 / (size - 2 * pad)} ${64 * size / (size - 2 * pad)} ${64 * size / (size - 2 * pad)}" fill="none"><rect width="64" height="64" rx="16" fill="#7c3aed"/><g transform="translate(8 8) scale(1.5)"><rect x="4" y="4" width="16" height="16" rx="5" stroke="#fff" stroke-width="${stroke}"/><rect x="12" y="12" width="16" height="16" rx="5" stroke="#fff" stroke-width="${stroke}"/></g></svg>`;
+</script></body></html>
