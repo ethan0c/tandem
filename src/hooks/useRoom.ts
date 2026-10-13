@@ -45,6 +45,7 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     if (!name) return;
     const socket = getSocket();
     socketRef.current = socket;
+    let active = true;
 
     const push = (playback: PlaybackState, from: string, reason: SyncReason) =>
       setRemote({ playback, from, reason, seq: ++seqRef.current });
@@ -55,8 +56,10 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
         let bestOffset = offsetRef.current;
         let n = 0;
         const ping = () => {
+          if (!active) { resolve(); return; }
           const t0 = Date.now();
           socket.timeout(2000).emit("time:ping", (err, serverTime) => {
+            if (!active) { resolve(); return; }
             if (!err) {
               const t1 = Date.now();
               const rtt = t1 - t0;
@@ -83,6 +86,7 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       setStatus("connecting");
       // The same clientId every time, so a reconnect lands us back in our own seat.
       socket.emit("room:join", { roomId, name, clientId, tabId }, (ack) => {
+        if (!active) return;
         if (dropped) playChime("reconnect");
         dropped = false;
         offsetRef.current = ack.serverNow - Date.now();
@@ -150,6 +154,7 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     else socket.connect();
 
     return () => {
+      active = false;
       window.removeEventListener("pagehide", onPageHide);
       window.removeEventListener("pageshow", onPageShow);
       socket.off("member:joined", onJoined);

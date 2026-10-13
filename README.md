@@ -56,6 +56,12 @@ set `NEXT_PUBLIC_TURN_*` where the site is built. Everything else works without 
   dropped member's seat (and their screen share) for a minute before treating it as a departure; a tab that is
   closed says goodbye explicitly and is removed at once. If the server forgot a share anyway (it restarted, or
   the sharer was away longer than that), the sharer announces it again on rejoin.
+- **Reload handover.** A random tab token is saved in session storage and reused only for reload navigation.
+  The server replaces any previous seat for that token immediately, even when the unload beacon and socket
+  goodbye are lost. The member ID still changes on reload so peers rebuild their media connections. New tabs
+  receive new tokens even if the browser copied the opener's session storage. Late goodbye requests cannot
+  remove the replacement seat because they carry the old member ID. Signaling is routed only between live
+  sockets in the same room.
 - **WebRTC** connects browsers directly for audio and video. For each pair, only the member with the greater
   member id sends the offer, a rule both sides can apply without talking, so there is no negotiation glare. The
   offerer re-offers with an ICE restart if the connection fails. STUN is Google's public server; set
@@ -79,13 +85,16 @@ browser extension bridges the site's HTML5 player to the app using the same Sock
 
 ## Call quality on weak connections
 
-`useWebRTC` samples each call connection's WebRTC stats every two seconds. Three consecutive poor samples
-trigger the weak-connection notice and a lower camera encoding profile. Five healthy samples restore the
-normal profile. Unknown samples do not count as recovery.
+`useWebRTC` samples each call connection's WebRTC stats every two seconds. Camera quality and the visible
+warning are separate: three constrained samples lower camera quality silently; five unconstrained samples
+restore it. The warning has a ten-second startup grace period, then requires five consecutive severe samples
+(about ten seconds). Three healthy samples clear it. Unknown samples break consecutive-sample streaks and
+do not declare recovery.
 
-Poor samples include a selected ICE candidate pair's RTT above 600 ms, inbound interval packet loss above
-5% (at least 20 packets), bandwidth-limited video encoding, or a disconnected/failed connection. Packet loss
-uses differences between samples, not lifetime counters. CPU encoding limits do not trigger a network warning.
+Camera constraints include selected-pair RTT above 600 ms, interval packet loss above 5% (at least 20 packets),
+or bandwidth-limited encoding. Warning severity requires RTT above one second, audio packet loss above 8%,
+video packet loss above 12%, or a disconnected/failed connection. Bandwidth adaptation alone never displays
+a warning. Packet loss uses interval counters, and unselected ICE pairs and CPU encoding limits are ignored.
 
 Camera senders are capped at 900 kbps, 24 fps, and up to 720p normally; the reduced profile uses 220 kbps,
 15 fps, and up to 360p. Browser support for sender parameters varies; unsupported settings do not interrupt
@@ -108,7 +117,7 @@ it does not record media. Calls and screen shares use direct WebRTC connections 
 services for discovery, and optionally the configured TURN relay. Connection services can observe client IPs.
 
 The web app stores the display name, call volume/mute preference, chime preference, and floating-call width in
-local storage. The extension stores `appOrigin` in Chrome sync storage and the current room code in the tab's
+local storage. A temporary reload token is stored in session storage for seat replacement. The extension stores `appOrigin` in Chrome sync storage and the current room code in the tab's
 session storage. Invite creation reads the active tab URL. Additional host permissions and registered content
 scripts persist until removed; implementation details are in the extension README. The public privacy page
 keeps these disclosures in everyday language.
