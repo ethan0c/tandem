@@ -8,6 +8,7 @@ import { Footer } from "@/components/landing/Footer";
 import { StartRoom } from "@/components/landing/StartRoom";
 import { LandingMotion } from "@/components/landing/LandingMotion";
 import { RotatingHeadline } from "@/components/landing/RotatingHeadline";
+import { RejoinRoom } from "@/components/landing/RejoinRoom";
 import { Preview } from "@/components/landing/Preview";
 
 const GITHUB = "https://github.com/ethan0c";
@@ -102,6 +103,7 @@ export default function Home() {
             <div id="start" className="mt-6 flex w-full scroll-mt-24 justify-center">
               <StartRoom tone="dark" />
             </div>
+            <RejoinRoom />
           </div>
           <div className="hero-preview w-full">
             <Preview />

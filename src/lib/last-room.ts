@@ -36,6 +36,12 @@ export function rememberRoom(roomId: string) {
   try { localStorage.setItem(LAST_KEY, JSON.stringify({ roomId, at: Date.now() })); } catch { /* storage unavailable */ }
 }
 
+export function activateSession(roomId: string, name: string) {
+  const current = readSession();
+  saveSession({ roomId, name, camOn: current?.roomId === roomId ? current.camOn : true, micOn: current?.roomId === roomId ? current.micOn : true, active: true });
+  rememberRoom(roomId);
+}
+
 export function finishSession(roomId: string) {
   const session = readSession();
   if (session?.roomId === roomId) saveSession({ ...session, active: false });

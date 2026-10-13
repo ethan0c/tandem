@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { playChime } from "@/lib/chime";
-import { finishSession, rememberRoom } from "@/lib/last-room";
+import { activateSession, finishSession, rememberRoom } from "@/lib/last-room";
 import { clientId, tabId, getSocket, sendGoodbye, type AppSocket } from "@/lib/socket";
 import { CHAT_HISTORY, type ChatMessage, type Member, type PlaybackState, type Source, type SyncReason } from "@/lib/types";
 
@@ -89,7 +89,7 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       // The same clientId every time, so a reconnect lands us back in our own seat.
       socket.emit("room:join", { roomId, name, clientId, tabId }, (ack) => {
         if (!active) return;
-        rememberRoom(roomId);
+        activateSession(roomId, name);
         if (dropped) playChime("reconnect");
         dropped = false;
         offsetRef.current = ack.serverNow - Date.now();
