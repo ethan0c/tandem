@@ -29,6 +29,9 @@ const RECONNECT_GRACE_MS = 60 * 1000;
 
 /** The live socket for each member, so signals follow a member across reconnects. */
 const socketOf = new Map<string, string>();
+/** A reload gets a new WebRTC identity but replaces the same tab's old seat. */
+const seatByTab = new Map<string, { roomId: string; clientId: string }>();
+const tabOfMember = new Map<string, string>();
 /** Members whose socket dropped and who are not yet removed from their room. */
 const pendingLeave = new Map<string, { roomId: string; timer: NodeJS.Timeout }>();
 
@@ -91,6 +94,9 @@ app.prepare().then(() => {
     const room = rooms.get(roomId);
     if (!room || !room.members.some((m) => m.id === clientId)) return;
     room.members = room.members.filter((m) => m.id !== clientId);
+    const tab = tabOfMember.get(clientId);
+    if (tab && seatByTab.get(tab)?.clientId === clientId) seatByTab.delete(tab);
+    tabOfMember.delete(clientId);
     if (room.hostId === clientId) room.hostId = room.members[0]?.id ?? null;
     io.to(roomId).emit("member:left", { id: clientId, hostId: room.hostId });
     // A screen share cannot outlive the person sharing it.
@@ -146,9 +152,25 @@ app.prepare().then(() => {
   };
 
   io.on("connection", (socket) => {
-    socket.on("room:join", ({ roomId: id, name, clientId: requested }, ack) => {
+    socket.on("room:join", ({ roomId: id, name, clientId: requested, tabId }, ack) => {
       // Older clients send no id; their socket id then plays the part, as it used to.
       const clientId = typeof requested === "string" && requested ? requested.slice(0, 64) : socket.id;
+      const tab = typeof tabId === "string" && tabId ? tabId.slice(0, 64) : undefined;
+      const previous = tab ? seatByTab.get(tab) : undefined;
+      if (previous && previous.clientId !== clientId) {
+        const pending = pendingLeave.get(previous.clientId);
+        if (pending) clearTimeout(pending.timer);
+        pendingLeave.delete(previous.clientId);
+        const oldSocketId = socketOf.get(previous.clientId);
+        socketOf.delete(previous.clientId);
+        // Remove routing first, so a late disconnect or goodbye cannot affect the new seat.
+        if (oldSocketId) io.sockets.sockets.get(oldSocketId)?.disconnect(true);
+        leave(previous.roomId, previous.clientId);
+      }
+      if (socket.data.roomId && socket.data.roomId !== id) {
+        socket.leave(socket.data.roomId);
+        leave(socket.data.roomId, clientId);
+      }
       socket.data.roomId = id;
       socket.data.clientId = clientId;
       socket.join(id);
@@ -160,6 +182,10 @@ app.prepare().then(() => {
         if (pending.roomId !== id) leave(pending.roomId, clientId);
       }
       socketOf.set(clientId, socket.id);
+      if (tab) {
+        seatByTab.set(tab, { roomId: id, clientId });
+        tabOfMember.set(clientId, tab);
+      }
 
       const room = getRoom(id);
       const trimmed = name.trim().slice(0, 32) || "Guest";
@@ -221,13 +247,13 @@ app.prepare().then(() => {
     socket.on("rtc:signal", ({ to, data }) => {
       const from = socket.data.clientId;
       const target = socketOf.get(to);
-      if (from && target) io.to(target).emit("rtc:signal", { from, data });
+      if (from && target && socketOf.get(from) === socket.id && io.sockets.sockets.get(target)?.data.roomId === socket.data.roomId) io.to(target).emit("rtc:signal", { from, data });
     });
 
     socket.on("screen:signal", ({ to, data }) => {
       const from = socket.data.clientId;
       const target = socketOf.get(to);
-      if (from && target) io.to(target).emit("screen:signal", { from, data });
+      if (from && target && socketOf.get(from) === socket.id && io.sockets.sockets.get(target)?.data.roomId === socket.data.roomId) io.to(target).emit("screen:signal", { from, data });
     });
 
     socket.on("disconnect", (reason) => {

@@ -91,11 +91,12 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
         try {
           const stats = await pc.getStats();
           if (cancelled) return;
+          if (!Array.from(pcs.current.values()).includes(pc)) continue;
           const struggling = monitor.quality.sample(stats, pc.connectionState);
           poor ||= struggling;
-          if (monitor.applied !== struggling) {
-            await setCameraQuality(pc, struggling);
-            monitor.applied = struggling;
+          if (monitor.applied !== monitor.quality.limited) {
+            await setCameraQuality(pc, monitor.quality.limited);
+            monitor.applied = monitor.quality.limited;
           }
         } catch {
           poor ||= monitor.quality.poor;
@@ -116,7 +117,11 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
   );
 
   const closePeer = useCallback((id: string) => {
-    pcs.current.get(id)?.close();
+    const pc = pcs.current.get(id);
+    if (pc) {
+      pc.ontrack = pc.onicecandidate = pc.onconnectionstatechange = null;
+      pc.close();
+    }
     pcs.current.delete(id);
     pendingIce.current.delete(id);
     offeredTo.current.delete(id);
@@ -137,6 +142,7 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
         await pc.setLocalDescription(offer);
         send(id, { type: "offer", sdp: offer });
       } catch {
+        if (pcs.current.get(id) !== pc) return;
         closePeer(id);
         setAttempt((n) => n + 1);
       }
@@ -153,6 +159,7 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
         if (e.candidate) send(id, { type: "candidate", candidate: e.candidate.toJSON() });
       };
       pc.ontrack = (e) => {
+        if (pcs.current.get(id) !== pc) return;
         const stream = e.streams[0] ?? new MediaStream([e.track]);
         setPeers((prev) => ({ ...prev, [id]: { id, stream } }));
       };
@@ -197,8 +204,6 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
       offeredTo.current.add(m.id);
       const pc = createPc(m.id);
       attachLocal(pc);
-      // negotiate() only touches state asynchronously, and only when the offer fails.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       void negotiate(m.id, pc);
     }
     for (const id of Array.from(pcs.current.keys())) {
@@ -265,9 +270,17 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
   // Tear everything down on unmount.
   useEffect(() => {
     const map = pcs.current;
+    const ice = pendingIce.current;
+    const offered = offeredTo.current;
     return () => {
-      for (const pc of map.values()) pc.close();
+      for (const pc of map.values()) {
+        pc.ontrack = pc.onicecandidate = pc.onconnectionstatechange = null;
+        pc.close();
+      }
       map.clear();
+      ice.clear();
+      offered.clear();
+      setPeers({});
     };
   }, []);
 

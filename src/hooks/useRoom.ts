@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { playChime } from "@/lib/chime";
-import { clientId, getSocket, sendGoodbye, type AppSocket } from "@/lib/socket";
+import { clientId, tabId, getSocket, sendGoodbye, type AppSocket } from "@/lib/socket";
 import { CHAT_HISTORY, type ChatMessage, type Member, type PlaybackState, type Source, type SyncReason } from "@/lib/types";
 
 export type RoomStatus = "connecting" | "joined" | "disconnected";
@@ -82,7 +82,7 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     const join = () => {
       setStatus("connecting");
       // The same clientId every time, so a reconnect lands us back in our own seat.
-      socket.emit("room:join", { roomId, name, clientId }, (ack) => {
+      socket.emit("room:join", { roomId, name, clientId, tabId }, (ack) => {
         if (dropped) playChime("reconnect");
         dropped = false;
         offsetRef.current = ack.serverNow - Date.now();

@@ -11,6 +11,23 @@ export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
  */
 export const clientId = nanoid(12);
 
+/** Reuse a tab's seat only on reload; new tabs may inherit a copy of sessionStorage. */
+function reloadTabId() {
+  const fresh = nanoid(24);
+  if (typeof window === "undefined") return fresh;
+  try {
+    const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    const saved = sessionStorage.getItem("tandem:tab-id");
+    const id = navigation?.type === "reload" && saved ? saved : fresh;
+    sessionStorage.setItem("tandem:tab-id", id);
+    return id;
+  } catch {
+    return fresh;
+  }
+}
+
+export const tabId = reloadTabId();
+
 let socket: AppSocket | null = null;
 
 /**
