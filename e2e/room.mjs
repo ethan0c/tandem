@@ -93,9 +93,10 @@ async function join(page, name) {
 const sessions = [];
 try {
   // The tab that gets shared: a title the picker flag can match, with something moving in it.
-  // 4K, to prove the share is not downscaled on the way to viewers.
-  const SHARE_W = 3840;
-  const SHARE_H = 2160;
+  // 4K by default, to prove the share is not downscaled on the way to viewers. Run again with
+  // SHARE_W=1280 SHARE_H=720 to prove a small tab is not upscaled either.
+  const SHARE_W = Number(process.env.SHARE_W ?? 3840);
+  const SHARE_H = Number(process.env.SHARE_H ?? 2160);
   const shareCtx = await browser.newContext({ viewport: { width: SHARE_W, height: SHARE_H } });
   const sharePage = await shareCtx.newPage();
   await sharePage.setContent(
@@ -149,10 +150,11 @@ try {
     await bob.getByText("Connecting to").waitFor({ state: "detached", timeout: 2_000 });
   });
 
-  await step(`Bob receives the share at full resolution (≥ 90% of ${SHARE_W}×${SHARE_H})`, async () => {
+  await step(`Bob receives the share at its real size (${SHARE_W}×${SHARE_H}, not scaled)`, async () => {
+    // The stage <video> is the only one with object-contain; camera tiles use object-cover.
     const dims = () =>
       bob.evaluate(() => {
-        const v = Array.from(document.querySelectorAll("video")).find((v) => !v.muted && v.videoWidth > 300);
+        const v = document.querySelector("video.object-contain");
         return v ? [v.videoWidth, v.videoHeight] : [0, 0];
       });
     const minW = Math.floor(SHARE_W * 0.9);
@@ -176,7 +178,20 @@ try {
       return out;
     });
     log("Bob", `inbound stats: ${JSON.stringify(stats)}`);
+    const sdp = await alice.evaluate(() =>
+      window.__pcs
+        .filter((p) => p.connectionState === "connected")
+        .map((p) => ({
+          offer: p.localDescription?.sdp.split("\n").find((l) => l.startsWith("m=video")),
+          answer: p.remoteDescription?.sdp.split("\n").find((l) => l.startsWith("m=video")),
+          pts: Object.fromEntries(
+            (p.localDescription?.sdp.match(/a=rtpmap:\d+ \S+/g) ?? []).map((l) => l.slice(9).split(" ")),
+          ),
+        })),
+    );
+    log("Alice", `video m-lines: ${JSON.stringify(sdp)}`);
     if (w < minW) throw new Error(`received ${w}×${h}, wanted ≥ ${minW} wide`);
+    if (w > SHARE_W || h > SHARE_H) throw new Error(`received ${w}×${h}: upscaled beyond the ${SHARE_W}×${SHARE_H} tab`);
     log("Bob", `share arrives at ${w}×${h}`);
   });
 

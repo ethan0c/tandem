@@ -204,8 +204,9 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
     let stream: MediaStream;
     try {
       stream = await navigator.mediaDevices.getDisplayMedia({
-        // No width/height constraint: capture at the surface's native size (4K or Retina stays 4K/Retina).
-        video: { frameRate: { ideal: 30, max: 60 } },
+        // Chrome caps screen capture at 1920x1080 unless asked for more. `ideal` here is a ceiling,
+        // not a target: the capture stays at the surface's native size and is never upscaled.
+        video: { frameRate: { ideal: 30, max: 60 }, width: { ideal: 3840 }, height: { ideal: 2160 } },
         audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
         // Chrome-only hints: offer tabs first, hide the Tandem tab (no hall of mirrors), allow tab audio.
         preferCurrentTab: false,
