@@ -19,6 +19,7 @@ const handle = app.getRequestHandler();
 /** Rooms live in memory only. An empty room is kept briefly so a refresh does not lose state. */
 const rooms = new Map<string, RoomState>();
 const cleanupTimers = new Map<string, NodeJS.Timeout>();
+const expiresAt = new Map<string, number>();
 const EMPTY_ROOM_TTL_MS = 10 * 60 * 1000;
 
 /**
@@ -60,22 +61,38 @@ function getRoom(id: string): RoomState {
   if (timer) {
     clearTimeout(timer);
     cleanupTimers.delete(id);
+    expiresAt.delete(id);
   }
   return room;
 }
 
 function scheduleCleanup(id: string) {
+  const previous = cleanupTimers.get(id);
+  if (previous) clearTimeout(previous);
+  expiresAt.set(id, Date.now() + EMPTY_ROOM_TTL_MS);
   cleanupTimers.set(
     id,
     setTimeout(() => {
       rooms.delete(id);
       cleanupTimers.delete(id);
+      expiresAt.delete(id);
     }, EMPTY_ROOM_TTL_MS),
   );
 }
 
 app.prepare().then(() => {
   const httpServer = createServer((req, res) => {
+    if (req.url?.startsWith("/room-status/") && req.method === "GET") {
+      const id = req.url.slice("/room-status/".length);
+      const origin = req.headers.origin;
+      const allowed = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim()) ?? [];
+      if (origin && (!process.env.CORS_ORIGIN || allowed.includes(origin))) res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader("Cache-Control", "no-store");
+      res.setHeader("Content-Type", "application/json");
+      const room = rooms.get(id);
+      res.end(JSON.stringify({ exists: !!room, expiresAt: expiresAt.get(id) ?? null }));
+      return;
+    }
     if (req.url === "/leave" && (req.method === "POST" || req.method === "OPTIONS")) {
       handleLeave(req, res);
       return;
@@ -108,6 +125,18 @@ app.prepare().then(() => {
     if (room.members.length === 0) scheduleCleanup(roomId);
   };
 
+  const holdSeat = (roomId: string, clientId: string) => {
+    const previous = pendingLeave.get(clientId);
+    if (previous) clearTimeout(previous.timer);
+    pendingLeave.set(clientId, {
+      roomId,
+      timer: setTimeout(() => {
+        pendingLeave.delete(clientId);
+        leave(roomId, clientId);
+      }, RECONNECT_GRACE_MS),
+    });
+  };
+
   /**
    * A page that is closing says goodbye with a beacon (see `sendGoodbye` in src/lib/socket.ts), because
    * a socket frame sent during unload may never arrive. Frees the member's seat at once.
@@ -129,8 +158,11 @@ app.prepare().then(() => {
     });
     req.on("end", () => {
       let clientId: unknown;
+      let reconnecting = false;
       try {
-        clientId = (JSON.parse(body) as { clientId?: unknown }).clientId;
+        const payload = JSON.parse(body) as { clientId?: unknown; reconnecting?: unknown };
+        clientId = payload.clientId;
+        reconnecting = payload.reconnecting === true;
       } catch {
         /* not ours */
       }
@@ -146,7 +178,10 @@ app.prepare().then(() => {
       const sid = socketOf.get(clientId);
       const roomId = pending?.roomId ?? (sid ? io.sockets.sockets.get(sid)?.data.roomId : undefined);
       socketOf.delete(clientId);
-      if (roomId) leave(roomId, clientId);
+      if (roomId) {
+        if (reconnecting) holdSeat(roomId, clientId);
+        else leave(roomId, clientId);
+      }
       res.writeHead(204).end();
     });
   };
@@ -157,6 +192,7 @@ app.prepare().then(() => {
       const clientId = typeof requested === "string" && requested ? requested.slice(0, 64) : socket.id;
       const tab = typeof tabId === "string" && tabId ? tabId.slice(0, 64) : undefined;
       const previous = tab ? seatByTab.get(tab) : undefined;
+      let replaced = false;
       if (previous && previous.clientId !== clientId) {
         const pending = pendingLeave.get(previous.clientId);
         if (pending) clearTimeout(pending.timer);
@@ -165,7 +201,22 @@ app.prepare().then(() => {
         socketOf.delete(previous.clientId);
         // Remove routing first, so a late disconnect or goodbye cannot affect the new seat.
         if (oldSocketId) io.sockets.sockets.get(oldSocketId)?.disconnect(true);
-        leave(previous.roomId, previous.clientId);
+        const room = rooms.get(previous.roomId);
+        const member = room?.members.find((m) => m.id === previous.clientId);
+        if (room && member && previous.roomId === id) {
+          // Rebuild media connections without announcing a departure or discarding chat.
+          member.id = clientId;
+          member.name = name.trim().slice(0, 32) || "Guest";
+          if (room.hostId === previous.clientId) room.hostId = clientId;
+          tabOfMember.delete(previous.clientId);
+          socket.to(id).emit("member:replaced", { id: previous.clientId, member, hostId: room.hostId });
+          if (room.source?.kind === "screen" && room.source.sharerId === previous.clientId) {
+            room.source = null;
+            room.playback = freshPlayback();
+            io.to(id).emit("source:changed", { source: null, playback: room.playback, from: clientId });
+          }
+          replaced = true;
+        } else leave(previous.roomId, previous.clientId);
       }
       if (socket.data.roomId && socket.data.roomId !== id) {
         socket.leave(socket.data.roomId);
@@ -193,7 +244,7 @@ app.prepare().then(() => {
       if (existing) {
         // Same member on a new socket: nothing changed for anyone else.
         existing.name = trimmed;
-      } else {
+      } else if (!replaced) {
         const member = { id: clientId, name: trimmed };
         room.members.push(member);
         socket.to(id).emit("member:joined", member);
@@ -268,13 +319,7 @@ app.prepare().then(() => {
         return;
       }
       // Anything else may be a blip; hold the seat while the browser reconnects.
-      pendingLeave.set(clientId, {
-        roomId,
-        timer: setTimeout(() => {
-          pendingLeave.delete(clientId);
-          leave(roomId, clientId);
-        }, RECONNECT_GRACE_MS),
-      });
+      holdSeat(roomId, clientId);
     });
   });
 
