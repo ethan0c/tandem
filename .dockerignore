@@ -5,7 +5,6 @@ node_modules
 !.env.example
 e2e
 scripts
-public/store-listing
 *.zip
 *.md
 .vercel
