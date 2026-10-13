@@ -7,7 +7,7 @@ import { FloatingCall } from "@/components/room/FloatingCall";
 
 const noop = () => {};
 const preview = { poster: "/haikyu.png", time: 531, duration: 1420 };
-const members = [{ id: "preview", name: "You" }];
+const members = [{ id: "preview", name: "Cash" }];
 
 /** Render the real room components with local sample state and no live session. */
 export function Preview() {

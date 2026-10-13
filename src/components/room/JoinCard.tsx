@@ -165,7 +165,7 @@ export function JoinCard({
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={32}
-              placeholder="What should we call you?"
+              placeholder="Cash"
               autoFocus
               className="h-11 w-full rounded-xl border border-white/10 bg-ink-700 px-3.5 text-sm text-white placeholder:text-zinc-500 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20"
             />
