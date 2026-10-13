@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { playChime } from "@/lib/chime";
-import { getSocket, type AppSocket } from "@/lib/socket";
+import { clientId, getSocket, type AppSocket } from "@/lib/socket";
 import type { Member, PlaybackState, Source, SyncReason } from "@/lib/types";
 
 export type RoomStatus = "connecting" | "joined" | "disconnected";
@@ -70,7 +70,8 @@ export function useRoom(roomId: string, name: string | null) {
     let currentSource: Source | null = null;
     const join = () => {
       setStatus("connecting");
-      socket.emit("room:join", { roomId, name }, (ack) => {
+      // The same clientId every time, so a reconnect lands us back in our own seat.
+      socket.emit("room:join", { roomId, name, clientId }, (ack) => {
         if (dropped) playChime("reconnect");
         dropped = false;
         offsetRef.current = ack.serverNow - Date.now();
@@ -108,6 +109,12 @@ export function useRoom(roomId: string, name: string | null) {
       playChime("disconnect");
       setStatus("disconnected");
     };
+    // Leaving the page: say goodbye so the server frees our seat at once instead of holding it
+    // for a reconnect that is not coming. If the page comes back from the back/forward cache, rejoin.
+    const onPageHide = () => socket.disconnect();
+    const onPageShow = () => {
+      if (!socket.active) socket.connect();
+    };
 
     socket.on("member:joined", onJoined);
     socket.on("member:left", onLeft);
@@ -115,10 +122,14 @@ export function useRoom(roomId: string, name: string | null) {
     socket.on("source:changed", onSource);
     socket.on("disconnect", onDisconnect);
     socket.on("connect", join);
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("pageshow", onPageShow);
     if (socket.connected) join();
     else socket.connect();
 
     return () => {
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("pageshow", onPageShow);
       socket.off("member:joined", onJoined);
       socket.off("member:left", onLeft);
       socket.off("sync:state", onSync);

@@ -1,7 +1,15 @@
+import { nanoid } from "nanoid";
 import { io, type Socket } from "socket.io-client";
 import type { ClientToServerEvents, ServerToClientEvents } from "./types";
 
 export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
+
+/**
+ * Who this tab is in a room. Chosen once per page load: a socket that drops and comes back is still
+ * the same member, so a blip never ends a share or a call. A reload is a new member, which is right,
+ * because its peer connections are gone and the others have to build new ones.
+ */
+export const clientId = nanoid(12);
 
 let socket: AppSocket | null = null;
 

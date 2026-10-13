@@ -1,5 +1,5 @@
 /**
- * Tandem mark: two linked rings, like the wheels of a tandem bicycle.
+ * Tandem mark: two linked frames, representing a shared screen.
  */
 export function LogoMark({
   size = 32,
@@ -13,15 +13,15 @@ export function LogoMark({
   return (
     <svg
       width={size}
-      height={size * 0.625}
-      viewBox="0 0 64 40"
+      height={size}
+      viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       aria-hidden="true"
     >
-      <circle cx="21" cy="20" r="15" stroke={color} strokeWidth="7" />
-      <circle cx="43" cy="20" r="15" stroke={color} strokeWidth="7" />
+      <rect x="4" y="4" width="16" height="16" rx="5" stroke={color} strokeWidth="2.25" />
+      <rect x="12" y="12" width="16" height="16" rx="5" stroke={color} strokeWidth="2.25" />
     </svg>
   );
 }
@@ -31,8 +31,10 @@ export function LogoTile({ size = 32, className = "" }: { size?: number; classNa
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
       <rect width="64" height="64" rx="16" fill="#7c3aed" />
-      <circle cx="23" cy="32" r="13" stroke="#fff" strokeWidth="6" />
-      <circle cx="41" cy="32" r="13" stroke="#fff" strokeWidth="6" />
+      <g transform="translate(8 8) scale(1.5)">
+        <rect x="4" y="4" width="16" height="16" rx="5" stroke="#fff" strokeWidth="2.25" />
+        <rect x="12" y="12" width="16" height="16" rx="5" stroke="#fff" strokeWidth="2.25" />
+      </g>
     </svg>
   );
 }
@@ -48,10 +50,10 @@ export function Logo({
 }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
-      <LogoMark size={size * 1.15} color="#8b5cf6" />
+      <LogoMark size={size} color="#8b5cf6" />
       <span
-        className={`font-display font-bold tracking-[-0.03em] ${light ? "text-white" : "text-ink"}`}
-        style={{ fontSize: size * 0.72, lineHeight: 1 }}
+        className={`font-sans font-medium tracking-[-0.045em] ${light ? "text-white" : "text-ink"}`}
+        style={{ fontSize: size * 0.78, lineHeight: 1 }}
       >
         tandem
       </span>

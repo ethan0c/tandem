@@ -16,6 +16,10 @@ export interface PlaybackState {
 }
 
 export interface Member {
+  /**
+   * The client id the browser chose for this page load (not the socket id). It survives a dropped and
+   * re-established socket, so a reconnect is the same member and nothing has to be renegotiated.
+   */
   id: string;
   name: string;
 }
@@ -30,6 +34,7 @@ export interface RoomState {
 
 export interface JoinAck {
   state: RoomState;
+  /** Our member id: the `clientId` we sent. */
   selfId: string;
   serverNow: number;
 }
@@ -38,8 +43,14 @@ export type SignalData =
   | { type: "offer" | "answer"; sdp: RTCSessionDescriptionInit }
   | { type: "candidate"; candidate: RTCIceCandidateInit };
 
-/** Screen-share signalling: a viewer sends `request` to the sharer, who answers with an offer. */
-export type ScreenSignal = SignalData | { type: "request" };
+/**
+ * Screen-share signalling: a viewer sends `request` to the sharer, who answers with an offer.
+ * `nonce` ties an answer to the offer it answers, so a late answer never lands on a newer connection.
+ */
+export type ScreenSignal =
+  | { type: "request" }
+  | { type: "offer" | "answer"; sdp: RTCSessionDescriptionInit; nonce: number }
+  | { type: "candidate"; candidate: RTCIceCandidateInit };
 
 export interface ServerToClientEvents {
   "member:joined": (member: Member) => void;
@@ -60,7 +71,7 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
   "room:join": (
-    payload: { roomId: string; name: string },
+    payload: { roomId: string; name: string; clientId: string },
     ack: (res: JoinAck) => void,
   ) => void;
   "time:ping": (ack: (serverNow: number) => void) => void;

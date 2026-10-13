@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   /* Neutral blacks. Purple stays on the logo and the primary button. */
   --color-ink: #0a0a0a;
@@ -95,7 +95,7 @@ input[type="range"].tandem-range:hover::-webkit-slider-thumb {
   justify-content: center;
   gap: 0.5rem;
   border-radius: 0.875rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.01em;
   line-height: 1;
   white-space: nowrap;
@@ -256,6 +256,7 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 .hero-nav a:focus-visible { outline: 2px solid rgb(255 255 255 / 0.5); outline-offset: 2px; }
 @media (max-width: 767px) {
   .hero-horizon { height: 64px; margin-top: 32px; }
+  .hero-horizon::before { width: 280vw; }
   .site-header { min-height: 64px; }
   .hero-body { gap: 36px; padding-top: 28px; }
   .hero-title { font-size: clamp(2.4rem, 11vw, 3rem); }

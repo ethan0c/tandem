@@ -90,7 +90,7 @@ export default function Home() {
 
         <div className="hero-body relative mx-auto flex site-width flex-1 flex-col items-center site-gutter">
           <div className="hero-intro flex flex-col items-center text-center">
-            <h1 className="hero-title font-display font-extrabold tracking-[-0.04em]">
+            <h1 className="hero-title font-display font-medium tracking-[-0.04em]">
               Watch anime together.
             </h1>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
@@ -110,7 +110,7 @@ export default function Home() {
       {/* Works with */}
       <section id="sources" className="scroll-mt-10 bg-ink pb-14 pt-10 sm:pb-20 sm:pt-16">
         <div data-reveal className="mx-auto site-width site-gutter">
-          <h2 className="font-display text-3xl font-bold tracking-[-0.03em] sm:text-4xl">Works with</h2>
+          <h2 className="font-display text-3xl font-medium tracking-[-0.03em] sm:text-4xl">Works with</h2>
           <p className="mt-3 text-sm text-zinc-400">Watch on your usual site with the Tandem extension.</p>
           <ul className="service-logos my-10 grid grid-cols-2 items-center gap-x-8 gap-y-10 sm:grid-cols-3 sm:gap-y-14 lg:grid-cols-5">
             {streamingSites.map(([name, slug, invert]) => (
@@ -140,7 +140,7 @@ export default function Home() {
         <div data-reveal className="mx-auto grid site-width gap-12 site-gutter py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28">
           <div>
             <p className="font-sans text-[11px] font-medium uppercase tracking-[0.12em] text-zinc-500">How it works</p>
-            <h2 className="mt-4 font-display text-4xl font-bold leading-tight tracking-[-0.03em]">Pause, skip, and catch up together.</h2>
+            <h2 className="mt-4 font-display text-4xl font-medium leading-tight tracking-[-0.03em]">Pause, skip, and catch up together.</h2>
             <p className="mt-5 max-w-sm leading-relaxed text-zinc-400">Tandem adjusts playback when one of you falls behind, including after buffering.</p>
           </div>
           <ol className="divide-y divide-white/10 border-y border-white/10">
@@ -152,7 +152,7 @@ export default function Home() {
               <li key={t} className="grid gap-3 py-7 sm:grid-cols-[3rem_1fr]">
                 <span className="font-sans text-sm text-zinc-500">0{i + 1}</span>
                 <div>
-                  <h3 className="font-display text-xl font-bold">{t}</h3>
+                  <h3 className="font-display text-xl font-medium">{t}</h3>
                   <p className="mt-2 max-w-lg leading-relaxed text-zinc-400">{b}</p>
                 </div>
               </li>
@@ -166,7 +166,7 @@ export default function Home() {
         <div data-reveal className="mx-auto site-width site-gutter">
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-ink-800 px-6 py-12 text-white sm:px-12 sm:py-16">
             <p className="font-sans text-[11px] font-medium uppercase tracking-[0.12em] text-zinc-500">The extension</p>
-            <h2 className="mt-4 font-display text-4xl font-bold leading-[1] tracking-[-0.03em] text-white sm:text-5xl">
+            <h2 className="mt-4 font-display text-4xl font-medium leading-[1] tracking-[-0.03em] text-white sm:text-5xl">
               Watch on the site you use.
             </h2>
             <p className="mt-5 max-w-md leading-relaxed text-zinc-400">
@@ -187,11 +187,11 @@ export default function Home() {
       {/* FAQ */}
       <section id="faq" className="scroll-mt-20 border-t border-white/10 bg-ink">
         <div data-reveal className="mx-auto grid site-width gap-10 site-gutter py-20 lg:grid-cols-[0.6fr_1.4fr] lg:py-28">
-          <h2 className="font-display text-4xl font-bold leading-[1] tracking-[-0.03em]">Questions</h2>
+          <h2 className="font-display text-4xl font-medium leading-[1] tracking-[-0.03em]">Questions</h2>
           <div className="divide-y divide-white/10 border-y border-white/10">
             {faq.map(({ q, a }) => (
               <details key={q} className="faq group">
-                <summary className="flex items-center justify-between gap-6 py-5 font-display text-lg font-semibold">
+                <summary className="flex items-center justify-between gap-6 py-5 font-display text-lg font-medium">
                   {q}
                   <span aria-hidden="true" className="faq-plus shrink-0 font-sans text-xl font-normal text-zinc-500 transition">+</span>
                 </summary>
@@ -205,7 +205,7 @@ export default function Home() {
       {/* Last call */}
       <section className="border-y border-white/10 bg-ink text-white">
         <div data-reveal className="mx-auto flex site-width flex-col items-start gap-8 site-gutter py-20 lg:flex-row lg:items-end lg:justify-between">
-          <h2 className="font-display text-4xl font-bold leading-tight tracking-[-0.03em] sm:text-5xl">
+          <h2 className="font-display text-4xl font-medium leading-tight tracking-[-0.03em] sm:text-5xl">
             Start watching together.
           </h2>
           <div className="w-full max-w-xl">
