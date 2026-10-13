@@ -150,7 +150,7 @@ export function ScreenStage({
         onDoubleClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-2 text-white">
-          <span className="flex items-center gap-2 rounded-full bg-red-600/90 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide">
+          <span className="flex items-center gap-2 rounded-full bg-red-600/90 px-2.5 py-1 text-xs font-semibold">
             <span className="size-1.5 animate-pulse rounded-full bg-white" /> Live
           </span>
           <span className="text-xs text-zinc-300">

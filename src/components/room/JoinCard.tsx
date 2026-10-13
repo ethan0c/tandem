@@ -155,7 +155,7 @@ export function JoinCard({
         </div>
         <div className={compact ? "space-y-3 p-4" : "space-y-4 p-5"}>
           <div>
-            <p className="text-xs uppercase tracking-wider text-zinc-500">Joining room</p>
+            <p className="text-xs font-medium text-zinc-500">Joining room</p>
             <p className={`font-sans text-white ${compact ? "text-base" : "text-lg"}`}>{roomId}</p>
           </div>
           {mediaError && <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-300">{mediaError}</p>}

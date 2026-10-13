@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { ButtonLink } from "@/components/Button";
@@ -7,7 +6,6 @@ import { StartRoom } from "@/components/landing/StartRoom";
 import { Preview } from "@/components/landing/Preview";
 
 const GITHUB = "https://github.com/ethan0c";
-const POSTERS = "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=1400&q=80";
 
 const sources = ["Miruro, with the extension", "Direct MP4 and WebM links", "HLS streams", "A file you both have", "Sharing a tab"];
 
@@ -83,7 +81,7 @@ export default function Home() {
       {/* Works with */}
       <section id="sources" className="scroll-mt-10 border-b border-cream-200 bg-cream pb-10 pt-24 sm:pt-32">
         <div className="mx-auto max-w-6xl px-5">
-          <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-zinc-500">Works with</p>
+          <p className="font-sans text-[11px] font-medium text-zinc-500">Works with</p>
         </div>
         <ul className="mx-auto mt-4 flex max-w-6xl flex-wrap gap-3 px-5">
           {sources.map((source) => (
@@ -96,7 +94,7 @@ export default function Home() {
       <section id="sync" className="scroll-mt-20 bg-cream">
         <div className="mx-auto grid max-w-6xl gap-12 px-5 py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28">
           <div>
-            <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-zinc-500">How it works</p>
+            <p className="font-sans text-[11px] font-medium text-zinc-500">How it works</p>
             <h2 className="mt-4 font-display text-4xl font-bold leading-tight text-ink">Pause, skip, and catch up together.</h2>
             <p className="mt-5 max-w-sm leading-relaxed text-zinc-600">Tandem adjusts playback when one of you falls behind, including after buffering.</p>
           </div>
@@ -120,12 +118,9 @@ export default function Home() {
 
       {/* Extension */}
       <section className="bg-cream">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-20 lg:grid-cols-[1fr_1fr] lg:py-28">
-          <div className="relative aspect-[5/4] overflow-hidden rounded-xl border border-cream-200">
-            <Image src={POSTERS} alt="A wall of anime posters" fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
-          </div>
+        <div className="mx-auto max-w-6xl px-5 py-16">
           <div>
-            <p className="font-sans text-[11px] uppercase tracking-[0.2em] text-zinc-500">The extension</p>
+            <p className="font-sans text-[11px] font-medium text-zinc-500">The extension</p>
             <h2 className="mt-4 font-display text-4xl font-bold leading-[1] tracking-[-0.03em] text-ink sm:text-5xl">
               Watch together on Miruro.
             </h2>
