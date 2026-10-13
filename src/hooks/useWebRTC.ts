@@ -41,10 +41,12 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
   const pendingIce = useRef<Map<string, RTCIceCandidateInit[]>>(new Map());
   const offeredTo = useRef<Set<string>>(new Set());
   const localRef = useRef(localStream);
-  localRef.current = localStream;
+  useEffect(() => {
+    localRef.current = localStream;
+  }, [localStream]);
 
-  const [micOn, setMicOn] = useState(true);
-  const [camOn, setCamOn] = useState(true);
+  const [micOn, setMicOn] = useState(() => localStream?.getAudioTracks()[0]?.enabled ?? true);
+  const [camOn, setCamOn] = useState(() => localStream?.getVideoTracks()[0]?.enabled ?? true);
 
   const send = useCallback(
     (to: string, data: SignalData) => socketRef.current?.emit("rtc:signal", { to, data }),
