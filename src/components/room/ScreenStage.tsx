@@ -136,7 +136,7 @@ export function ScreenStage({
               <MonitorUp className="size-4 text-brand-300" /> You&rsquo;re sharing {label}
             </p>
             <p className="mt-1 text-zinc-400">
-              Play and pause in that tab. Everyone here sees and hears what it shows. This preview is muted.
+              Play and pause in that tab. Everyone here watches along. Your preview has no sound so you do not hear the show twice.
             </p>
           </div>
         </div>

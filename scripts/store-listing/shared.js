@@ -25,7 +25,7 @@ for (const el of document.querySelectorAll("[data-panel]")) {
       <div class="members"><span>A</span><span>M</span></div>
       <span class="leave">${svg("out")} Leave</span>
     </div>
-    <div class="foot"><span>${ring(14, "#7c3aed")} k7f-29q</span><span class="ok">In sync · 0.04s</span></div></div>`;
+    <div class="foot"><span>${ring(14, "#7c3aed")} k7f-29q</span><span class="ok">Watching together</span></div></div>`;
 }
 
 for (const el of document.querySelectorAll("[data-video]")) {
@@ -33,7 +33,7 @@ for (const el of document.querySelectorAll("[data-video]")) {
   el.classList.add("video", "glow");
   el.innerHTML = `
     <div class="scrim"></div>
-    ${el.dataset.video === "pill" ? '<div class="pill"><span class="dot"></span>In sync · 0.04s</div>' : ""}
+    ${el.dataset.video === "pill" ? '<div class="pill"><span class="dot"></span>Watching together</div>' : ""}
     <div class="track" style="top:${h - 52}px"><i style="width:52%"></i></div>
     <div class="ctrl" style="top:${h - 36}px"><span>❚❚</span><span>12:41 / 23:50</span><span class="fs">⛶</span></div>`;
 }

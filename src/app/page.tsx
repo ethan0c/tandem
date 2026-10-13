@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/Button";
 import { Footer } from "@/components/landing/Footer";
 import { StartRoom } from "@/components/landing/StartRoom";
 import { LandingMotion } from "@/components/landing/LandingMotion";
+import { RotatingHeadline } from "@/components/landing/RotatingHeadline";
 import { Preview } from "@/components/landing/Preview";
 
 const GITHUB = "https://github.com/ethan0c";
@@ -25,9 +26,9 @@ const streamingSites: [name: string, slug: string, invert?: boolean][] = [
 ];
 
 const ways = [
-  ["Miruro, with the extension", "You both open the episode on Miruro. The extension keeps the two players in sync and adds the call."],
-  ["A file you both have", "Each of you opens your own copy of the video. Tandem lines up playback between them."],
-  ["Share a tab", "One of you shares the tab with audio. The other watches the stream, and either can pause."],
+  ["Miruro, with the extension", "Open the same episode on Miruro. Tandem keeps you watching together, with your call beside the video."],
+  ["A file you both have", "Open the same video file on each computer. When one of you pauses or skips, the other follows."],
+  ["Share a tab", "Share the browser tab playing your show, including its sound. Your partner watches along."],
 ];
 
 const faq = [
@@ -37,35 +38,35 @@ const faq = [
   },
   {
     q: "Do we both need the same video file?",
-    a: "Yes, if you choose a local file. Each person opens their own copy, and Tandem keeps playback in sync. With tab sharing, only the person sharing needs the video. Select Share tab audio in the browser picker so your partner can hear it.",
+    a: "Yes, if you watch a video file. You each need a copy on your computer. If you share a browser tab instead, only one of you needs the video. Turn on “Share tab audio” when choosing the tab so your partner can hear it.",
   },
   {
     q: "Does it work with Netflix or Prime Video?",
-    a: "The extension has experimental support for Netflix and Prime Video, plus other major streaming sites. Each person needs their own access to the same episode. Compatibility varies, especially with ads. Tab sharing can still show a black screen for protected video.",
+    a: "You can try the extension on these sites, but it may not work with every video. You both need access to the same episode, and ads can get you out of step. Some sites block screen sharing, so your partner may see a black screen.",
   },
   {
     q: "What does the extension do?",
-    a: "It syncs the video player on the page and adds a floating call. Both people need the extension and access to the same episode. Miruro is included; support for other streaming sites is experimental.",
+    a: "It keeps your videos playing together and puts your call beside the show. You both need the extension and access to the same episode. It works with Miruro; other sites may not always work.",
   },
   {
     q: "Which browser should we use?",
-    a: "Tab sharing with audio works best in Chrome or Edge on desktop. The extension supports Chrome, Edge, and Brave. Local files must be in a format your browser can play, such as MP4 or WebM.",
+    a: "Use Chrome or Edge on a computer to share a tab with sound. The extension also works in Brave. If you watch a file, MP4 and WebM are good options.",
   },
   {
     q: "Do I have to turn my camera on?",
-    a: "No. You can turn your camera and microphone off and still watch together. You can also join if you decline the browser’s camera and microphone permissions.",
+    a: "No. You can watch with your camera and microphone off. You can also join without giving Tandem access to them.",
   },
   {
     q: "Does Tandem record the video or call?",
-    a: "No. Local files stay on your computer. Shared tabs and calls stream between participants, with a relay if needed to connect. The server holds room details temporarily and deletes them 10 minutes after everyone leaves.",
+    a: "No. Tandem does not record your call or the video you watch. Video files stay on your computer. Room details are kept only while needed and deleted 10 minutes after everyone leaves.",
   },
   {
     q: "Can more than two people join?",
-    a: "Yes, but Tandem works best for two. Larger calls use more bandwidth because each person connects to everyone else.",
+    a: "Yes, but Tandem works best for two. Bigger groups need a stronger internet connection.",
   },
   {
     q: "Is it free?",
-    a: "Yes. Tandem is free and open source, with no account required.",
+    a: "Yes. It is free to use, and you do not need an account.",
   },
 ];
 
@@ -73,7 +74,7 @@ export default function Home() {
   return (
     <LandingMotion>
       {/* Theater */}
-      <section className="hero-shell relative overflow-hidden text-white">
+      <section className="hero-shell relative text-white">
         <header className="relative z-10">
           <HeaderFrame>
             <Link href="/" aria-label="Tandem home" className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-brand-400 focus-visible:outline-offset-4">
@@ -82,7 +83,7 @@ export default function Home() {
             <nav aria-label="Main navigation" className="hero-nav flex items-center gap-1 text-sm text-zinc-400">
               <a href="#sync" className="hidden md:block">How it works</a>
               <a href="#sources" className="hidden md:block">Works with</a>
-              <a href="#faq" className="hidden md:block">FAQ</a>
+              <a href="#faq" className="hidden md:block">Questions</a>
               <a href={GITHUB} target="_blank" rel="noreferrer" className="hidden sm:flex items-center gap-1">
                 GitHub <ArrowUpRight className="size-3.5" />
               </a>
@@ -94,11 +95,9 @@ export default function Home() {
 
         <div className="hero-body relative z-10 mx-auto flex site-width flex-1 flex-col items-center site-gutter">
           <div className="hero-intro flex flex-col items-center text-center">
-            <h1 className="hero-title font-display font-bold tracking-[-0.04em]">
-              Watch anime together.
-            </h1>
+            <RotatingHeadline />
             <p className="mt-3 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
-              A video call and synced playback in one room. Share a tab, open a file, or use the extension on your streaming site.
+              Watch the same moment, even when you are apart. Start a video call, share your show, and watch together.
             </p>
             <div id="start" className="mt-6 flex w-full scroll-mt-24 justify-center">
               <StartRoom tone="dark" />
@@ -131,7 +130,7 @@ export default function Home() {
               </li>
             ))}
           </ul>
-          <p className="mt-5 text-sm text-zinc-500">Support for these sites is experimental. Both viewers need access to the same episode; ads can interrupt sync.</p>
+          <p className="mt-5 text-sm text-zinc-500">Some videos may not work with Tandem yet. You both need access to the same episode, and ads can get you out of step.</p>
         </div>
       </section>
 
@@ -155,13 +154,13 @@ export default function Home() {
         <div data-reveal className="mx-auto grid site-width gap-12 site-gutter py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28">
           <div>
             <h2 className="font-display text-4xl font-medium leading-tight tracking-[-0.03em]">Pause, skip, and catch up together.</h2>
-            <p className="mt-5 max-w-sm leading-relaxed text-zinc-400">Tandem adjusts playback when one of you falls behind, including after buffering.</p>
+            <p className="mt-5 max-w-sm leading-relaxed text-zinc-400">If one video falls behind or stops to load, Tandem helps you get back to the same moment.</p>
           </div>
           <ol className="divide-y divide-white/10 border-y border-white/10">
             {[
               ["Create a room", "Send your partner the room link so they can join."],
               ["Choose what to watch", "Share a browser tab, open a file you both have, or use the extension on Miruro."],
-              ["Press play", "Either of you can pause or skip. Your videos stay in sync, and you can keep talking on the call."],
+              ["Press play", "When you each open the same video, either of you can pause or skip and the other follows. Keep talking as you watch."],
             ].map(([t, b], i) => (
               <li key={t} className="grid gap-3 py-7 sm:grid-cols-[3rem_1fr]">
                 <span className="font-sans text-sm text-zinc-500">0{i + 1}</span>
@@ -183,7 +182,7 @@ export default function Home() {
               Watch on the site you already use.
             </h2>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-brand-100">
-              Use the extension on Miruro, or try experimental support for Netflix, Prime Video, YouTube, Disney+, Hulu, Max, Crunchyroll, Apple TV+, Paramount+, and Peacock.
+              Add Tandem to your browser to watch on Miruro. You can also try it on the sites above, though some videos may not work yet.
             </p>
           </div>
           <div className="flex flex-wrap gap-3 lg:justify-end">

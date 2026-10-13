@@ -254,7 +254,7 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
         systemAudio: "include",
       } as DisplayMediaStreamOptions);
     } catch (e) {
-      if ((e as DOMException)?.name !== "NotAllowedError") setError("Screen sharing is not available in this browser.");
+      if ((e as DOMException)?.name !== "NotAllowedError") setError("Could not share your screen. Try Chrome or Edge on a computer.");
       return false;
     }
     const video = stream.getVideoTracks()[0];
@@ -273,7 +273,7 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
     setLocalScreen(stream);
     for (const id of viewers) offerTo(id).catch(() => {});
     if (!stream.getAudioTracks().length) {
-      setError("No audio is being shared. To include sound, pick a browser tab and tick “Share tab audio”.");
+      setError("Your partner cannot hear the show. Share a browser tab and turn on “Share tab audio” to include sound.");
     }
     // The server stamps our real id as sharerId.
     const surface = (video?.getSettings() as { displaySurface?: string } | undefined)?.displaySurface;

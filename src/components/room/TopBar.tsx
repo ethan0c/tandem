@@ -40,8 +40,8 @@ export function TopBar({ roomId, roomUrl, members, selfId, status, drift, isFull
       : drift === null
         ? { text: "Ready", tone: "bg-white/10 text-zinc-300" }
         : Math.abs(drift) < 0.3
-          ? { text: `In sync · ${Math.abs(drift).toFixed(2)}s`, tone: "bg-emerald-500/15 text-emerald-300" }
-          : { text: `Correcting · ${drift > 0 ? "+" : "-"}${Math.abs(drift).toFixed(1)}s`, tone: "bg-amber-500/15 text-amber-300" };
+          ? { text: "Watching together", tone: "bg-emerald-500/15 text-emerald-300" }
+          : { text: "Catching up…", tone: "bg-amber-500/15 text-amber-300" };
 
   return (
     <header

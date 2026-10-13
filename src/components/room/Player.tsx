@@ -276,7 +276,7 @@ export function Player({
             </div>
             <h2 className="mt-4 text-lg font-semibold">Nothing playing yet</h2>
             <p className="mt-1.5 text-sm text-zinc-400">
-              Share a browser tab live, or pick a file you both have.
+              Share the tab playing your show, or choose a video file you both have.
             </p>
             <button
               onClick={onOpenSource}
@@ -330,7 +330,7 @@ export function Player({
 
       {buffering && hasMedia && !blocked && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <Loader label="Buffering…" size={48} />
+          <Loader label="Loading video…" size={48} />
         </div>
       )}
 
@@ -345,7 +345,7 @@ export function Player({
           className="absolute inset-0 flex items-center justify-center bg-black/40"
         >
           <span className="btn3d btn3d-brand btn3d-lg">
-            <Play className="size-4" /> Tap to start playback
+            <Play className="size-4" /> Tap to start watching
           </span>
         </button>
       )}
@@ -375,7 +375,7 @@ export function Player({
           }}
           className="tandem-range w-full"
           style={{ "--fill": `${pct}%` } as React.CSSProperties}
-          aria-label="Seek"
+          aria-label="Video progress"
         />
         <div className="mt-2 flex items-center gap-2 text-white">
           <IconButton onClick={togglePlay} label={playing ? "Pause" : "Play"} primary>

@@ -1,25 +1,27 @@
-Watch anime with someone who isn't in the same room, and stay on the same frame the whole time.
+Watch your favorite shows with someone who is far away.
 
-Tandem keeps two video players in sync and puts your video call in a small floating window on top of the episode. When one of you presses play, pause or skips ahead, the other player does the same. You don't need to count down "3, 2, 1, play" again.
+Tandem keeps you watching the same moment and puts your video call beside the show. When one of you plays, pauses, or skips ahead, the other follows. No more counting down “3, 2, 1, play.”
 
 HOW IT WORKS
-1. Open an episode on a supported site.
-2. Click the Tandem icon and press "Create a room".
-3. Press "Copy invite" and send the link to your partner.
-4. Your partner opens the link with Tandem installed and joins the same room at the same timestamp.
+1. Open the same episode on a supported site.
+2. Click the Tandem button in your browser and choose “Create a room”.
+3. Choose “Copy invite” and send the link to your partner.
+4. Your partner opens the link with Tandem installed and joins your room.
 
 FEATURES
-• Synced playback: play, pause and seek are mirrored on both screens.
-• Automatic drift correction: if the two players slowly drift apart (buffering, slow connections), Tandem nudges them back together.
-• Floating video call: see and hear each other in a small panel over the video. Drag it anywhere, or shrink it to just its title bar.
-• Works in fullscreen: the player's own fullscreen button keeps the call visible on top.
-• One-link invites: the invite is the episode URL with your room code added, so your partner lands on the right episode in the right room.
-• No account needed: pick a display name and join.
+• Watch together: when one of you pauses or skips, the other follows.
+• Catch up automatically: if one video stops to load or falls behind, Tandem helps you get back to the same moment.
+• Keep your call beside the show: see and hear each other in a small window. Move it anywhere or make it smaller.
+• Keep talking in fullscreen: your call stays visible when you make the video fill the screen.
+• Invite with one link: your partner opens the episode and joins your room.
+• No account needed: choose a name and join.
 
-SUPPORTED SITES
-miruro.tv (and its .to / .online mirrors). More sites with standard HTML5 video players are planned.
+SITES YOU CAN TRY
+Miruro is included. You can also try Tandem on Netflix, Prime Video, YouTube, Disney+, Hulu, Max, Crunchyroll, Apple TV+, Paramount+, and Peacock, or turn it on for another video site from the Tandem button in your browser.
+
+Some videos may not work yet. You both need access to the same episode, and ads can get you out of step.
 
 PRIVACY
-Tandem runs only on the supported sites listed above. It reads the state of the page's video player (playing or paused, current time) so it can sync it with your room. Camera and microphone are used only for the call, and only after you allow them. Tandem does not collect browsing history, does not sell data and does not show ads.
+Tandem works on supported sites and additional sites you allow. It checks whether the video is playing or paused and where you are in it so you can watch together. Camera and microphone are used only for the call, after you allow them. Tandem does not read your browsing history, sell your information, or show ads. Read the full privacy details at https://www.ilovemygf.site/privacy.
 
 Made for long-distance watch nights. 💜

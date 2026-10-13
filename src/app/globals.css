@@ -235,11 +235,14 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   display: flex;
   flex-direction: column;
   min-height: 100svh;
+  /* Clip sideways only (the planet is wider than the page); the preview's shadow may fall into the next section. */
+  overflow-x: clip;
+  overflow-y: visible;
   /* A quiet lift, like a dark room lit from above: darkest at the top edge, a few percent
      brighter through the middle, back to black by the bottom. Barely tinted toward the brand. */
   background:
     radial-gradient(90% 60% at 50% 0%, rgb(139 92 246 / 0.14), transparent 70%),
-    linear-gradient(to bottom, #0c0b10 0%, #19161f 42%, #100e14 72%, var(--color-ink) 100%);
+    linear-gradient(to bottom, #0c0b10 0%, #19161f 42%, rgb(16 14 20 / 0.6) 72%, transparent 100%);
 }
 /* The extension section is the one solid purple surface on the page. */
 .extension-shell {
@@ -312,3 +315,42 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 /* Shared fluid gutters keep every section aligned at any window width. */
 .site-width { width: 100%; max-width: 1280px; }
 .site-gutter { padding-inline: clamp(20px, 4vw, 48px); }
+
+/* The rotating headline. The word slot hugs the current word and tweens its width to the next,
+   so "Watch <word> together." always reads with ordinary word spacing. */
+.rotating-phrase { display: inline-flex; align-items: baseline; gap: 0.25em; white-space: nowrap; }
+.rotating-word {
+  display: inline-grid;
+  /* The track is exactly the slot's width, never the widest word in it, so during a handover both
+     words stay centred and any overflow is split evenly on both sides. */
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  position: relative;
+  overflow: hidden;
+  vertical-align: bottom;
+  color: var(--color-brand-400);
+  line-height: 1.25;
+  margin-block: -0.125em;
+  transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.rotating-word > span { grid-area: 1 / 1; min-width: 0; white-space: nowrap; }
+/* Hidden copies of every word, used only for measuring; absolute so they never affect the slot's size. */
+.rotating-word > .rotating-measure { position: absolute; visibility: hidden; pointer-events: none; display: flex; }
+.rotating-incoming { animation: hero-word-arrive 650ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.rotating-outgoing { animation: hero-word-depart 450ms cubic-bezier(0.4, 0, 1, 1) both; }
+@keyframes hero-word-arrive {
+  from { opacity: 0; transform: translateY(75%); filter: blur(6px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes hero-word-depart {
+  from { opacity: 1; transform: translateY(0); filter: blur(0); }
+  to { opacity: 0; transform: translateY(-75%); filter: blur(6px); }
+}
+@media (max-width: 767px) {
+  .rotating-ending { display: block; margin-top: 0.05em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rotating-word { transition: none; }
+  .rotating-incoming { animation: none; }
+  .rotating-outgoing { display: none; }
+}

@@ -73,8 +73,45 @@ set `NEXT_PUBLIC_TURN_*` where the site is built. Everything else works without 
 | Share tab        | The sharer streams a tab (with tab audio) over WebRTC. DRM sites may appear black. A viewer keeps asking the sharer for a picture until one arrives and asks again if the link fails, so a lost message costs seconds, not the show. |
 | Local file       | Nothing is uploaded. Your partner is prompted to pick the same file on their machine.   |
 
-Streaming sites with protected or proprietary players cannot be driven from a web page. A browser extension that
-speaks the same Socket.IO events (`sync:update`, `sync:state`) is the natural next step for those.
+Streaming sites with protected or proprietary players cannot be driven from an unrelated web page. The
+browser extension bridges the site's HTML5 player to the app using the same Socket.IO sync events. See
+[extension/README.md](extension/README.md) for supported domains, permissions, and compatibility limitations.
+
+## Call quality on weak connections
+
+`useWebRTC` samples each call connection's WebRTC stats every two seconds. Three consecutive poor samples
+trigger the weak-connection notice and a lower camera encoding profile. Five healthy samples restore the
+normal profile. Unknown samples do not count as recovery.
+
+Poor samples include a selected ICE candidate pair's RTT above 600 ms, inbound interval packet loss above
+5% (at least 20 packets), bandwidth-limited video encoding, or a disconnected/failed connection. Packet loss
+uses differences between samples, not lifetime counters. CPU encoding limits do not trigger a network warning.
+
+Camera senders are capped at 900 kbps, 24 fps, and up to 720p normally; the reduced profile uses 220 kbps,
+15 fps, and up to 360p. Browser support for sender parameters varies; unsupported settings do not interrupt
+the call. Screen sharing uses separate peer connections and is not modified by the camera quality monitor.
+The camera-off suggestion disables the local camera track while preserving audio. Recovery never enables a
+camera the user turned off.
+
+The UI shows “Watching together” or “Catching up…” instead of exposing drift measurements. The local-file
+sync thresholds and corrections remain documented in the sync model above.
+
+```bash
+node --import tsx --test tests/connection-quality.test.ts
+```
+
+## Privacy implementation
+
+Room metadata is held in server memory: member names/IDs, the selected source, and playback state. Idle rooms
+are deleted ten minutes after the last member leaves. The signaling server relays WebRTC negotiation messages;
+it does not record media. Calls and screen shares use direct WebRTC connections where possible, Google's STUN
+services for discovery, and optionally the configured TURN relay. Connection services can observe client IPs.
+
+The web app stores the display name, call volume/mute preference, chime preference, and floating-call width in
+local storage. The extension stores `appOrigin` in Chrome sync storage and the current room code in the tab's
+session storage. Invite creation reads the active tab URL. Additional host permissions and registered content
+scripts persist until removed; implementation details are in the extension README. The public privacy page
+keeps these disclosures in everyday language.
 
 ## Keyboard
 

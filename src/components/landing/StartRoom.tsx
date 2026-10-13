@@ -27,7 +27,7 @@ export function StartRoom({ tone = "light" }: { tone?: "light" | "dark" | "brand
     e.preventDefault();
     const parsed = parseRoomCode(code);
     if (!parsed) {
-      setError("Paste a room link or an 8-character code.");
+      setError("Paste the room link or code your partner sent you.");
       return;
     }
     router.push(`/room/${parsed}`);

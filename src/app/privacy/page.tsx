@@ -11,44 +11,48 @@ export const metadata: Metadata = {
 
 const sections = [
   {
-    title: "Summary",
+    title: "Your privacy at a glance",
     body: [
-      "Tandem has no accounts, no ads and no analytics. Nothing about you is written to a database. Rooms live in the server's memory and are deleted 10 minutes after the last person leaves.",
+      "You do not need an account. Tandem has no ads and does not track how you use the app. We do not record your call or the video you watch. Room details are deleted 10 minutes after everyone leaves.",
     ],
   },
   {
-    title: "What the server handles",
+    title: "What your room remembers",
     body: [
-      "While you are in a room, the server keeps the room code, the display name you typed, and the playback state (playing or paused, and the current time). If you paste a video link into the web app, that link is shared with the others in your room.",
-      "The server relays call signaling so your browsers can connect to each other. It never sees, records or stores your video, audio or the episode itself.",
+      "While your room is open, Tandem keeps its code, the names people choose, which video is shared, and whether the video is playing or paused and where you are in it. People in the room can see each other’s names and the shared video details.",
+      "Tandem helps your browsers connect for the call. Your camera, microphone, and shared video are not recorded or stored by Tandem.",
     ],
   },
   {
-    title: "Camera and microphone",
+    title: "Your camera and microphone",
     body: [
-      "Your camera and microphone are used only for the call, and only after you allow them in the browser. The call runs peer to peer between the browsers in the room. To find a route between you, your browser contacts public STUN servers run by Google, which see your IP address as part of that.",
+      "Your camera and microphone are used only for the call, after you allow them. You can turn either off at any time, or watch without using them.",
+      "Your browser uses Google’s connection services to help the call reach the other people in your room. Those services can see your internet address (IP address). Depending on how Tandem is hosted, another connection service may help carry the call when a direct connection is not possible.",
     ],
   },
   {
     title: "The browser extension",
     body: [
-      "The extension runs on the streaming sites listed in its manifest, including Miruro and the experimental streaming services. You can also grant access to another website through the extension popup. On those pages it reads and controls the video player (play, pause, seek, current time) to keep your room in sync, and shows the floating call panel, which is this website loaded in a frame.",
-      "It stores one setting with Chrome sync storage: the Tandem app URL. The current room code is kept in the tab's session storage so a reload keeps you in the room, and it is cleared when you leave. The extension does not read your browsing history. It reads the active tab URL to create invites and request access to a site. Additional site permissions and content-script registrations are managed by your browser and remain until removed.",
+      "The extension works on the video sites it supports, including Miruro. You can also turn it on for another site from the Tandem button in your browser. On those sites, it checks the video’s position and controls play, pause, and skipping so you can watch together. It also shows your call beside the video.",
+      "The extension remembers the Tandem website address using your browser’s saved settings. It remembers your room while the tab is open, so refreshing does not make you leave. The room code is cleared when you leave.",
+      "It does not read your browsing history. It reads the address of the current tab to make invite links and ask for access to that site. If you allow it to use an additional site, that access stays on until you remove it in your browser’s extension settings.",
     ],
   },
   {
-    title: "Stored in your browser",
-    body: ["The web app remembers the display name you last used, in your browser's local storage, so you don't have to type it again."],
-  },
-  {
-    title: "Sharing and selling",
+    title: "What stays in your browser",
     body: [
-      "Tandem does not sell, rent or share your data with anyone, and does not use it for anything other than running your watch session.",
+      "Tandem remembers the name you last used so you do not need to type it again. It also remembers your call volume, notification sound preference, and call window size. These settings stay in your browser.",
     ],
   },
   {
-    title: "Contact",
-    body: ["Questions or requests: open an issue at github.com/ethan0c."],
+    title: "How your information is used",
+    body: [
+      "Tandem does not sell or rent your information. Your information is used only to run your room and call, including the connection services described above.",
+    ],
+  },
+  {
+    title: "Get in touch",
+    body: ["For questions about your privacy, visit our project on GitHub at github.com/ethan0c."],
   },
 ];
 

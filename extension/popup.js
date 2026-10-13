@@ -41,7 +41,11 @@ async function main() {
       const origin = `${new URL(tab.url).origin}/*`;
       try {
         const granted = await chrome.permissions.request({ origins: [origin] });
-        if (!granted) throw new Error("Site access was not granted.");
+        if (!granted) {
+          $("#access-error").hidden = false;
+          $("#access-error").textContent = "Allow Tandem to use this site, then try again.";
+          return;
+        }
         const id = `tandem-${new URL(tab.url).origin.replace(/[^a-z0-9]/gi, "-")}`;
         const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [id] });
         if (!existing.length) {
@@ -59,9 +63,9 @@ async function main() {
           await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
         }
         window.location.reload();
-      } catch (error) {
+      } catch {
         $("#access-error").hidden = false;
-        $("#access-error").textContent = error.message || "Could not enable Tandem here. Try reloading the page.";
+        $("#access-error").textContent = "Could not turn on Tandem here. Refresh the page and try again.";
       }
     });
     return;
@@ -73,7 +77,7 @@ async function main() {
   if (status?.roomId) {
     $("#active").hidden = false;
     $("#current").textContent = status.roomId;
-    $("#player").textContent = status.hasVideo ? "Linked to the page's video player." : "Looking for a video on this page…";
+    $("#player").textContent = status.hasVideo ? "Ready to watch together." : "Looking for a video on this page…";
     $("#copy").addEventListener("click", async () => {
       const url = new URL(tab.url);
       url.hash = `tandem=${status.roomId}`;
@@ -94,9 +98,9 @@ async function main() {
     await send({ type: "tandem:open", roomId, appOrigin: origin });
     window.close();
   };
-  const showError = (error) => {
+  const showError = () => {
     $("#error").hidden = false;
-    $("#error").textContent = error.message || "Could not open the room. Reload the page and try again.";
+    $("#error").textContent = "Could not open the room. Refresh the page and try again.";
   };
   $("#create").addEventListener("click", () => open(newRoomId()).catch(showError));
   $("#join").addEventListener("submit", (e) => {
@@ -104,15 +108,15 @@ async function main() {
     const code = parseRoomCode($("#code").value);
     if (!code) {
       $("#error").hidden = false;
-      $("#error").textContent = "Paste a room link or an 8-character code.";
+      $("#error").textContent = "Paste the room link or code your partner sent you.";
       return;
     }
     open(code).catch(showError);
   });
 }
 
-main().catch((error) => {
+main().catch(() => {
   $("#unsupported").hidden = false;
   $("#access-error").hidden = false;
-  $("#access-error").textContent = error.message || "Could not connect to this tab.";
+  $("#access-error").textContent = "Could not open Tandem on this tab. Refresh the page and try again.";
 });

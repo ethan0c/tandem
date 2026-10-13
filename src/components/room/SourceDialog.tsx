@@ -46,19 +46,19 @@ export function SourceDialog({ open, onClose, onFile, onScreen, screenError }: P
             Share tab
           </TabButton>
           <TabButton active={tab === "file"} onClick={() => setTab("file")} icon={<FolderOpen className="size-4" />}>
-            Local file
+            Video file
           </TabButton>
         </div>
         <div className="px-5 pb-5 pt-2">
           {tab === "screen" ? (
             <div className="space-y-3">
               <p className="text-sm text-zinc-400">
-                Stream a browser tab live to everyone here. Pick the tab with your show and tick{" "}
-                <span className="text-zinc-200">Share tab audio</span>, then control playback in that tab.
+                Let everyone watch what is playing in your browser. Choose the tab with your show and turn on{" "}
+                <span className="text-zinc-200">Share tab audio</span>, then play or pause the show in that tab.
               </p>
               <p className="rounded-lg border border-amber-400/20 bg-amber-950/40 px-3 py-2 text-xs text-amber-200/90">
-                Netflix, Crunchyroll and other DRM-protected services often show up as a black screen for viewers.
-                Sites without DRM stream fine. Works best in Chrome or Edge on desktop.
+                Some streaming sites block screen sharing, so your partner may see a black screen.
+                For the best results, use Chrome or Edge on a computer.
               </p>
               {screenError && <p className="text-xs text-red-300">{screenError}</p>}
               <button
@@ -77,8 +77,8 @@ export function SourceDialog({ open, onClose, onFile, onScreen, screenError }: P
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-zinc-400">
-                Nothing is uploaded. Your partner is asked to pick the same file on their computer, and Tandem keeps
-                both copies in step.
+                You both need the same video file on your computers. When one of you pauses or skips, the other follows.
+                Your file stays on your computer.
               </p>
               <button
                 onClick={() => fileInput.current?.click()}

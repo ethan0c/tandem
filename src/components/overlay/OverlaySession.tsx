@@ -89,10 +89,10 @@ export function OverlaySession({ roomId, name, localStream, embedded }: Props) {
       : hasVideo === false
         ? { text: "No video found on this page", tone: "text-amber-300" }
         : drift === null
-          ? { text: hasVideo ? "Player linked" : embedded ? "Linking player…" : "Open via the extension", tone: "text-zinc-400" }
+          ? { text: hasVideo ? "Ready to watch" : embedded ? "Finding your video…" : "Open Tandem from your browser toolbar", tone: "text-zinc-400" }
           : Math.abs(drift) < 0.3
-            ? { text: `In sync · ${Math.abs(drift).toFixed(2)}s`, tone: "text-emerald-300" }
-            : { text: `Correcting · ${drift > 0 ? "+" : "-"}${Math.abs(drift).toFixed(1)}s`, tone: "text-amber-300" };
+            ? { text: "Watching together", tone: "text-emerald-300" }
+            : { text: "Catching up…", tone: "text-amber-300" };
 
   return (
     <div className="flex flex-col bg-ink text-white">

@@ -19,7 +19,7 @@ const columns = [
     links: [
       { label: "Chrome · Edge · Brave", href: `${GITHUB}`, external: true },
       { label: "Supported sites", href: "/#sources" },
-      { label: "Source on GitHub", href: GITHUB, external: true },
+      { label: "Project on GitHub", href: GITHUB, external: true },
     ],
   },
   {
@@ -39,7 +39,7 @@ export function Footer() {
           <div>
             <Logo size={30} light />
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-zinc-400">
-              Watch anime with your partner, with synced playback and a video call.
+              Watch your favorite shows together, with your call beside the video.
             </p>
           </div>
           {columns.map((col) => (
@@ -64,7 +64,7 @@ export function Footer() {
           ))}
         </div>
         <div className="mt-14 flex flex-col gap-2 border-t border-white/10 pt-6 font-sans text-[11px] text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-          <span>© 2026 tandem · MIT</span>
+          <span>© 2026 tandem</span>
           <span>
             built by{" "}
             <a href={GITHUB} target="_blank" rel="noreferrer" className="text-zinc-300 hover:text-white">
