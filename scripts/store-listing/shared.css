@@ -1,0 +1,78 @@
+/* Shared styles for the Chrome Web Store mockups. Tokens mirror src/app/globals.css. */
+@font-face { font-family: "Geist"; src: url("../../extension/fonts/geist.woff2") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "Geist Mono"; src: url("../../extension/fonts/geist-mono.woff2") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "Bricolage Grotesque"; src: url("../../extension/fonts/bricolage-grotesque.woff2") format("woff2"); font-weight: 200 800; }
+
+:root {
+  --ink: #120a1f; --ink-800: #1b1030; --ink-700: #2a1b45; --cream: #f7f5f1; --cream-200: #ebe7df;
+  --brand-300: #c4b5fd; --brand-400: #a78bfa; --brand-500: #8b5cf6; --brand-600: #7c3aed; --brand-800: #5b21b6; --brand-900: #4c1d95;
+  --sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, monospace;
+  --display: "Bricolage Grotesque", "Geist", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; overflow: hidden; }
+body { font-family: var(--sans); -webkit-font-smoothing: antialiased; position: relative; }
+body.light { background: var(--cream); color: var(--ink); }
+body.dark { background: var(--ink); color: #fff; }
+.abs { position: absolute; }
+
+/* Logo (src/components/Logo.tsx) */
+.logo { display: inline-flex; align-items: center; gap: 8px; }
+.logo b { font-family: var(--display); font-weight: 700; letter-spacing: -0.025em; line-height: 1; }
+
+/* Headings use font-bold like the landing page. */
+h1 { margin: 0; font-family: var(--display); font-weight: 700; letter-spacing: -0.03em; line-height: 0.98; }
+.lead { margin: 0; line-height: 1.6; }
+
+/* Glow backdrop used behind the video and on dark slides */
+.glow {
+  background:
+    radial-gradient(40% 45% at 30% 30%, rgba(240, 171, 252, 0.85), transparent 70%),
+    radial-gradient(45% 50% at 80% 75%, rgba(129, 140, 248, 0.55), transparent 70%),
+    linear-gradient(160deg, #3b1a78 0%, #24124a 45%, #0d0716 100%);
+}
+
+/* Video card */
+.video { border-radius: 18px; overflow: hidden; box-shadow: 0 30px 70px rgba(18, 10, 31, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08); }
+.video .scrim { position: absolute; inset: auto 0 0 0; height: 45%; background: linear-gradient(transparent, rgba(0, 0, 0, 0.75)); }
+.video .pill { position: absolute; left: 18px; top: 18px; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); color: #6ee7b7; font-size: 13px; font-weight: 500; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; display: inline-block; }
+.track { position: absolute; left: 20px; right: 20px; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, 0.25); }
+.track i { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--brand-500); }
+.ctrl { position: absolute; left: 20px; right: 20px; display: flex; align-items: center; gap: 16px; font-family: var(--mono); color: #fff; font-size: 14px; }
+.ctrl .fs { margin-left: auto; opacity: 0.8; }
+
+/* Floating call panel: extension/content.css bar + src/components/overlay/OverlaySession.tsx */
+.panel { width: 320px; border-radius: 16px; overflow: hidden; background: var(--ink); color: #fff; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.15); }
+.panel .bar { height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px 0 12px; background: var(--ink-800); border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 12px; }
+.panel .bar span { display: flex; align-items: center; gap: 7px; }
+.panel .bar b { font-family: var(--display); font-size: 14px; font-weight: 700; letter-spacing: -0.02em; }
+.panel .bar code { font-family: var(--mono); font-size: 11px; color: #a1a1aa; }
+.panel .bar .x { color: #d4d4d8; font-size: 15px; }
+.panel .stage { position: relative; aspect-ratio: 4 / 3; background: radial-gradient(70% 60% at 50% 40%, #3a2163, var(--ink-800)); }
+.panel .name { position: absolute; left: 8px; top: 8px; border-radius: 6px; background: rgba(0, 0, 0, 0.55); padding: 2px 6px; font-size: 11px; font-weight: 500; }
+.panel .avatar { position: absolute; left: 50%; top: 46%; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, #f472b6, #a855f7); font-size: 38px; font-weight: 600; }
+.panel .you { position: absolute; right: 8px; bottom: 8px; width: 75px; height: 56px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.2); background: linear-gradient(135deg, #5b21b6, #3b1a78); display: grid; place-items: center; font-size: 12px; color: #d4d4d8; }
+.panel .controls { display: flex; align-items: center; gap: 6px; padding: 8px 10px; }
+.panel .tog { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.1); }
+.panel svg.i { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.panel .members { margin-left: auto; display: flex; }
+.panel .members span { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink); display: grid; place-items: center; font-size: 10px; font-weight: 600; background: var(--brand-900); }
+.panel .members span:first-child { background: var(--brand-600); }
+.panel .members span + span { margin-left: -6px; }
+.panel .leave { margin-left: 4px; height: 28px; display: flex; align-items: center; gap: 4px; padding: 0 8px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.1); font-size: 11px; color: #d4d4d8; }
+.panel .leave svg.i { width: 12px; height: 12px; }
+.panel .foot { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 6px 12px; font-size: 11px; }
+.panel .foot > span:first-child { display: flex; align-items: center; gap: 6px; color: #a1a1aa; font-family: var(--mono); }
+.panel .ok { color: #6ee7b7; }
+
+/* Popup frames (render the real extension/popup.css) */
+.popup { border: 0; border-radius: 16px; background: var(--cream); box-shadow: 0 30px 70px rgba(76, 29, 149, 0.18), 0 0 0 1px rgba(18, 10, 31, 0.08); }
+
+/* 3D buttons (globals.css .btn3d) */
+.btn3d { display: inline-flex; align-items: center; justify-content: center; height: 52px; padding: 0 26px; border-radius: 16px; font-weight: 700; font-size: 17px; letter-spacing: -0.01em; color: #fff; background: var(--brand-600); box-shadow: 0 5px 0 var(--brand-800); }
+
+/* Feature chips */
+.chips { display: flex; gap: 10px; }
+.chip { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 999px; background: #fff; border: 2px solid var(--cream-200); font-size: 16px; font-weight: 600; }
