@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const sections = [
   {
-    title: "The short version",
+    title: "Summary",
     body: [
       "Tandem has no accounts, no ads and no analytics. Nothing about you is written to a database. Rooms live in the server's memory and are deleted 10 minutes after the last person leaves.",
     ],
@@ -62,7 +62,7 @@ export default function Privacy() {
         </div>
       </header>
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-16">
-        <h1 className="font-display text-4xl font-extrabold tracking-tight">Privacy</h1>
+        <h1 className="font-display text-4xl font-bold tracking-tight">Privacy</h1>
         <p className="mt-3 font-mono text-xs text-zinc-500">Last updated 13 October 2026</p>
         {sections.map((s) => (
           <section key={s.title} className="mt-10">

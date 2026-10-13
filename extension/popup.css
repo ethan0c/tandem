@@ -35,7 +35,7 @@ form input { flex: 1; min-width: 0; }
 .btn-sm { height: 34px; padding: 0 10px; border-radius: 11px; font-size: 12px; }
 .btn-brand { background: var(--brand-600); color: #fff; --sh: var(--brand-800); }
 .btn-dark { background: var(--ink); color: #fff; --sh: #000; }
-.btn-light { background: #fff; color: var(--brand-700); border-color: #e4e4e7; --sh: #d4d4d8; }
+.btn-light { background: #fff; color: var(--ink); border-color: #e4e4e7; --sh: #d4d4d8; }
 .btn-danger { background: #ef4444; color: #fff; --sh: #991b1b; }
 
 details { margin-top: 14px; border-top: 1px solid var(--cream-200); padding-top: 10px; }

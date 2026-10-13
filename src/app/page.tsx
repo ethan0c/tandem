@@ -73,12 +73,12 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-5 pb-0 pt-14 sm:pt-20">
           <div className="grid items-end gap-10 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
-              <h1 className="font-display text-[2.75rem] font-extrabold leading-[0.95] tracking-[-0.03em] sm:text-7xl">
+              <h1 className="font-display text-[2.75rem] font-bold leading-[0.95] tracking-[-0.03em] sm:text-7xl">
                 Same episode.
                 <br />
                 Same second.
                 <br />
-                <span className="text-brand-400">Same couch, almost.</span>
+                <span className="text-brand-400">Watch together.</span>
               </h1>
             </div>
             <div className="lg:pb-2">
@@ -125,18 +125,18 @@ export default function Home() {
         <div className="mx-auto grid max-w-6xl gap-12 px-5 py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28">
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">How it stays in sync</p>
-            <p className="mt-6 font-display text-[6rem] font-extrabold leading-none tracking-[-0.04em] text-ink sm:text-[8rem]">
+            <p className="mt-6 font-display text-[6rem] font-bold leading-none tracking-[-0.04em] text-ink sm:text-[8rem]">
               0.1<span className="text-brand-600">s</span>
             </p>
             <p className="mt-2 max-w-xs text-sm text-zinc-600">
-              Typical gap between two players on a normal connection. Shorter than a blink.
+              Typical gap between two players on a normal connection.
             </p>
           </div>
           <ol className="divide-y divide-cream-200 border-y border-cream-200">
             {[
               ["The server stamps every change", "Play, pause, seek. Each one is recorded with the server's clock, not yours, so both browsers agree on when it happened."],
               ["Each browser learns its clock offset", "A few pings on join tell the page how far its clock is from the server's. From then on it can compute where the video should be at any instant."],
-              ["Twice a second, a nudge", "If you are a little behind, your player runs at 108% speed until you catch up. A little ahead, 92%. More than a second and a half out, it seeks. You hear nothing change."],
+              ["Twice a second, a nudge", "If you are a little behind, your player runs at 108% speed until you catch up. A little ahead, 92%. More than a second and a half out, it seeks."],
             ].map(([t, b], i) => (
               <li key={t} className="grid gap-3 py-7 sm:grid-cols-[3rem_1fr]">
                 <span className="font-mono text-sm text-brand-600">0{i + 1}</span>
@@ -154,9 +154,9 @@ export default function Home() {
       <section className="bg-ink text-white">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 lg:grid-cols-2 lg:py-28">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">A night on Tandem</p>
-            <h2 className="mt-4 font-display text-4xl font-extrabold leading-[1] tracking-[-0.03em] sm:text-5xl">
-              One link. Then you just watch.
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">Session log</p>
+            <h2 className="mt-4 font-display text-4xl font-bold leading-[1] tracking-[-0.03em] sm:text-5xl">
+              Share one link and start watching.
             </h2>
             <p className="mt-5 max-w-md leading-relaxed text-zinc-400">
               The room keeps nothing. No history, no account, no &ldquo;continue watching&rdquo;. When the last person
@@ -165,7 +165,7 @@ export default function Home() {
             <div className="relative mt-10 aspect-[4/3] overflow-hidden rounded-xl border border-white/10">
               <Image src={TOGETHER} alt="Two people laughing together at a laptop" fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
               <div className="absolute bottom-3 left-3 rounded bg-black/60 px-2 py-1 font-mono text-[11px] text-zinc-200">
-                the call stays up after the credits
+                the call stays open between episodes
               </div>
             </div>
           </div>
@@ -195,8 +195,8 @@ export default function Home() {
           </div>
           <div>
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">The extension</p>
-            <h2 className="mt-4 font-display text-4xl font-extrabold leading-[1] tracking-[-0.03em] text-ink sm:text-5xl">
-              Your site, their player, our sync.
+            <h2 className="mt-4 font-display text-4xl font-bold leading-[1] tracking-[-0.03em] text-ink sm:text-5xl">
+              Sync the player on the site you already use.
             </h2>
             <p className="mt-5 max-w-md leading-relaxed text-zinc-600">
               Streaming sites run their own player, and a web page cannot touch it. The Tandem extension can. It
@@ -223,7 +223,7 @@ export default function Home() {
       {/* FAQ */}
       <section id="faq" className="scroll-mt-20 border-t border-cream-200 bg-cream">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 lg:grid-cols-[0.6fr_1.4fr] lg:py-28">
-          <h2 className="font-display text-4xl font-extrabold leading-[1] tracking-[-0.03em] text-ink">Questions</h2>
+          <h2 className="font-display text-4xl font-bold leading-[1] tracking-[-0.03em] text-ink">Questions</h2>
           <div className="divide-y divide-cream-200 border-y border-cream-200">
             {faq.map(({ q, a }) => (
               <details key={q} className="faq group">
@@ -241,13 +241,13 @@ export default function Home() {
       {/* Last call */}
       <section className="bg-brand-600 text-white">
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-8 px-5 py-20 sm:flex-row sm:items-end sm:justify-between">
-          <h2 className="font-display text-5xl font-extrabold leading-[0.95] tracking-[-0.03em] sm:text-7xl">
-            Tonight,
+          <h2 className="font-display text-5xl font-bold leading-[0.95] tracking-[-0.03em] sm:text-7xl">
+            Start a room
             <br />
-            then.
+            in one click.
           </h2>
           <div className="w-full max-w-xl">
-            <StartRoom tone="dark" />
+            <StartRoom tone="brand" />
           </div>
         </div>
       </section>

@@ -133,7 +133,7 @@ input[type="range"].tandem-range:hover::-webkit-slider-thumb {
 
 .btn3d-brand { background: var(--color-brand-600); color: #fff; --btn-shadow: var(--color-brand-800); }
 .btn3d-dark { background: var(--color-ink); color: #fff; --btn-shadow: #000; }
-.btn3d-light { background: #fff; color: var(--color-brand-700); border-color: #e4e4e7; --btn-shadow: #d4d4d8; }
+.btn3d-light { background: #fff; color: var(--color-ink); border-color: #e4e4e7; --btn-shadow: #d4d4d8; }
 .btn3d-ghost { background: rgb(255 255 255 / 0.1); color: #fff; border-color: rgb(255 255 255 / 0.14); --btn-shadow: rgb(0 0 0 / 0.6); }
 .btn3d-danger { background: #ef4444; color: #fff; --btn-shadow: #991b1b; }
 
