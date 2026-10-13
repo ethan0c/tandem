@@ -6,6 +6,8 @@ import type { Member } from "@/lib/types";
 
 export function Participants({ members, selfId, hostId, compact = false }: { members: Member[]; selfId: string | null; hostId?: string | null; compact?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
   const headingId = useId();
   const self = members.find((m) => m.id === selfId) ?? members[0];
   const avatarSize = compact ? "size-6" : "size-7";
@@ -17,6 +19,7 @@ export function Participants({ members, selfId, hostId, compact = false }: { mem
   return (
     <>
       <button
+        ref={trigger}
         type="button"
         aria-label="View participants"
         aria-haspopup="dialog"
@@ -36,13 +39,17 @@ export function Participants({ members, selfId, hostId, compact = false }: { mem
       <dialog
         ref={dialog}
         aria-labelledby={headingId}
+        onClose={() => { if (trigger.current?.getClientRects().length) trigger.current.focus(); }}
+        onKeyDown={(event) => {
+          if (event.key === "Tab") { event.preventDefault(); closeButton.current?.focus(); }
+        }}
         onClick={(event) => { if (event.target === event.currentTarget) dialog.current?.close(); }}
         className="m-auto w-[calc(100%-2rem)] max-w-sm overflow-visible rounded-2xl border border-white/10 bg-ink-800 p-0 text-white shadow-2xl backdrop:bg-black/65 backdrop:backdrop-blur-sm"
       >
         <div className="overflow-hidden rounded-2xl">
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
             <div><h2 id={headingId} className="text-base font-medium">Participants</h2><p className="mt-0.5 text-xs text-zinc-400">{members.length} {members.length === 1 ? "person" : "people"} in this room</p></div>
-            <button type="button" aria-label="Close participants" onClick={() => dialog.current?.close()} className="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-400"><X className="size-4" /></button>
+            <button ref={closeButton} type="button" aria-label="Close participants" onClick={() => dialog.current?.close()} className="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-400"><X className="size-4" /></button>
           </div>
           <ul className="max-h-[50dvh] overflow-y-auto p-3">
             {members.map((m) => (
