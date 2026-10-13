@@ -58,6 +58,15 @@ export function ScreenStage({
     };
   }, [stream]);
 
+  // The sharer's "you're sharing" notice shows for a few seconds per share, then gets out of the way.
+  const [noticeDoneFor, setNoticeDoneFor] = useState<MediaStream | null>(null);
+  useEffect(() => {
+    if (!isSharer || !localScreen) return;
+    const t = setTimeout(() => setNoticeDoneFor(localScreen), 3000);
+    return () => clearTimeout(t);
+  }, [isSharer, localScreen]);
+  const showNotice = isSharer && !!localScreen && noticeDoneFor !== localScreen;
+
   const toggleMute = () => {
     const v = videoRef.current;
     if (v) v.muted = !v.muted;
@@ -117,8 +126,9 @@ export function ScreenStage({
 
       {isSharer && (
         <div
+          aria-hidden={!showNotice}
           className={`absolute inset-x-0 top-16 z-10 flex justify-center px-4 transition-opacity duration-300 ${
-            chromeVisible ? "opacity-100" : "pointer-events-none opacity-0"
+            showNotice ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
           <div className="max-w-md rounded-2xl border border-white/10 bg-ink-800/85 px-4 py-3 text-sm shadow-xl backdrop-blur">

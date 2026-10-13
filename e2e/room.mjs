@@ -103,7 +103,7 @@ async function join(page, name) {
     const b = document.querySelector('button[aria-label*="microphone"]');
     return b && !b.disabled;
   }, null, { timeout: STEP_MS });
-  await page.getByPlaceholder("What should we call you?").fill(name);
+  await page.getByLabel("Your name").fill(name);
   await page.getByRole("button", { name: "Join room" }).click();
 }
 
@@ -262,6 +262,7 @@ try {
   });
 
   await step("Call volume turns the partner down without touching the show", async () => {
+    await bob.getByRole("button", { name: "Mute call" }).hover();
     await bob.getByLabel("Call volume").fill("0.3");
     await bob.waitForFunction(
       () => Array.from(document.querySelectorAll("video")).some((v) => !v.muted && v.srcObject && Math.abs(v.volume - 0.3) < 0.01),

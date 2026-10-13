@@ -3,11 +3,37 @@
 import { useRef, useState, type RefObject } from "react";
 import { Check, Copy, Mic, MicOff, Minimize2, Maximize2, Video, VideoOff } from "lucide-react";
 import { CallVolumeControl } from "@/components/CallVolumeControl";
+import { useClientValue } from "@/hooks/useClientValue";
 import { useDraggable } from "@/hooks/useDraggable";
 import { useCallOutputVolume } from "@/lib/call-volume";
 import type { Peer } from "@/hooks/useWebRTC";
 import type { Member } from "@/lib/types";
 import { StreamVideo } from "./StreamVideo";
+
+const WIDTH_KEY = "tandem:call-width";
+const MIN_WIDTH = 176;
+const MAX_WIDTH = 720;
+const SMALL_WIDTH = 288;
+const LARGE_WIDTH = 480;
+/** The video area is 4:3, so height grows by 3/4 of any width change. */
+const HEIGHT_PER_WIDTH = 3 / 4;
+
+function readSavedWidth(): number | null {
+  try {
+    const w = Number(localStorage.getItem(WIDTH_KEY));
+    return w >= MIN_WIDTH ? Math.min(w, MAX_WIDTH) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveWidth(w: number) {
+  try {
+    localStorage.setItem(WIDTH_KEY, String(Math.round(w)));
+  } catch {
+    /* storage blocked: the size still applies for this page */
+  }
+}
 
 interface Props {
   containerRef: RefObject<HTMLElement | null>;
@@ -26,7 +52,11 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
   const [minimized, setMinimized] = useState(false);
   const [copied, setCopied] = useState(false);
   const callVolume = useCallOutputVolume();
-  const { pos, dragging, handlers } = useDraggable(containerRef, ref, (c, e) => ({
+  const savedWidth = useClientValue(readSavedWidth, null);
+  const [width, setWidth] = useState<number | null>(null);
+  const [resizing, setResizing] = useState(false);
+  const resizeStart = useRef<{ px: number; width: number; height: number; right: number; bottom: number; maxWidth: number } | null>(null);
+  const { pos, dragging, moveTo, handlers } = useDraggable(containerRef, ref, (c, e) => ({
     x: c.width - e.width - 16,
     y: c.height - e.height - 88,
   }));
@@ -34,6 +64,84 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
   const nameOf = (id: string) => members.find((m) => m.id === id)?.name ?? "Guest";
   const hasLocalVideo = !!localStream?.getVideoTracks().length;
   const hasLocalAudio = !!localStream?.getAudioTracks().length;
+
+  const currentWidth = width ?? savedWidth;
+
+  /** Resize to `next` px wide while keeping the bottom-right corner where it is. */
+  function resizeTo(next: number, from = resizeStart.current) {
+    const el = ref.current;
+    const container = containerRef.current;
+    if (!el || !container || !pos) return;
+    const rect = el.getBoundingClientRect();
+    const start = from ?? {
+      px: 0,
+      width: rect.width,
+      height: rect.height,
+      right: pos.x + rect.width,
+      bottom: pos.y + rect.height,
+      maxWidth: maxWidthFor(container.getBoundingClientRect(), rect),
+    };
+    const w = Math.round(Math.min(Math.max(next, MIN_WIDTH), start.maxWidth));
+    const h = start.height + (w - start.width) * HEIGHT_PER_WIDTH;
+    setWidth(w);
+    moveTo({ x: start.right - w, y: start.bottom - h });
+    return w;
+  }
+
+  function onResizeDown(e: React.PointerEvent<HTMLButtonElement>) {
+    const el = ref.current;
+    const container = containerRef.current;
+    if (!el || !container || !pos) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const rect = el.getBoundingClientRect();
+    resizeStart.current = {
+      px: e.clientX,
+      width: rect.width,
+      height: rect.height,
+      right: pos.x + rect.width,
+      bottom: pos.y + rect.height,
+      maxWidth: maxWidthFor(container.getBoundingClientRect(), rect),
+    };
+    setResizing(true);
+  }
+
+  function onResizeMove(e: React.PointerEvent<HTMLButtonElement>) {
+    const s = resizeStart.current;
+    if (!s) return;
+    // The grip sits on the left edge, so dragging left makes the call wider.
+    resizeTo(s.width - (e.clientX - s.px), s);
+  }
+
+  function onResizeUp(e: React.PointerEvent<HTMLButtonElement>) {
+    if (!resizeStart.current) return;
+    resizeStart.current = null;
+    setResizing(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* already released */
+    }
+    if (ref.current) saveWidth(ref.current.getBoundingClientRect().width);
+  }
+
+  function onResizeKey(e: React.KeyboardEvent<HTMLButtonElement>) {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect) return;
+    const step = e.shiftKey ? 64 : 24;
+    const delta = e.key === "ArrowLeft" || e.key === "ArrowUp" ? step : e.key === "ArrowRight" || e.key === "ArrowDown" ? -step : 0;
+    if (!delta) return;
+    e.preventDefault();
+    const w = resizeTo(rect.width + delta, null);
+    if (w) saveWidth(w);
+  }
+
+  function toggleSize() {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect) return;
+    const w = resizeTo(rect.width < (SMALL_WIDTH + LARGE_WIDTH) / 2 ? LARGE_WIDTH : SMALL_WIDTH, null);
+    if (w) saveWidth(w);
+  }
 
   async function copy() {
     try {
@@ -54,11 +162,32 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
         top: pos?.y ?? 0,
         visibility: pos ? "visible" : "hidden",
         touchAction: "none",
+        width: !minimized && currentWidth ? currentWidth : undefined,
       }}
-      className={`absolute z-30 overflow-hidden rounded-2xl border border-white/15 bg-ink-800/90 text-white shadow-2xl shadow-black/50 backdrop-blur transition-[width] ${
-        dragging ? "cursor-grabbing" : "cursor-grab"
-      } ${minimized ? "w-44" : "w-56 sm:w-72"}`}
+      className={`group/call absolute z-30 max-w-[calc(100%-16px)] overflow-hidden rounded-2xl border border-white/15 bg-ink-800/90 text-white shadow-2xl shadow-black/50 backdrop-blur ${
+        resizing ? "" : "transition-[width]"
+      } ${dragging ? "cursor-grabbing" : "cursor-grab"} ${minimized ? "w-44" : "w-56 sm:w-72"}`}
     >
+      {!minimized && (
+        <button
+          onPointerDown={onResizeDown}
+          onPointerMove={onResizeMove}
+          onPointerUp={onResizeUp}
+          onPointerCancel={onResizeUp}
+          onKeyDown={onResizeKey}
+          onDoubleClick={toggleSize}
+          aria-label="Resize call (arrow keys, double-click to toggle size)"
+          title="Drag to resize · double-click to toggle size"
+          className={`absolute left-0 top-0 z-10 flex size-7 cursor-nwse-resize items-start justify-start rounded-br-xl p-1.5 text-white/80 transition-opacity focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-brand-400 group-hover/call:opacity-100 ${
+            resizing ? "bg-black/40 opacity-100" : "bg-black/30 opacity-0"
+          }`}
+          style={{ touchAction: "none" }}
+        >
+          <svg viewBox="0 0 10 10" className="size-2.5" aria-hidden="true">
+            <path d="M1 9V1h8M1 5.5 5.5 1" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+      )}
       {!minimized && (
         <div className="relative aspect-[4/3] bg-ink-700">
           {peers.length === 0 ? (
@@ -165,4 +294,10 @@ function CallButton({
       {children}
     </button>
   );
+}
+
+/** As wide as fits: inside the player with a margin, and short enough to fit its height. */
+function maxWidthFor(container: DOMRect, el: DOMRect): number {
+  const chrome = el.height - el.width * HEIGHT_PER_WIDTH;
+  return Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, container.width - 16, (container.height - 16 - chrome) / HEIGHT_PER_WIDTH));
 }

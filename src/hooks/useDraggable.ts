@@ -80,5 +80,8 @@ export function useDraggable(
     }
   }, []);
 
-  return { pos, dragging, handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp } };
+  /** Move programmatically (e.g. to keep a corner fixed while resizing), still clamped. */
+  const moveTo = useCallback((p: Pos) => setPos(clamp(p)), [clamp]);
+
+  return { pos, dragging, moveTo, handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp } };
 }
