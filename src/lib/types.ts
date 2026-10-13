@@ -1,8 +1,9 @@
 /** Shared contracts between the Socket.IO server and the browser client. */
 
 export type Source =
-  | { kind: "url"; url: string }
-  | { kind: "file"; name: string };
+  | { kind: "file"; name: string }
+  /** Live screen/tab capture streamed over WebRTC from `sharerId`; the server fills in `sharerId`. */
+  | { kind: "screen"; sharerId: string; label: string };
 
 export type SyncReason = "play" | "pause" | "seek" | "ended" | "resync";
 
@@ -37,6 +38,9 @@ export type SignalData =
   | { type: "offer" | "answer"; sdp: RTCSessionDescriptionInit }
   | { type: "candidate"; candidate: RTCIceCandidateInit };
 
+/** Screen-share signalling: a viewer sends `request` to the sharer, who answers with an offer. */
+export type ScreenSignal = SignalData | { type: "request" };
+
 export interface ServerToClientEvents {
   "member:joined": (member: Member) => void;
   "member:left": (payload: { id: string; hostId: string | null }) => void;
@@ -51,6 +55,7 @@ export interface ServerToClientEvents {
     from: string;
   }) => void;
   "rtc:signal": (payload: { from: string; data: SignalData }) => void;
+  "screen:signal": (payload: { from: string; data: ScreenSignal }) => void;
 }
 
 export interface ClientToServerEvents {
@@ -66,6 +71,7 @@ export interface ClientToServerEvents {
   }) => void;
   "source:set": (source: Source | null) => void;
   "rtc:signal": (payload: { to: string; data: SignalData }) => void;
+  "screen:signal": (payload: { to: string; data: ScreenSignal }) => void;
 }
 
 /** Where the media should be right now, given a playback state and the server clock. */

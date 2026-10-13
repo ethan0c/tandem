@@ -10,7 +10,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "hls.js": "^1.7.3",
     "lucide-react": "^1.56.0",
     "nanoid": "^5.1.16",
     "next": "16.4.0",

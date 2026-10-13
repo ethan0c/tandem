@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useClientValue } from "@/hooks/useClientValue";
 import { useRoom } from "@/hooks/useRoom";
+import { useScreenShare } from "@/hooks/useScreenShare";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import { FloatingCall } from "./FloatingCall";
 import { Player } from "./Player";
+import { ScreenStage } from "./ScreenStage";
 import { SourceDialog } from "./SourceDialog";
 import { TopBar } from "./TopBar";
 
@@ -23,6 +25,13 @@ export function Session({ roomId, name, localStream }: Props) {
     selfId: room.selfId,
     members: room.members,
     localStream,
+  });
+  const screen = useScreenShare({
+    socketRef: room.socketRef,
+    selfId: room.selfId,
+    members: room.members,
+    source: room.source,
+    changeSource: room.changeSource,
   });
 
   const [localFile, setLocalFile] = useState<File | null>(null);
@@ -76,7 +85,10 @@ export function Session({ roomId, name, localStream }: Props) {
   const onPlayingChange = useCallback((p: boolean) => setPlaying(p), []);
   const onDrift = useCallback((d: number | null) => setDrift(d), []);
 
-  const chromeVisible = active || !playing || sourceOpen;
+  // A live share always counts as playing, so the chrome auto-hides.
+  const screenSharerId = room.source?.kind === "screen" ? room.source.sharerId : null;
+  const isScreen = !!screenSharerId;
+  const chromeVisible = active || (!playing && !isScreen) || sourceOpen;
   const pickerName =
     room.remote && room.remote.from !== room.selfId
       ? (room.members.find((m) => m.id === room.remote?.from)?.name ?? null)
@@ -95,28 +107,45 @@ export function Session({ roomId, name, localStream }: Props) {
         members={room.members}
         selfId={room.selfId}
         status={room.status}
-        drift={drift}
+        drift={isScreen ? null : drift}
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullscreen}
         visible={chromeVisible}
       />
 
-      <Player
-        source={room.source}
-        localFile={effectiveFile}
-        remote={room.remote}
-        selfId={room.selfId}
-        serverNow={room.serverNow}
-        emitSync={room.emitSync}
-        onOpenSource={() => setSourceOpen(true)}
-        onPickFile={setLocalFile}
-        onToggleFullscreen={toggleFullscreen}
-        isFullscreen={isFullscreen}
-        onDrift={onDrift}
-        onPlayingChange={onPlayingChange}
-        chromeVisible={chromeVisible}
-        pickerName={pickerName}
-      />
+      {room.source?.kind === "screen" ? (
+        <ScreenStage
+          isSharer={screen.isSharer}
+          label={room.source.label}
+          sharerName={room.members.find((m) => m.id === screenSharerId)?.name ?? null}
+          localScreen={screen.localScreen}
+          remoteScreen={screen.remoteScreen}
+          error={screen.error}
+          onDismissError={screen.clearError}
+          onStop={screen.stop}
+          onOpenSource={() => setSourceOpen(true)}
+          onToggleFullscreen={toggleFullscreen}
+          isFullscreen={isFullscreen}
+          chromeVisible={chromeVisible}
+        />
+      ) : (
+        <Player
+          source={room.source}
+          localFile={effectiveFile}
+          remote={room.remote}
+          selfId={room.selfId}
+          serverNow={room.serverNow}
+          emitSync={room.emitSync}
+          onOpenSource={() => setSourceOpen(true)}
+          onPickFile={setLocalFile}
+          onToggleFullscreen={toggleFullscreen}
+          isFullscreen={isFullscreen}
+          onDrift={onDrift}
+          onPlayingChange={onPlayingChange}
+          chromeVisible={chromeVisible}
+          pickerName={pickerName}
+        />
+      )}
 
       <FloatingCall
         containerRef={containerRef}
@@ -133,11 +162,12 @@ export function Session({ roomId, name, localStream }: Props) {
       <SourceDialog
         open={sourceOpen}
         onClose={() => setSourceOpen(false)}
-        onUrl={(url) => room.changeSource({ kind: "url", url })}
         onFile={(file) => {
           setLocalFile(file);
           room.changeSource({ kind: "file", name: file.name });
         }}
+        onScreen={screen.start}
+        screenError={isScreen ? null : screen.error}
       />
 
       {room.status === "disconnected" && (

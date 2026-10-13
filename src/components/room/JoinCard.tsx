@@ -14,7 +14,16 @@ export interface JoinResult {
 
 const NAME_KEY = "tandem:name";
 
-export function JoinCard({ roomId, onJoin }: { roomId: string; onJoin: (r: JoinResult) => void }) {
+export function JoinCard({
+  roomId,
+  onJoin,
+  compact = false,
+}: {
+  roomId: string;
+  onJoin: (r: JoinResult) => void;
+  /** Tight layout for the extension overlay: no logo, no page chrome. */
+  compact?: boolean;
+}) {
   const storedName = useClientValue(() => {
     try {
       return localStorage.getItem(NAME_KEY) ?? "";
@@ -85,16 +94,30 @@ export function JoinCard({ roomId, onJoin }: { roomId: string; onJoin: (r: JoinR
   const hasVideo = !!stream?.getVideoTracks().length;
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-950 px-5 py-10 text-white">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[40rem] bg-[radial-gradient(50rem_20rem_at_50%_-5%,rgb(124_58_237/0.25),transparent_60%)]" />
-      <Link href="/" className="relative mb-8">
-        <Logo size={30} light />
-      </Link>
+    <div
+      className={
+        compact
+          ? "flex flex-col bg-zinc-950 text-white"
+          : "flex flex-1 flex-col items-center justify-center bg-zinc-950 px-5 py-10 text-white"
+      }
+    >
+      {!compact && (
+        <>
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[40rem] bg-[radial-gradient(50rem_20rem_at_50%_-5%,rgb(124_58_237/0.25),transparent_60%)]" />
+          <Link href="/" className="relative mb-8">
+            <Logo size={30} light />
+          </Link>
+        </>
+      )}
       <form
         onSubmit={join}
-        className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 shadow-2xl shadow-black/40 backdrop-blur"
+        className={
+          compact
+            ? "relative w-full overflow-hidden bg-zinc-950"
+            : "relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/80 shadow-2xl shadow-black/40 backdrop-blur"
+        }
       >
-        <div className="relative aspect-[4/3] bg-zinc-800">
+        <div className={`relative bg-zinc-800 ${compact ? "aspect-video" : "aspect-[4/3]"}`}>
           {stream && hasVideo && camOn ? (
             <StreamVideo stream={stream} muted mirror className="h-full w-full object-cover" />
           ) : (
@@ -130,10 +153,10 @@ export function JoinCard({ roomId, onJoin }: { roomId: string; onJoin: (r: JoinR
             </button>
           </div>
         </div>
-        <div className="space-y-4 p-5">
+        <div className={compact ? "space-y-3 p-4" : "space-y-4 p-5"}>
           <div>
             <p className="text-xs uppercase tracking-wider text-zinc-500">Joining room</p>
-            <p className="font-mono text-lg text-white">{roomId}</p>
+            <p className={`font-mono text-white ${compact ? "text-base" : "text-lg"}`}>{roomId}</p>
           </div>
           {mediaError && <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-300">{mediaError}</p>}
           <label className="block">

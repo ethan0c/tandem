@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type Hls from "hls.js";
 import {
   Film,
   FolderOpen,
@@ -35,8 +34,6 @@ interface PlayerProps {
   chromeVisible: boolean;
   pickerName: string | null;
 }
-
-const isHlsUrl = (u: string) => /\.m3u8(\?|$)/i.test(u);
 
 export function Player({
   source,
@@ -105,50 +102,19 @@ export function Player({
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    let cancelled = false;
-    let hls: Hls | null = null;
-    let objectUrl: string | null = null;
     setError(null);
     setDuration(0);
     setCurrentTime(0);
     setBlocked(false);
 
-    if (!source) {
+    if (source?.kind !== "file" || !localFile) {
       v.removeAttribute("src");
       v.load();
       return;
     }
-    if (source.kind === "file") {
-      if (!localFile) {
-        v.removeAttribute("src");
-        v.load();
-        return;
-      }
-      objectUrl = URL.createObjectURL(localFile);
-      v.src = objectUrl;
-    } else if (isHlsUrl(source.url) && !v.canPlayType("application/vnd.apple.mpegurl")) {
-      const url = source.url;
-      import("hls.js").then(({ default: HlsCtor }) => {
-        if (cancelled) return;
-        if (!HlsCtor.isSupported()) {
-          setError("This browser cannot play HLS streams.");
-          return;
-        }
-        hls = new HlsCtor();
-        hls.on(HlsCtor.Events.ERROR, (_evt, data) => {
-          if (data.fatal) setError("Could not load this stream. Check the link and CORS headers.");
-        });
-        hls.loadSource(url);
-        hls.attachMedia(v);
-      });
-    } else {
-      v.src = source.url;
-    }
-    return () => {
-      cancelled = true;
-      hls?.destroy();
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
+    const objectUrl = URL.createObjectURL(localFile);
+    v.src = objectUrl;
+    return () => URL.revokeObjectURL(objectUrl);
   }, [source, localFile]);
 
   // Drift correction: nudge playback rate for small drift, hard-seek for large drift.
@@ -290,7 +256,7 @@ export function Player({
           emitSync(false, d, "ended");
         }}
         onError={() => {
-          if (hasMedia) setError("This video could not be played. The link must point at a playable file that allows cross-origin access.");
+          if (hasMedia) setError("This file could not be played. Try an MP4 or WebM.");
         }}
       />
 
@@ -303,7 +269,7 @@ export function Player({
             </div>
             <h2 className="mt-4 text-lg font-semibold">Nothing playing yet</h2>
             <p className="mt-1.5 text-sm text-zinc-400">
-              Paste a video link or pick a file you both have. Playback stays locked together.
+              Share a browser tab live, or pick a file you both have.
             </p>
             <button
               onClick={onOpenSource}

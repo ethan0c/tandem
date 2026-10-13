@@ -83,13 +83,18 @@ app.prepare().then(() => {
       if (!roomId) return;
       const room = rooms.get(roomId);
       if (!room) return;
-      room.source = source;
+      // Only the sender can be the sharer of their own screen.
+      room.source = source?.kind === "screen" ? { ...source, sharerId: socket.id } : source;
       room.playback = freshPlayback();
-      io.to(roomId).emit("source:changed", { source, playback: room.playback, from: socket.id });
+      io.to(roomId).emit("source:changed", { source: room.source, playback: room.playback, from: socket.id });
     });
 
     socket.on("rtc:signal", ({ to, data }) => {
       io.to(to).emit("rtc:signal", { from: socket.id, data });
+    });
+
+    socket.on("screen:signal", ({ to, data }) => {
+      io.to(to).emit("screen:signal", { from: socket.id, data });
     });
 
     socket.on("disconnect", () => {
@@ -99,6 +104,12 @@ app.prepare().then(() => {
       room.members = room.members.filter((m) => m.id !== socket.id);
       if (room.hostId === socket.id) room.hostId = room.members[0]?.id ?? null;
       socket.to(roomId).emit("member:left", { id: socket.id, hostId: room.hostId });
+      // A screen share cannot outlive the person sharing it.
+      if (room.source?.kind === "screen" && room.source.sharerId === socket.id) {
+        room.source = null;
+        room.playback = freshPlayback();
+        socket.to(roomId).emit("source:changed", { source: null, playback: room.playback, from: socket.id });
+      }
       if (room.members.length === 0) scheduleCleanup(roomId);
     });
   });

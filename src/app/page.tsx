@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Link2, MonitorPlay, PictureInPicture2, Puzzle, ShieldCheck, Timer, Video } from "lucide-react";
+import { ArrowRight, MonitorPlay, MonitorUp, PictureInPicture2, Puzzle, ShieldCheck, Timer, Video } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { ButtonLink } from "@/components/Button";
 import { Footer } from "@/components/landing/Footer";
@@ -29,14 +29,14 @@ const features = [
   {
     icon: ShieldCheck,
     title: "No accounts, no tracking",
-    body: "Rooms are just links. Nothing is stored once everyone leaves. Each of you streams the video from your own source.",
+    body: "Rooms are just links. Nothing is stored once everyone leaves, and shared tabs stream peer to peer.",
   },
 ];
 
 const steps = [
   { n: "1", title: "Create a room", body: "One click gives you a private link. No sign-up." },
   { n: "2", title: "Share the link", body: "Send it to your person. They pick a name and turn on their camera." },
-  { n: "3", title: "Press play", body: "Paste a video link or pick the same file. Playback stays locked together." },
+  { n: "3", title: "Press play", body: "Share the tab you're watching in, or pick the same file. Everyone sees it live." },
 ];
 
 export default function Home() {
@@ -119,9 +119,9 @@ export default function Home() {
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/85 via-zinc-950/20 to-transparent" />
               <div className="absolute bottom-0 p-7 text-white">
                 <p className="text-xs font-semibold uppercase tracking-wider text-brand-300">Your library, your rules</p>
-                <h3 className="mt-2 max-w-md text-2xl font-bold">Any direct link or any file you both have</h3>
+                <h3 className="mt-2 max-w-md text-2xl font-bold">Share a tab or play a file you both have</h3>
                 <p className="mt-2 max-w-md text-sm text-zinc-300">
-                  MP4, WebM, HLS streams, or a 4GB episode sitting on both your drives. Tandem only syncs the clock.
+                  Stream the tab your show is in, or play a 4GB episode sitting on both your drives.
                 </p>
               </div>
             </div>
@@ -165,17 +165,21 @@ export default function Home() {
             <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">Sources</p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">Where does the video come from?</h2>
             <div className="mt-8 grid gap-5 md:grid-cols-3">
-              <SourceCard icon={Link2} title="A direct link" tag="Works today">
-                Paste an MP4, WebM or HLS (.m3u8) link and both of you load it from that source. Tandem never
-                re-streams the video, it only synchronises the clock.
+              <SourceCard icon={MonitorUp} title="Share a tab" tag="Works today">
+                Pick the browser tab your show is playing in and tick &ldquo;Share tab audio&rdquo;. Everyone in the
+                room watches it live. DRM services like Netflix may show up black.
               </SourceCard>
               <SourceCard icon={MonitorPlay} title="A file you both have" tag="Works today">
                 Pick a local file. Your partner is prompted to pick the same one on their machine. Nothing is uploaded,
                 so a 4GB episode starts instantly.
               </SourceCard>
-              <SourceCard icon={Puzzle} title="Streaming sites" tag="Needs the extension">
-                Sites like Miruro or Crunchyroll run their own player, which a web page cannot control. A small browser
-                extension that speaks Tandem&apos;s sync protocol is the next step.
+              <SourceCard icon={Puzzle} title="Streaming sites" tag="With the extension">
+                Sites like Miruro run their own player, which a web page cannot control. The Tandem browser extension
+                syncs that player and floats your call on top. Load it from the{" "}
+                <a href="https://github.com/ethan0c" target="_blank" rel="noreferrer" className="font-medium text-brand-700 underline">
+                  extension folder
+                </a>{" "}
+                in the repo.
               </SourceCard>
             </div>
           </div>
@@ -215,7 +219,7 @@ function SourceCard({
   tag: string;
   children: React.ReactNode;
 }) {
-  const soon = tag.startsWith("Needs");
+  const soon = tag.startsWith("With");
   return (
     <div className="rounded-2xl border-2 border-zinc-200 border-b-[6px] bg-white p-6">
       <div className="flex items-center justify-between">

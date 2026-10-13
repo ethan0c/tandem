@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Tandem</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <img src="icons/48.png" width="28" height="28" alt="" />
+      <span>tandem</span>
+    </header>
+
+    <section id="unsupported" hidden>
+      <p class="muted">Open an episode on a supported site first (miruro.tv), then click Tandem again.</p>
+    </section>
+
+    <section id="active" hidden>
+      <p class="label">In room</p>
+      <div class="row">
+        <code id="current"></code>
+        <button id="copy" class="btn btn-light btn-sm">Copy invite</button>
+      </div>
+      <p id="player" class="muted"></p>
+      <button id="leave" class="btn btn-danger">Leave room</button>
+    </section>
+
+    <section id="idle" hidden>
+      <button id="create" class="btn btn-brand">+ Create a room</button>
+      <div class="or"><span>or join</span></div>
+      <form id="join" class="row">
+        <input id="code" placeholder="Paste a room link or code" autocomplete="off" />
+        <button class="btn btn-dark btn-sm" type="submit">Join</button>
+      </form>
+      <p id="error" class="error" hidden></p>
+    </section>
+
+    <details>
+      <summary>Settings</summary>
+      <label>
+        Tandem app URL
+        <input id="origin" placeholder="http://localhost:3000" />
+      </label>
+    </details>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

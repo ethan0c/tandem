@@ -1,19 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FolderOpen, Link2, X } from "lucide-react";
+import { FolderOpen, MonitorUp, X } from "lucide-react";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  onUrl: (url: string) => void;
   onFile: (file: File) => void;
+  /** Opens the browser's share picker; resolves false if nothing was shared. */
+  onScreen: () => Promise<boolean>;
+  screenError: string | null;
 }
 
-export function SourceDialog({ open, onClose, onUrl, onFile }: Props) {
-  const [tab, setTab] = useState<"url" | "file">("url");
-  const [url, setUrl] = useState("");
-  const [error, setError] = useState<string | null>(null);
+export function SourceDialog({ open, onClose, onFile, onScreen, screenError }: Props) {
+  const [tab, setTab] = useState<"screen" | "file">("screen");
+  const [sharing, setSharing] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -24,21 +25,6 @@ export function SourceDialog({ open, onClose, onUrl, onFile }: Props) {
   }, [open, onClose]);
 
   if (!open) return null;
-
-  function submitUrl(e: React.FormEvent) {
-    e.preventDefault();
-    const trimmed = url.trim();
-    try {
-      const u = new URL(trimmed);
-      if (!/^https?:$/.test(u.protocol)) throw new Error();
-    } catch {
-      setError("Enter a full http(s) link to an MP4, WebM or .m3u8 stream.");
-      return;
-    }
-    onUrl(trimmed);
-    setUrl("");
-    onClose();
-  }
 
   return (
     <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>
@@ -56,38 +42,38 @@ export function SourceDialog({ open, onClose, onUrl, onFile }: Props) {
           </button>
         </div>
         <div className="flex gap-1 p-2">
-          <TabButton active={tab === "url"} onClick={() => setTab("url")} icon={<Link2 className="size-4" />}>
-            Link
+          <TabButton active={tab === "screen"} onClick={() => setTab("screen")} icon={<MonitorUp className="size-4" />}>
+            Share tab
           </TabButton>
           <TabButton active={tab === "file"} onClick={() => setTab("file")} icon={<FolderOpen className="size-4" />}>
             Local file
           </TabButton>
         </div>
         <div className="px-5 pb-5 pt-2">
-          {tab === "url" ? (
-            <form onSubmit={submitUrl} className="space-y-3">
+          {tab === "screen" ? (
+            <div className="space-y-3">
               <p className="text-sm text-zinc-400">
-                Everyone in the room loads this link. Direct MP4, WebM and HLS (.m3u8) links work; streaming sites with
-                protected players do not.
+                Stream a browser tab live to everyone here. Pick the tab with your show and tick{" "}
+                <span className="text-zinc-200">Share tab audio</span>, then control playback in that tab.
               </p>
-              <input
-                autoFocus
-                value={url}
-                onChange={(e) => {
-                  setUrl(e.target.value);
-                  setError(null);
-                }}
-                placeholder="https://…/episode-01.mp4"
-                className="h-11 w-full rounded-xl border border-white/10 bg-zinc-800 px-3.5 font-mono text-sm placeholder:text-zinc-500 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20"
-              />
-              {error && <p className="text-xs text-red-300">{error}</p>}
+              <p className="rounded-lg border border-amber-400/20 bg-amber-950/40 px-3 py-2 text-xs text-amber-200/90">
+                Netflix, Crunchyroll and other DRM-protected services often show up as a black screen for viewers.
+                Sites without DRM stream fine. Works best in Chrome or Edge on desktop.
+              </p>
+              {screenError && <p className="text-xs text-red-300">{screenError}</p>}
               <button
-                type="submit"
+                disabled={sharing}
+                onClick={async () => {
+                  setSharing(true);
+                  const ok = await onScreen();
+                  setSharing(false);
+                  if (ok) onClose();
+                }}
                 className="btn3d btn3d-brand btn3d-md w-full"
               >
-                Play for everyone
+                {sharing ? "Waiting for you to pick…" : "Choose a tab to share"}
               </button>
-            </form>
+            </div>
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-zinc-400">
