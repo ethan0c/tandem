@@ -16,7 +16,7 @@ export function iceServers(): RTCIceServer[] {
   const turn = process.env.NEXT_PUBLIC_TURN_URL;
   if (turn) {
     servers.push({
-      urls: turn,
+      urls: turn.split(",").map((u) => u.trim()),
       username: process.env.NEXT_PUBLIC_TURN_USERNAME,
       credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL,
     });
@@ -33,12 +33,16 @@ interface Options {
 
 /**
  * Mesh WebRTC between everyone in the room.
- * Rule: the newcomer sends the offer to each existing member, so there are never glare collisions.
+ * Rule: for each pair, only the member with the greater socket id sends the offer. Both sides can
+ * compute that without talking, so there is never a glare collision no matter how join events race.
  */
 export function useWebRTC({ socketRef, selfId, members, localStream }: Options) {
   const [peers, setPeers] = useState<Record<string, Peer>>({});
+  // Bumped when a negotiation fails so the offer effect runs again.
+  const [attempt, setAttempt] = useState(0);
   const pcs = useRef<Map<string, RTCPeerConnection>>(new Map());
   const pendingIce = useRef<Map<string, RTCIceCandidateInit[]>>(new Map());
+  /** Peers we are the offerer for. */
   const offeredTo = useRef<Set<string>>(new Set());
   const localRef = useRef(localStream);
   useEffect(() => {
@@ -66,6 +70,21 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
     });
   }, []);
 
+  /** Offerer side: send a (re)offer. On failure, drop the connection and let the offer effect retry. */
+  const negotiate = useCallback(
+    async (id: string, pc: RTCPeerConnection, iceRestart = false) => {
+      try {
+        const offer = await pc.createOffer(iceRestart ? { iceRestart: true } : undefined);
+        await pc.setLocalDescription(offer);
+        send(id, { type: "offer", sdp: offer });
+      } catch {
+        closePeer(id);
+        setAttempt((n) => n + 1);
+      }
+    },
+    [send, closePeer],
+  );
+
   const createPc = useCallback(
     (id: string) => {
       const pc = new RTCPeerConnection({ iceServers: iceServers() });
@@ -79,13 +98,12 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
         setPeers((prev) => ({ ...prev, [id]: { id, stream } }));
       };
       pc.onconnectionstatechange = () => {
-        if (pc.connectionState === "failed") {
-          pc.restartIce();
-        }
+        // Only the offerer restarts; the other side answers the new offer like any other.
+        if (pc.connectionState === "failed" && offeredTo.current.has(id)) void negotiate(id, pc, true);
       };
       return pc;
     },
-    [send],
+    [send, negotiate],
   );
 
   /** Attach local tracks, or a receive-only transceiver when we have no track of that kind. */
@@ -110,46 +128,50 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
     }
   }, []);
 
-  // Offer to members that were already in the room when we joined.
+  // Offer to the members we are responsible for; tear down anyone who left.
   useEffect(() => {
     if (!selfId) return;
     for (const m of members) {
-      if (m.id === selfId || pcs.current.has(m.id) || offeredTo.current.has(m.id)) continue;
+      if (m.id === selfId || pcs.current.has(m.id)) continue;
+      // The greater id offers, so when ours is smaller we wait for theirs.
+      if (selfId < m.id) continue;
       offeredTo.current.add(m.id);
       const pc = createPc(m.id);
       attachLocal(pc);
-      (async () => {
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        send(m.id, { type: "offer", sdp: offer });
-      })().catch(() => closePeer(m.id));
+      void negotiate(m.id, pc);
     }
-    // Members who left: tear down.
     for (const id of Array.from(pcs.current.keys())) {
       if (!members.some((m) => m.id === id)) closePeer(id);
     }
-    // Only react to membership changes; `members` identity changes whenever the roster does.
+    // Only react to membership changes (and failed attempts); the callbacks are stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [members, selfId]);
+  }, [members, selfId, attempt]);
 
-  // Once someone joins after us they will offer to us; we answer here.
+  // Answerer side, plus answers and candidates for connections we initiated.
   useEffect(() => {
     const socket = socketRef.current;
-    if (!socket) return;
+    if (!socket || !selfId) return;
     const onSignal = async ({ from, data }: { from: string; data: SignalData }) => {
       let pc = pcs.current.get(from);
       if (data.type === "offer") {
-        // Ignore stale offers from the same peer by rebuilding the connection.
-        if (pc) closePeer(from);
-        pc = createPc(from);
-        await pc.setRemoteDescription(data.sdp);
-        attachLocal(pc);
+        // An offer on a settled connection is a renegotiation (ICE restart); anything else is rebuilt.
+        if (pc && pc.signalingState !== "stable") {
+          closePeer(from);
+          pc = undefined;
+        }
+        if (pc) {
+          await pc.setRemoteDescription(data.sdp);
+        } else {
+          pc = createPc(from);
+          await pc.setRemoteDescription(data.sdp);
+          attachLocal(pc);
+        }
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
         send(from, { type: "answer", sdp: answer });
         await flushIce(from, pc);
       } else if (data.type === "answer") {
-        if (!pc) return;
+        if (!pc || pc.signalingState !== "have-local-offer") return;
         await pc.setRemoteDescription(data.sdp);
         await flushIce(from, pc);
       } else if (data.type === "candidate") {
@@ -166,13 +188,18 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
         }
       }
     };
-    socket.on("rtc:signal", onSignal);
-    return () => {
-      socket.off("rtc:signal", onSignal);
+    const handler = (payload: { from: string; data: SignalData }) => {
+      onSignal(payload).catch(() => {
+        // A broken negotiation is dropped; if we are the offerer the offer effect retries.
+        closePeer(payload.from);
+        setAttempt((n) => n + 1);
+      });
     };
-    // The socket is created in useRoom; re-subscribe once we know we are joined.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selfId]);
+    socket.on("rtc:signal", handler);
+    return () => {
+      socket.off("rtc:signal", handler);
+    };
+  }, [socketRef, selfId, createPc, attachLocal, flushIce, send, closePeer]);
 
   // Tear everything down on unmount.
   useEffect(() => {

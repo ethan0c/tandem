@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Check, Copy, LogOut, Mic, MicOff, Video, VideoOff } from "lucide-react";
 import { LogoMark } from "@/components/Logo";
 import { StreamVideo } from "@/components/room/StreamVideo";
+import { useReleaseStream } from "@/hooks/useReleaseStream";
 import { useRoom } from "@/hooks/useRoom";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import type { SyncReason } from "@/lib/types";
@@ -27,9 +28,7 @@ export function OverlaySession({ roomId, name, localStream, embedded }: Props) {
   const [drift, setDrift] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    return () => localStream?.getTracks().forEach((t) => t.stop());
-  }, [localStream]);
+  useReleaseStream(localStream);
 
   // Remote playback changes go to the page's <video>, re-stamped onto the local clock.
   const { remote, selfId, serverNow } = room;

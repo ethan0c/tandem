@@ -53,6 +53,8 @@ app.prepare().then(() => {
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
     path: "/socket.io",
+    // Only needed when the site is served from another origin (see NEXT_PUBLIC_SOCKET_URL).
+    cors: process.env.CORS_ORIGIN ? { origin: process.env.CORS_ORIGIN.split(",").map((o) => o.trim()) } : undefined,
   });
 
   io.on("connection", (socket) => {

@@ -76,9 +76,18 @@ async function open(name) {
     if (m.type() === "error") log(name, `console.error: ${m.text()}`);
   });
   await page.goto(`${BASE}/room/${roomId}`, { waitUntil: "domcontentloaded" });
+  await join(page, name);
+  return page;
+}
+
+/** Fill the name once React has hydrated (the mic button enables after getUserMedia resolves). */
+async function join(page, name) {
+  await page.waitForFunction(() => {
+    const b = document.querySelector('button[aria-label*="microphone"]');
+    return b && !b.disabled;
+  }, null, { timeout: STEP_MS });
   await page.getByPlaceholder("What should we call you?").fill(name);
   await page.getByRole("button", { name: "Join room" }).click();
-  return page;
 }
 
 const sessions = [];
@@ -160,8 +169,7 @@ try {
 
   await step("Bob reloads and reconnects; Alice still sees him", async () => {
     await bob.reload({ waitUntil: "domcontentloaded" });
-    await bob.getByPlaceholder("What should we call you?").fill("Bob");
-    await bob.getByRole("button", { name: "Join room" }).click();
+    await join(bob, "Bob");
     await bob.getByText("Ready", { exact: true }).waitFor({ timeout: STEP_MS });
     for (const p of [alice, bob]) {
       await p.waitForFunction(

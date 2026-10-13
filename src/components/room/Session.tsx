@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useClientValue } from "@/hooks/useClientValue";
+import { useReleaseStream } from "@/hooks/useReleaseStream";
 import { useRoom } from "@/hooks/useRoom";
 import { useScreenShare } from "@/hooks/useScreenShare";
 import { useWebRTC } from "@/hooks/useWebRTC";
@@ -45,9 +46,7 @@ export function Session({ roomId, name, localStream }: Props) {
   const roomUrl = origin ? `${origin}/room/${roomId}` : "";
 
   // Stop local media when leaving the room.
-  useEffect(() => {
-    return () => localStream?.getTracks().forEach((t) => t.stop());
-  }, [localStream]);
+  useReleaseStream(localStream);
 
   // Chrome (top bar + controls) hides after a few idle seconds while playing.
   const bump = useCallback(() => {
