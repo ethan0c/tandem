@@ -113,7 +113,7 @@ export default function Home() {
       </section>
 
       {/* Works with */}
-      <section id="sources" className="scroll-mt-10 bg-ink pb-14 pt-16 sm:pb-20 sm:pt-24">
+      <section id="sources" className="scroll-mt-10 pb-14 pt-16 sm:pb-20 sm:pt-24">
         <div data-reveal className="mx-auto site-width site-gutter">
           <h2 className="font-display text-3xl font-medium tracking-[-0.03em] sm:text-4xl">Works with</h2>
           <p className="mt-3 text-sm text-zinc-400">Watch on your usual site with the Tandem extension.</p>
@@ -136,7 +136,7 @@ export default function Home() {
       </section>
 
       {/* Three ways to watch */}
-      <section className="border-t border-white/10 bg-ink">
+      <section className="border-t border-white/10">
         <div data-reveal className="mx-auto site-width site-gutter py-16 lg:py-20">
           <h2 className="font-display text-3xl font-medium tracking-[-0.03em] sm:text-4xl">Three ways to watch</h2>
           <ul className="mt-10 grid gap-10 md:grid-cols-3 md:gap-8">
@@ -151,7 +151,7 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section id="sync" className="scroll-mt-20 border-t border-white/10 bg-ink">
+      <section id="sync" className="scroll-mt-20 border-t border-white/10">
         <div data-reveal className="mx-auto grid site-width gap-12 site-gutter py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28">
           <div>
             <h2 className="font-display text-4xl font-medium leading-tight tracking-[-0.03em]">Pause, skip, and catch up together.</h2>
@@ -198,7 +198,7 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="scroll-mt-20 border-t border-white/10 bg-ink">
+      <section id="faq" className="scroll-mt-20 border-t border-white/10">
         <div data-reveal className="mx-auto grid site-width gap-10 site-gutter py-20 lg:grid-cols-[0.6fr_1.4fr] lg:py-28">
           <h2 className="font-display text-4xl font-medium leading-[1] tracking-[-0.03em]">Questions</h2>
           <div className="divide-y divide-white/10 border-y border-white/10">

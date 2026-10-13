@@ -99,7 +99,7 @@ export function JoinCard({
       className={
         compact
           ? "flex flex-col bg-ink text-white"
-          : "relative flex flex-1 flex-col items-center bg-ink text-white"
+          : "relative flex flex-1 flex-col items-center text-white"
       }
     >
       {!compact && (

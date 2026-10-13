@@ -48,6 +48,17 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+/* One quiet lift behind every page, fixed to the viewport so sections never seam. A few percent
+   brighter through the middle than at the edges. Surfaces that need true black (the player, the
+   extension overlay) paint an opaque background over it. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, #0c0b10 0%, #15131a 45%, #0d0c10 100%);
+}
 
 details.faq > summary { list-style: none; cursor: pointer; }
 details.faq > summary::-webkit-details-marker { display: none; }
@@ -224,11 +235,11 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   display: flex;
   flex-direction: column;
   min-height: 100svh;
+  /* A quiet lift, like a dark room lit from above: darkest at the top edge, a few percent
+     brighter through the middle, back to black by the bottom. Barely tinted toward the brand. */
   background:
-    radial-gradient(80% 55% at 50% -12%, rgb(139 92 246 / 0.55), transparent 70%),
-    radial-gradient(45% 40% at 8% 18%, rgb(67 56 202 / 0.4), transparent 70%),
-    radial-gradient(40% 40% at 92% 26%, rgb(192 38 211 / 0.22), transparent 70%),
-    linear-gradient(to bottom, #170a2e 0%, #0f0820 38%, var(--color-ink) 78%);
+    radial-gradient(90% 60% at 50% 0%, rgb(139 92 246 / 0.14), transparent 70%),
+    linear-gradient(to bottom, #0c0b10 0%, #19161f 42%, #100e14 72%, var(--color-ink) 100%);
 }
 /* The extension section is the one solid purple surface on the page. */
 .extension-shell {
@@ -239,9 +250,7 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 }
 .extension-shell .btn3d-ghost { background: rgb(255 255 255 / 0.12); border-color: rgb(255 255 255 / 0.2); }
 .cta-shell {
-  background:
-    radial-gradient(70% 90% at 50% 120%, rgb(124 58 237 / 0.35), transparent 70%),
-    var(--color-ink);
+  background: radial-gradient(70% 90% at 50% 120%, rgb(124 58 237 / 0.35), transparent 70%);
 }
 /* A curved horizon under the hero: the top sliver of a wide ellipse, faded at both ends. */
 .hero-horizon {
@@ -287,12 +296,13 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 .hero-nav a:focus-visible { outline: 2px solid rgb(255 255 255 / 0.5); outline-offset: 2px; }
 @media (max-width: 767px) {
   .hero-shell { min-height: 0; }
-  .hero-horizon { --line: 96px; height: 200px; }
+  /* On phones the preview is full width, so the line goes under it instead of behind it. */
+  .hero-horizon { --line: 72px; height: 180px; }
   .hero-horizon::before { width: 280vw; }
   .hero-preview { flex: none; container-type: normal; display: block; }
   .hero-preview > figure { width: 100%; min-width: 0; }
   .site-header { min-height: 64px; }
-  .hero-body { gap: 28px; padding-top: 24px; padding-bottom: 32px; }
+  .hero-body { gap: 28px; padding-top: 24px; padding-bottom: 112px; }
   .hero-title { font-size: clamp(2.4rem, 11vw, 3rem); }
   .hero-body .btn3d-lg, .hero-body .room-link-field { height: 48px; }
   .hero-body .btn3d-lg { font-size: 0.95rem; }

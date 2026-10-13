@@ -55,7 +55,7 @@ const sections = [
 export default function Privacy() {
   return (
     <div className="flex flex-1 flex-col">
-      <header className="border-b border-white/10 bg-ink text-white">
+      <header className="border-b border-white/10 text-white">
         <HeaderFrame>
           <Link href="/" aria-label="Tandem home">
             <Logo size={24} light />
