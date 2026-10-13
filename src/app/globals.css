@@ -241,7 +241,7 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   background: radial-gradient(50% 50% at 50% 50%, rgb(124 58 237 / 0.28), transparent 70%);
   pointer-events: none;
 }
-.hero-header { height: 72px; }
+.site-header { min-height: 72px; flex-shrink: 0; }
 .hero-body { gap: clamp(40px, 6vh, 64px); padding-top: clamp(32px, 8vh, 88px); padding-bottom: 0; }
 .hero-title { font-size: clamp(2.5rem, 6vw, 4.75rem); line-height: 1; }
 .hero-preview { max-width: 1080px; }
@@ -259,7 +259,7 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 .hero-nav a:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: 2px; }
 @media (max-width: 767px) {
   .hero-shell { --hero-overlap: 72px; }
-  .hero-header { height: 64px; }
+  .site-header { min-height: 64px; }
   .hero-body { gap: 36px; padding-top: 28px; }
   .hero-title { font-size: clamp(2.4rem, 11vw, 3rem); }
   .hero-body .btn3d-lg, .hero-body .room-link-field { height: 48px; }

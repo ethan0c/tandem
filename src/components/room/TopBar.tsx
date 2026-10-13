@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Check, Copy, LogOut, Maximize, Minimize } from "lucide-react";
 import { ChimeToggle } from "@/components/ChimeToggle";
+import { HeaderFrame } from "@/components/HeaderFrame";
 import { Logo } from "@/components/Logo";
 import type { Member } from "@/lib/types";
 import type { RoomStatus } from "@/hooks/useRoom";
@@ -44,54 +45,58 @@ export function TopBar({ roomId, roomUrl, members, selfId, status, drift, isFull
 
   return (
     <header
-      className={`absolute inset-x-0 top-0 z-20 flex h-14 items-center justify-between gap-3 bg-gradient-to-b from-black/80 to-transparent px-4 text-white transition-all duration-300 ${
+      className={`absolute inset-x-0 top-0 z-20 bg-gradient-to-b from-black/80 to-transparent text-white transition-all duration-300 ${
         visible ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
       }`}
     >
-      <div className="flex min-w-0 items-center gap-3">
-        <Link href="/" className="shrink-0" aria-label="Tandem home">
-          <Logo size={26} light />
-        </Link>
-        <button
-          onClick={copy}
-          className="group flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-sans text-xs text-zinc-200 transition hover:bg-white/10"
-          title="Copy invite link"
-        >
-          {roomId}
-          {copied ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3 text-zinc-400 group-hover:text-white" />}
-        </button>
-        <span className={`hidden rounded-full px-2.5 py-1 text-[11px] font-medium sm:inline ${sync.tone}`}>{sync.text}</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <div className="flex -space-x-2">
-          {members.map((m) => (
-            <span
-              key={m.id}
-              title={m.name}
-              className={`flex size-7 items-center justify-center rounded-full border-2 border-ink text-[11px] font-semibold ${
-                m.id === selfId ? "bg-brand-600" : "bg-brand-900"
-              }`}
-            >
-              {m.name.slice(0, 1).toUpperCase()}
-            </span>
-          ))}
+      <HeaderFrame>
+        <div className="flex min-w-0 items-center gap-3">
+          <Link href="/" className="shrink-0" aria-label="Tandem home">
+            <Logo size={24} light />
+          </Link>
+          <button
+            onClick={copy}
+            className="group flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-sans text-xs text-zinc-200 transition hover:bg-white/10"
+            title="Copy invite link"
+            aria-label="Copy invite link"
+          >
+            <span className="hidden sm:inline">{roomId}</span>
+            {copied ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3 text-zinc-400 group-hover:text-white" />}
+          </button>
+          <span className={`hidden rounded-full px-2.5 py-1 text-[11px] font-medium sm:inline ${sync.tone}`}>{sync.text}</span>
         </div>
-        <ChimeToggle className="flex size-8 items-center justify-center rounded-lg text-zinc-300 transition hover:bg-white/10 hover:text-white" />
-        <button
-          onClick={onToggleFullscreen}
-          className="flex size-8 items-center justify-center rounded-lg transition hover:bg-white/10"
-          aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-          title="Fullscreen (f)"
-        >
-          {isFullscreen ? <Minimize className="size-4" /> : <Maximize className="size-4" />}
-        </button>
-        <Link
-          href="/"
-          className="flex h-8 items-center gap-1.5 rounded-lg border border-white/10 px-2.5 text-xs text-zinc-300 transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-white"
-        >
-          <LogOut className="size-3.5" /> Leave
-        </Link>
-      </div>
+        <div className="flex items-center gap-2">
+          <div className="hidden -space-x-2 sm:flex">
+            {members.map((m) => (
+              <span
+                key={m.id}
+                title={m.name}
+                className={`flex size-7 items-center justify-center rounded-full border-2 border-ink text-[11px] font-semibold ${
+                  m.id === selfId ? "bg-brand-600" : "bg-brand-900"
+                }`}
+              >
+                {m.name.slice(0, 1).toUpperCase()}
+              </span>
+            ))}
+          </div>
+          <ChimeToggle className="flex size-8 items-center justify-center rounded-lg text-zinc-300 transition hover:bg-white/10 hover:text-white" />
+          <button
+            onClick={onToggleFullscreen}
+            className="flex size-8 items-center justify-center rounded-lg transition hover:bg-white/10"
+            aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+            title="Fullscreen (f)"
+          >
+            {isFullscreen ? <Minimize className="size-4" /> : <Maximize className="size-4" />}
+          </button>
+          <Link
+            href="/"
+            aria-label="Leave room"
+            className="flex h-8 items-center gap-1.5 rounded-lg border border-white/10 px-2.5 text-xs text-zinc-300 transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-white"
+          >
+            <LogOut className="size-3.5" /> <span className="hidden sm:inline">Leave</span>
+          </Link>
+        </div>
+      </HeaderFrame>
     </header>
   );
 }

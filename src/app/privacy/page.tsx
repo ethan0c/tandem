@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HeaderFrame } from "@/components/HeaderFrame";
 import { Logo } from "@/components/Logo";
 import { Footer } from "@/components/landing/Footer";
 
@@ -55,11 +56,11 @@ export default function Privacy() {
   return (
     <div className="flex flex-1 flex-col">
       <header className="bg-ink text-white">
-        <div className="mx-auto flex h-16 max-w-6xl items-center px-5">
+        <HeaderFrame>
           <Link href="/" aria-label="Tandem home">
-            <Logo size={28} light />
+            <Logo size={24} light />
           </Link>
-        </div>
+        </HeaderFrame>
       </header>
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-16">
         <h1 className="font-display text-4xl font-bold tracking-tight">Privacy</h1>

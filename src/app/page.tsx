@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
+import { HeaderFrame } from "@/components/HeaderFrame";
 import { Logo } from "@/components/Logo";
 import { ButtonLink } from "@/components/Button";
 import { Footer } from "@/components/landing/Footer";
@@ -70,28 +71,27 @@ export default function Home() {
       {/* Theater */}
       <section className="hero-shell relative overflow-hidden text-white">
         <div aria-hidden="true" className="hero-glow" />
-        <header className="hero-header relative mx-auto flex site-width items-center justify-between gap-6 site-gutter">
-          <Link href="/" aria-label="Tandem home" className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-brand-400 focus-visible:outline-offset-4">
-            <Logo size={24} light />
-          </Link>
-          <nav aria-label="Main navigation" className="hero-nav flex items-center gap-1 text-sm text-zinc-400">
-            <a href="#sync" className="hidden md:block">How it works</a>
-            <a href="#sources" className="hidden md:block">Works with</a>
-            <a href="#faq" className="hidden md:block">FAQ</a>
-            <a href={GITHUB} target="_blank" rel="noreferrer" className="hidden sm:flex items-center gap-1">
-              GitHub <ArrowUpRight className="size-3.5" />
-            </a>
-            <span aria-hidden="true" className="mx-2 hidden h-5 w-px bg-white/10 md:block" />
-            <ButtonLink href="#start" size="sm">Create a room</ButtonLink>
-          </nav>
+        <header className="relative">
+          <HeaderFrame>
+            <Link href="/" aria-label="Tandem home" className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-brand-400 focus-visible:outline-offset-4">
+              <Logo size={24} light />
+            </Link>
+            <nav aria-label="Main navigation" className="hero-nav flex items-center gap-1 text-sm text-zinc-400">
+              <a href="#sync" className="hidden md:block">How it works</a>
+              <a href="#sources" className="hidden md:block">Works with</a>
+              <a href="#faq" className="hidden md:block">FAQ</a>
+              <a href={GITHUB} target="_blank" rel="noreferrer" className="hidden sm:flex items-center gap-1">
+                GitHub <ArrowUpRight className="size-3.5" />
+              </a>
+              <span aria-hidden="true" className="mx-2 hidden h-5 w-px bg-white/10 md:block" />
+              <ButtonLink href="#start" size="sm">Create a room</ButtonLink>
+            </nav>
+          </HeaderFrame>
         </header>
 
         <div className="hero-body relative mx-auto flex site-width flex-1 flex-col items-center site-gutter">
           <div className="hero-intro flex flex-col items-center text-center">
-            <p className="hero-eyebrow rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-              Free &middot; No signup &middot; Open source
-            </p>
-            <h1 className="hero-title mt-5 font-display font-bold tracking-[-0.035em]">
+            <h1 className="hero-title font-display font-bold tracking-[-0.035em]">
               Watch anime <span className="text-brand-400">together.</span>
             </h1>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">

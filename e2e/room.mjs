@@ -224,6 +224,16 @@ try {
     log("Bob", `share arrives at ${w}×${h}`);
   });
 
+  await step("Alice's sharing notice hides itself after about 3s", async () => {
+    const notice = alice.locator("p", { hasText: "sharing" }).locator("xpath=ancestor::div[@aria-hidden][1]");
+    await alice.waitForFunction(
+      () => Array.from(document.querySelectorAll("[aria-hidden]")).some((e) => e.textContent?.includes("sharing") && e.getAttribute("aria-hidden") === "true"),
+      null,
+      { timeout: 5_000 },
+    );
+    if ((await notice.getAttribute("aria-hidden")) !== "true") throw new Error("notice still shown");
+  });
+
   await step("Carol joins late and sees the share too", async () => {
     const aliceNotes = await notes(alice);
     const carol = await open("Carol");
@@ -244,6 +254,9 @@ try {
 
   await step("Alice stops sharing; viewers return to the empty state and hear it", async () => {
     const before = await notes(bob);
+    // The controls hide while the mouse is idle; moving it brings them back.
+    await alice.mouse.move(600, 400);
+    await alice.mouse.move(620, 410);
     await alice.getByRole("button", { name: "Stop sharing" }).click();
     for (const p of sessions) await p.getByText("Nothing playing yet").waitFor({ timeout: STEP_MS });
     await heardChime(bob, before);
@@ -259,6 +272,23 @@ try {
     if ((await notes(bob)) !== before) throw new Error("chime played while muted");
     await alice.getByRole("button", { name: "Stop sharing" }).click();
     await bob.getByText("Nothing playing yet").waitFor({ timeout: STEP_MS });
+  });
+
+  await step("Dragging the call's corner grip resizes it and keeps its bottom-right corner", async () => {
+    const call = bob.getByRole("button", { name: /^Resize call/ }).locator("..");
+    const before = await call.boundingBox();
+    await call.hover();
+    const grip = await bob.getByRole("button", { name: /^Resize call/ }).boundingBox();
+    await bob.mouse.move(grip.x + 8, grip.y + 8);
+    await bob.mouse.down();
+    await bob.mouse.move(grip.x - 150, grip.y - 100, { steps: 8 });
+    await bob.mouse.up();
+    const after = await call.boundingBox();
+    if (after.width < before.width + 100) throw new Error(`width ${before.width} -> ${after.width}`);
+    const dr = Math.abs(after.x + after.width - (before.x + before.width));
+    const db = Math.abs(after.y + after.height - (before.y + before.height));
+    if (dr > 2 || db > 2) throw new Error(`bottom-right moved by ${dr},${db}`);
+    globalThis.bobCallWidth = Math.round(after.width);
   });
 
   await step("Call volume turns the partner down without touching the show", async () => {
@@ -277,6 +307,8 @@ try {
     await bob.getByText("Ready", { exact: true }).waitFor({ timeout: STEP_MS });
     await bob.getByRole("button", { name: "Turn sounds on" }).waitFor({ timeout: 2_000 });
     if ((await bob.getByLabel("Call volume").inputValue()) !== "0.3") throw new Error("call volume not remembered");
+    const w = Math.round((await bob.getByRole("button", { name: /^Resize call/ }).locator("..").boundingBox()).width);
+    if (Math.abs(w - globalThis.bobCallWidth) > 2) throw new Error(`call size not remembered: ${globalThis.bobCallWidth} -> ${w}`);
     for (const p of [alice, bob]) {
       await p.waitForFunction(
         () => Array.from(document.querySelectorAll("video")).some((v) => !v.muted && v.videoWidth > 0 && !v.paused),
