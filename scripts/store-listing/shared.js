@@ -17,9 +17,7 @@ for (const el of document.querySelectorAll("[data-logo]")) {
 }
 
 for (const el of document.querySelectorAll("[data-panel]")) {
-  el.classList.add("panel");
-  el.style.zoom = el.dataset.panel;
-  el.innerHTML = `
+  el.innerHTML = `<div class="panel" style="zoom:${el.dataset.panel}">
     <div class="bar"><span>${ring(20, "#a78bfa")}<b>tandem</b><code>k7f-29q</code></span><span class="x">×</span></div>
     <div class="stage"><span class="name">Mika</span><div class="avatar">M</div><div class="you">You</div></div>
     <div class="controls">
@@ -27,7 +25,7 @@ for (const el of document.querySelectorAll("[data-panel]")) {
       <div class="members"><span>A</span><span>M</span></div>
       <span class="leave">${svg("out")} Leave</span>
     </div>
-    <div class="foot"><span>${ring(14, "#7c3aed")} k7f-29q</span><span class="ok">In sync · 0.04s</span></div>`;
+    <div class="foot"><span>${ring(14, "#7c3aed")} k7f-29q</span><span class="ok">In sync · 0.04s</span></div></div>`;
 }
 
 for (const el of document.querySelectorAll("[data-video]")) {
