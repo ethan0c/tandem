@@ -43,6 +43,7 @@ const sections = [
     title: "What stays in your browser",
     body: [
       "Tandem remembers the name you last used so you do not need to type it again. It also remembers your call volume, notification sound preference, and call window size. These settings stay in your browser.",
+      "While a tab is open, Tandem remembers your room and camera and microphone choices so you can reconnect after refreshing. It also briefly remembers your last room to offer a way back from the homepage. You can dismiss that reminder.",
     ],
   },
   {

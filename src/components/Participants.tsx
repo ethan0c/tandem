@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef } from "react";
+import { useId, useLayoutEffect, useRef } from "react";
 import { X } from "lucide-react";
 import type { Member } from "@/lib/types";
 
@@ -9,6 +9,10 @@ export function Participants({ members, selfId, hostId, compact = false }: { mem
   const headingId = useId();
   const self = members.find((m) => m.id === selfId) ?? members[0];
   const avatarSize = compact ? "size-6" : "size-7";
+  useLayoutEffect(() => {
+    const element = dialog.current;
+    return () => element?.close();
+  }, []);
 
   return (
     <>
