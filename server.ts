@@ -113,6 +113,11 @@ app.prepare().then(() => {
 
   const io = new Server<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>(httpServer, {
     path: "/socket.io",
+    // A connection that dies without closing (Wi-Fi drops, a network change) is only noticed by the
+    // heartbeat. The default (25 s + 20 s) left people looking at a frozen call for up to 45 s; this
+    // notices within about 13 s, for a ping of a few bytes every 8 s.
+    pingInterval: 8_000,
+    pingTimeout: 5_000,
     // Only needed when the site is served from another origin (see NEXT_PUBLIC_SOCKET_URL).
     cors: process.env.CORS_ORIGIN ? { origin: process.env.CORS_ORIGIN.split(",").map((o) => o.trim()) } : undefined,
   });

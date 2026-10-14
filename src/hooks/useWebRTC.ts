@@ -47,6 +47,13 @@ export function preferCodecs(pc: RTCPeerConnection) {
   }
 }
 
+/** How long a call may sit "disconnected" before we restart it. */
+const STALL_MS = 2_500;
+/** How long an offer may go unanswered (or unconnected) before the connection is rebuilt. */
+const OFFER_TIMEOUT_MS = 15_000;
+/** After reconnecting, how long to wait for the room to be rejoined before sending signals. */
+const REJOIN_SETTLE_MS = 1_000;
+
 interface Options {
   socketRef: RefObject<AppSocket | null>;
   selfId: string | null;
@@ -67,6 +74,8 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
   const pendingIce = useRef<Map<string, RTCIceCandidateInit[]>>(new Map());
   /** Peers we are the offerer for. */
   const offeredTo = useRef<Set<string>>(new Set());
+  /** Per peer: rebuild the connection if an offer has not connected in time. */
+  const watchdogs = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const localRef = useRef(localStream);
   useEffect(() => {
     localRef.current = localStream;
@@ -121,6 +130,8 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
   );
 
   const closePeer = useCallback((id: string) => {
+    clearTimeout(watchdogs.current.get(id));
+    watchdogs.current.delete(id);
     const pc = pcs.current.get(id);
     if (pc) {
       pc.ontrack = pc.onicecandidate = pc.onconnectionstatechange = null;
@@ -145,6 +156,17 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
         const offer = await pc.createOffer(iceRestart ? { iceRestart: true } : undefined);
         await pc.setLocalDescription(offer);
         send(id, { type: "offer", sdp: offer });
+        // An offer can be lost (sent to a socket that had already died) and nothing would ever retry
+        // it. If this one has not connected in time, start over with a fresh connection.
+        clearTimeout(watchdogs.current.get(id));
+        watchdogs.current.set(
+          id,
+          setTimeout(() => {
+            if (pcs.current.get(id) !== pc || pc.connectionState === "connected") return;
+            closePeer(id);
+            setAttempt((n) => n + 1);
+          }, OFFER_TIMEOUT_MS),
+        );
       } catch {
         if (pcs.current.get(id) !== pc) return;
         closePeer(id);
@@ -152,6 +174,21 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
       }
     },
     [send, closePeer],
+  );
+
+  /**
+   * Get a stalled call moving again. Only the offerer can restart ICE (so both sides never offer at
+   * once); the other side asks it to.
+   */
+  const kick = useCallback(
+    (id: string, pc: RTCPeerConnection) => {
+      if (!offeredTo.current.has(id)) {
+        send(id, { type: "restart" });
+        return;
+      }
+      if (pc.signalingState === "stable") void negotiate(id, pc, true);
+    },
+    [send, negotiate],
   );
 
   const createPc = useCallback(
@@ -167,13 +204,26 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
         const stream = e.streams[0] ?? new MediaStream([e.track]);
         setPeers((prev) => ({ ...prev, [id]: { id, stream } }));
       };
+      // Chrome takes about 30 s to call a lost connection "failed". A short "disconnected" usually
+      // heals by itself, so give it a moment, then restart ICE rather than wait for "failed".
+      let stalled: ReturnType<typeof setTimeout> | undefined;
       pc.onconnectionstatechange = () => {
-        // Only the offerer restarts; the other side answers the new offer like any other.
-        if (pc.connectionState === "failed" && offeredTo.current.has(id)) void negotiate(id, pc, true);
+        clearTimeout(stalled);
+        if (pcs.current.get(id) !== pc) return;
+        if (pc.connectionState === "connected") {
+          clearTimeout(watchdogs.current.get(id));
+          watchdogs.current.delete(id);
+        } else if (pc.connectionState === "failed") {
+          kick(id, pc);
+        } else if (pc.connectionState === "disconnected") {
+          stalled = setTimeout(() => {
+            if (pcs.current.get(id) === pc && pc.connectionState === "disconnected") kick(id, pc);
+          }, STALL_MS);
+        }
       };
       return pc;
     },
-    [send, negotiate],
+    [send, kick],
   );
 
   /** Attach local tracks, or a receive-only transceiver when we have no track of that kind. */
@@ -223,15 +273,28 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
     if (!socket || !selfId) return;
     const onSignal = async ({ from, data }: { from: string; data: SignalData }) => {
       let pc = pcs.current.get(from);
+      if (data.type === "restart") {
+        // The other side's call stalled and only we, the offerer, can restart it.
+        if (pc && offeredTo.current.has(from)) kick(from, pc);
+        else if (!pc && selfId > from) setAttempt((n) => n + 1);
+        return;
+      }
       if (data.type === "offer") {
         // An offer on a settled connection is a renegotiation (ICE restart); anything else is rebuilt.
         if (pc && pc.signalingState !== "stable") {
           closePeer(from);
           pc = undefined;
         }
+        let renegotiated = false;
         if (pc) {
-          await pc.setRemoteDescription(data.sdp);
-        } else {
+          // The offerer may have rebuilt its connection from scratch, which our old one cannot take.
+          renegotiated = await pc.setRemoteDescription(data.sdp).then(() => true, () => false);
+          if (!renegotiated) {
+            closePeer(from);
+            pc = undefined;
+          }
+        }
+        if (!pc) {
           pc = createPc(from);
           await pc.setRemoteDescription(data.sdp);
           attachLocal(pc);
@@ -266,13 +329,36 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
       });
     };
     socket.on("rtc:signal", handler);
-    return () => {
-      socket.off("rtc:signal", handler);
+    // Back on the signalling server: anything not connected may have missed its signals while we
+    // were away, so restart it now instead of waiting for it to give up. After a network change even
+    // connections that still look fine are usually broken, so then restart them all. (useRoom starts a
+    // fresh socket when the network returns, so that lands here too.) Signals only go through once the
+    // room is rejoined, a moment after "connect".
+    let everything = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const onConnect = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        for (const [id, pc] of pcs.current) if (everything || pc.connectionState !== "connected") kick(id, pc);
+        everything = false;
+      }, REJOIN_SETTLE_MS);
     };
-  }, [socketRef, selfId, createPc, attachLocal, flushIce, send, closePeer]);
+    const onOnline = () => {
+      everything = true;
+    };
+    socket.on("connect", onConnect);
+    window.addEventListener("online", onOnline);
+    return () => {
+      clearTimeout(timer);
+      socket.off("rtc:signal", handler);
+      socket.off("connect", onConnect);
+      window.removeEventListener("online", onOnline);
+    };
+  }, [socketRef, selfId, createPc, attachLocal, flushIce, send, closePeer, kick]);
 
   // Tear everything down on unmount.
   useEffect(() => {
+    const timers = watchdogs.current;
     const map = pcs.current;
     const ice = pendingIce.current;
     const offered = offeredTo.current;
@@ -281,6 +367,8 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
         pc.ontrack = pc.onicecandidate = pc.onconnectionstatechange = null;
         pc.close();
       }
+      for (const t of timers.values()) clearTimeout(t);
+      timers.clear();
       map.clear();
       ice.clear();
       offered.clear();

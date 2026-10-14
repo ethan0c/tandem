@@ -61,7 +61,8 @@ export function sendGoodbye(reconnecting = false) {
 export function getSocket(): AppSocket {
   if (!socket) {
     const url = process.env.NEXT_PUBLIC_SOCKET_URL;
-    const opts = { path: "/socket.io", transports: ["websocket", "polling"] };
+    // Retry quickly: the default backoff grows to 5 s, which is most of the wait after a short outage.
+    const opts = { path: "/socket.io", transports: ["websocket", "polling"], reconnectionDelay: 500, reconnectionDelayMax: 2_000 };
     socket = url ? io(url, opts) : io(opts);
   }
   return socket;

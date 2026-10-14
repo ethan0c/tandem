@@ -68,7 +68,9 @@ export interface JoinAck {
 
 export type SignalData =
   | { type: "offer" | "answer"; sdp: RTCSessionDescriptionInit }
-  | { type: "candidate"; candidate: RTCIceCandidateInit };
+  | { type: "candidate"; candidate: RTCIceCandidateInit }
+  /** The answering side's call stalled: ask the offering side to restart it. */
+  | { type: "restart" };
 
 /**
  * Screen-share signalling: a viewer sends `request` to the sharer, who answers with an offer.

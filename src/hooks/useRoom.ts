@@ -200,6 +200,17 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       socket.io.reconnection(true);
       socket.connect();
     };
+    // The browser knows about a lost network long before any heartbeat does. Going offline, drop the
+    // connection now so the page says so. Coming back, a connection that still looks open is almost
+    // certainly dead after a network change, so start a fresh one rather than wait to find out.
+    const onOffline = () => {
+      if (!handedOff && socket.connected) socket.io.engine?.close();
+    };
+    const onOnline = () => {
+      if (handedOff) return;
+      if (socket.connected) socket.io.engine?.close();
+      else socket.connect();
+    };
 
     socket.on("member:joined", onJoined);
     socket.on("member:left", onLeft);
@@ -213,6 +224,8 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     socket.on("connect", join);
     window.addEventListener("pagehide", onPageHide);
     window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("offline", onOffline);
+    window.addEventListener("online", onOnline);
     if (socket.connected) join();
     else socket.connect();
 
@@ -222,6 +235,8 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       reclaimRef.current = () => {};
       window.removeEventListener("pagehide", onPageHide);
       window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("offline", onOffline);
+      window.removeEventListener("online", onOnline);
       socket.off("member:joined", onJoined);
       socket.off("member:left", onLeft);
       socket.off("member:replaced", onReplaced);
