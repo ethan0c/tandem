@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { ConnectionQuality, SHARE_TIERS, ShareAdaptation, setCameraQuality, setShareQuality } from '../src/lib/connection-quality';
+import { ConnectionQuality, RELAY_SHARE_TIER, SHARE_TIERS, ShareAdaptation, setCameraQuality, setShareQuality, viaRelay } from '../src/lib/connection-quality';
 
 function report(...rows: Record<string, unknown>[]) {
   return new Map(rows.map((row) => [row.id, row])) as unknown as RTCStatsReport;
@@ -125,4 +125,22 @@ test('share steps scale the capture to the step height', async () => {
   await setShareQuality(pc, 2);
   assert.equal(latest?.encodings[0].scaleResolutionDownBy, 2);
   assert.equal(latest?.encodings[0].maxBitrate, 6_000_000);
+});
+
+test('tells a relayed connection from a direct one, by the pair in use', () => {
+  const stats = (local: string, remote: string) => report(
+    { id: 't', type: 'transport', selectedCandidatePairId: 'p' },
+    { id: 'p', type: 'candidate-pair', localCandidateId: 'l', remoteCandidateId: 'r', state: 'succeeded', nominated: true },
+    { id: 'l', type: 'local-candidate', candidateType: local },
+    { id: 'r', type: 'remote-candidate', candidateType: remote },
+  );
+  assert.equal(viaRelay(stats('host', 'srflx')), false);
+  assert.equal(viaRelay(stats('relay', 'host')), true);
+  assert.equal(viaRelay(stats('srflx', 'relay')), true, 'the other side relaying counts too');
+  assert.equal(viaRelay(report()), false, 'not connected yet');
+});
+
+test('the relay cap is the lowest share step', () => {
+  assert.equal(RELAY_SHARE_TIER, SHARE_TIERS.length - 1);
+  assert.ok(SHARE_TIERS[RELAY_SHARE_TIER].bitrate <= 2_500_000);
 });

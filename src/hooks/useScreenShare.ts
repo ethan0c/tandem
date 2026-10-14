@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { AppSocket } from "@/lib/socket";
 import type { Member, ScreenSignal, Source } from "@/lib/types";
-import { ShareAdaptation, setShareQuality } from "@/lib/connection-quality";
+import { RELAY_SHARE_TIER, ShareAdaptation, setShareQuality, viaRelay } from "@/lib/connection-quality";
 import { iceServers, preferCodecs, REJOIN_SETTLE_MS, STALL_MS } from "./useWebRTC";
 
 /** A viewer with no picture asks the sharer again this often, in case a request or offer was lost. */
@@ -147,7 +147,10 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
         if (cancelled) return;
         if (out.pc.connectionState !== "connected") continue;
         try {
-          const tier = out.adaptation.sample(await out.pc.getStats());
+          const stats = await out.pc.getStats();
+          // Through the metered relay, a share stays at 720p however good the link is.
+          const relay = viaRelay(stats);
+          const tier = Math.max(out.adaptation.sample(stats), relay ? RELAY_SHARE_TIER : 0);
           if (cancelled) return;
           if (tier !== out.tier) {
             out.tier = tier;

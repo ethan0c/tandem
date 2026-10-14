@@ -65,7 +65,30 @@ export class ConnectionQuality {
 }
 
 /** Limit only the camera sender; screen sharing uses its own connections. */
-export async function setCameraQuality(pc: RTCPeerConnection, poor: boolean) {
+/**
+ * Whether the connection in use goes through a TURN relay rather than directly. Relay traffic is
+ * metered (it is the one cost that grows with users), so relayed calls and shares send less.
+ */
+export function viaRelay(stats: RTCStatsReport): boolean {
+  let selected: string | undefined;
+  stats.forEach((s) => {
+    if (s.type === "transport" && s.selectedCandidatePairId) selected = s.selectedCandidatePairId;
+  });
+  let pair: { localCandidateId?: string; remoteCandidateId?: string } | undefined;
+  stats.forEach((s) => {
+    if (s.type === "candidate-pair" && (selected ? s.id === selected : s.nominated && s.state === "succeeded")) pair = s;
+  });
+  if (!pair) return false;
+  const local = pair.localCandidateId ? stats.get(pair.localCandidateId) : undefined;
+  const remote = pair.remoteCandidateId ? stats.get(pair.remoteCandidateId) : undefined;
+  return local?.candidateType === "relay" || remote?.candidateType === "relay";
+}
+
+/** The highest share step a relayed connection may use: 720p at 2.5 Mbps instead of up to 4K at 20. */
+export const RELAY_SHARE_TIER = 3;
+
+/** `relay`: the call goes through the metered relay, so it sends about half (still a clear 540p picture). */
+export async function setCameraQuality(pc: RTCPeerConnection, poor: boolean, relay = false) {
   for (const sender of pc.getSenders()) {
     if (sender.track?.kind !== "video") continue;
     try {
@@ -73,9 +96,9 @@ export async function setCameraQuality(pc: RTCPeerConnection, poor: boolean) {
       if (!params.encodings?.length) continue;
       const height = sender.track.getSettings().height ?? 720;
       for (const encoding of params.encodings) {
-        encoding.maxBitrate = poor ? 220_000 : 900_000;
+        encoding.maxBitrate = poor ? 220_000 : relay ? 450_000 : 900_000;
         encoding.maxFramerate = poor ? 15 : 24;
-        encoding.scaleResolutionDownBy = Math.max(1, height / (poor ? 360 : 720));
+        encoding.scaleResolutionDownBy = Math.max(1, height / (poor ? 360 : relay ? 540 : 720));
       }
       params.degradationPreference = "maintain-framerate";
       await sender.setParameters(params);

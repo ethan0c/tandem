@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { AppSocket } from "@/lib/socket";
 import type { Member, SignalData } from "@/lib/types";
-import { ConnectionQuality, setCameraQuality } from "@/lib/connection-quality";
+import { ConnectionQuality, setCameraQuality, viaRelay } from "@/lib/connection-quality";
 import { rememberMedia } from "@/lib/last-room";
 
 export interface Peer {
@@ -98,7 +98,7 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
   useEffect(() => { rememberMedia(camOn, micOn); }, [camOn, micOn]);
 
   useEffect(() => {
-    const monitors = new Map<RTCPeerConnection, { quality: ConnectionQuality; applied: boolean | null }>();
+    const monitors = new Map<RTCPeerConnection, { quality: ConnectionQuality; applied: string | null; logged: boolean }>();
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout>;
     async function poll() {
@@ -108,7 +108,7 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
       for (const pc of current) {
         if (cancelled) return;
         if (pc.connectionState === "closed" || pc.connectionState === "new" || pc.connectionState === "connecting") continue;
-        const monitor = monitors.get(pc) ?? { quality: new ConnectionQuality(), applied: null };
+        const monitor = monitors.get(pc) ?? { quality: new ConnectionQuality(), applied: null, logged: false };
         monitors.set(pc, monitor);
         try {
           const stats = await pc.getStats();
@@ -118,9 +118,15 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
           poor ||= struggling;
           // A hidden tab gets less CPU: send the light camera so the screen share keeps the encoder time.
           const light = monitor.quality.limited || document.visibilityState === "hidden";
-          if (monitor.applied !== light) {
-            await setCameraQuality(pc, light);
-            monitor.applied = light;
+          const relay = viaRelay(stats);
+          if (!monitor.logged && pc.connectionState === "connected") {
+            // One line per call, so "why is this call slow / using the relay?" has an answer in the console.
+            console.info(`[tandem] call connected ${relay ? "through the TURN relay" : "directly"}`);
+            monitor.logged = true;
+          }
+          if (monitor.applied !== `${light}|${relay}`) {
+            await setCameraQuality(pc, light, relay);
+            monitor.applied = `${light}|${relay}`;
           }
         } catch {
           poor ||= monitor.quality.poor;
