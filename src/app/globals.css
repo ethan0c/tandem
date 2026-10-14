@@ -273,10 +273,9 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 .hero-body { gap: clamp(24px, 4vh, 40px); padding-top: clamp(16px, 4vh, 40px); padding-bottom: clamp(24px, 4vh, 40px); min-height: 0; }
 .hero-intro { flex-shrink: 0; }
 .hero-title { font-size: clamp(2.5rem, 5vw, 4.25rem); line-height: 1; }
-/* The preview takes whatever height is left in the viewport, keeping 16:9, so the whole hero fits above the fold. */
-/* Reserve the minimum figure height so extra intro content can grow the hero without overlapping the preview. */
-.hero-preview { flex: 1; min-height: 315px; max-width: 1080px; container-type: size; display: flex; align-items: flex-end; justify-content: center; }
-.hero-preview > figure { width: min(100cqw, 100cqh * 16 / 9); min-width: min(100cqw, 560px); }
+/* Keep the preview in normal flow so the hero grows when the rejoin card appears. */
+.hero-preview { flex: 1; min-height: 0; max-width: 1080px; display: flex; align-items: flex-end; justify-content: center; }
+.hero-preview > figure { width: min(100%, max(560px, calc((100svh - 440px) * 16 / 9))); flex-shrink: 0; }
 .hero-nav a { padding: 8px 12px; border-radius: 8px; transition: color 180ms ease; }
 .hero-nav a:hover, .hero-nav a:focus-visible { color: white; }
 .hero-nav a:focus-visible { outline: 2px solid rgb(255 255 255 / 0.5); outline-offset: 2px; }
