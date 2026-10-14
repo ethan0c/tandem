@@ -93,7 +93,7 @@ export function ScreenStage({
         autoPlay
         playsInline
         muted={isSharer}
-        className="absolute inset-0 h-full w-full object-contain"
+        className="absolute inset-0 h-full w-full object-contain object-center"
         onPlaying={() => setWaiting(false)}
         onWaiting={() => setWaiting(true)}
         onVolumeChange={(e) => {

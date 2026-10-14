@@ -240,7 +240,7 @@ export function Player({
         poster={preview?.poster}
         aria-label={preview ? "Haikyu episode preview" : undefined}
         preload="auto"
-        className="absolute inset-0 h-full w-full"
+        className="absolute inset-0 h-full w-full object-contain object-center"
         onClick={togglePlay}
         onLoadedMetadata={(e) => {
           setDuration(e.currentTarget.duration);

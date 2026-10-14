@@ -289,8 +289,7 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
   const sendMessage = useCallback((text: string) => {
     const clean = text.trim();
     if (!clean) return;
-    if (joinedRef.current) socketRef.current?.emit("chat:send", { text: clean });
-    else heldChat.current = [...heldChat.current, clean].slice(-20);
+    socketRef.current?.emit("chat:send", { text: clean });
   }, []);
 
   // A reaction is only worth anything right now, so one sent while away is dropped.

@@ -55,19 +55,19 @@ export function TopBar({ roomId, roomUrl, members, selfId, hostId, status, drift
     >
       <HeaderFrame>
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          <Link href="/" className="shrink-0" aria-label="Tandem home">
+          <Link href="/" className="flex h-8 shrink-0 items-center" aria-label="Tandem home">
             <Logo size={24} light className="[&>span]:hidden sm:[&>span]:inline" />
           </Link>
           <button
             onClick={copy}
-            className="group flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-sans text-xs text-zinc-200 transition hover:bg-white/10"
+            className="group flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-sans text-xs text-zinc-200 transition hover:bg-white/10"
             title="Copy invite link"
             aria-label="Copy invite link"
           >
             <span className="hidden sm:inline">{roomId}</span>
             {copied ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3 text-zinc-400 group-hover:text-white" />}
           </button>
-          <span className={`hidden rounded-full px-2.5 py-1 text-[11px] font-medium sm:inline ${sync.tone}`}>{sync.text}</span>
+          <span className={`hidden h-8 items-center rounded-full px-2.5 text-[11px] font-medium sm:inline-flex ${sync.tone}`}>{sync.text}</span>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <Participants members={members} selfId={selfId} hostId={hostId} />

@@ -71,7 +71,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
     ref,
     (c, e) => ({
       x: c.width - e.width - 16,
-      y: c.height - e.height - 88,
+      y: (c.height - e.height) / 2,
     }),
     reserveRight,
   );
