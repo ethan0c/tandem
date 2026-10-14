@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHmac } from 'node:crypto';
 import { test } from 'node:test';
 import { TURN_TTL_S, mintIceServers } from '../src/lib/turn';
 
@@ -37,4 +38,21 @@ test('Cloudflare: keeps the relay entries from either response shape', async () 
   assert.deepEqual(list?.iceServers, [{ urls: ['turn:turn.cloudflare.com:3478?transport=udp'], username: 'a', credential: 'b' }]);
   const single = await mintIceServers(env, reply(200, { iceServers: { urls: ['turns:turn.cloudflare.com:5349?transport=tcp'], username: 'a', credential: 'b' } }));
   assert.equal(single?.iceServers.length, 1);
+});
+
+test('own relay (coturn): credentials computed here, valid only until they expire', async () => {
+  const fetchImpl = (async () => { throw new Error('nothing should be called'); }) as unknown as typeof fetch;
+  const minted = await mintIceServers({ TURN_SECRET: 'shh', TURN_URLS: 'turn:turn.example.com:3478,turns:turn.example.com:443?transport=tcp' }, fetchImpl, 1_000_000);
+  const server = minted!.iceServers[0];
+  const expiry = Math.floor((1_000_000 + TURN_TTL_S * 1000) / 1000);
+  assert.equal(server.username, `${expiry}:tandem`);
+  // What coturn computes to check it: base64(HMAC-SHA1(secret, username)).
+  assert.equal(server.credential, createHmac('sha1', 'shh').update(`${expiry}:tandem`).digest('base64'));
+  assert.deepEqual(server.urls, ['turn:turn.example.com:3478', 'turns:turn.example.com:443?transport=tcp']);
+  assert.ok(!JSON.stringify(minted).includes('shh'));
+});
+
+test('own relay wins over a hosted provider when both are set', async () => {
+  const minted = await mintIceServers({ TURN_SECRET: 's', TURN_URLS: 'turn:a:3478', METERED_DOMAIN: 'x', METERED_SECRET_KEY: 'y' }, reply(500, {}));
+  assert.match(String(minted!.iceServers[0].username), /:tandem$/);
 });

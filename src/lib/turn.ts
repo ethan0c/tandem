@@ -1,7 +1,11 @@
+import { createHmac } from "node:crypto";
+
 /**
  * Short-lived TURN credentials, minted on the server (see /api/turn). A password baked into the page
- * can be copied and used to drain the relay quota for as long as it lives; these expire on their own.
- * Supports Metered (METERED_DOMAIN + METERED_SECRET_KEY) and Cloudflare (CLOUDFLARE_TURN_KEY_ID +
+ * can be copied and used to drain the relay for as long as it lives; these expire on their own.
+ *
+ * Providers, in order: our own coturn (TURN_SECRET: credentials are computed here, nothing to call;
+ * see deploy/turn), Metered (METERED_DOMAIN + METERED_SECRET_KEY), Cloudflare (CLOUDFLARE_TURN_KEY_ID +
  * CLOUDFLARE_TURN_API_TOKEN). Server-only: the secrets never reach the browser.
  */
 
@@ -26,6 +30,16 @@ function relayUrls(env: Env) {
 
 export async function mintIceServers(env: Env = process.env, fetchImpl: typeof fetch = fetch, now = Date.now()): Promise<MintedIce | null> {
   const expiresAt = now + TURN_TTL_S * 1000;
+
+  if (env.TURN_SECRET) {
+    // coturn's "TURN REST API" scheme (use-auth-secret): the username is the expiry time, the password
+    // is an HMAC of it with the secret the relay also knows. The relay checks both; no call needed.
+    const urls = relayUrls(env);
+    if (!urls.length) return null;
+    const username = `${Math.floor(expiresAt / 1000)}:tandem`;
+    const credential = createHmac("sha1", env.TURN_SECRET).update(username).digest("base64");
+    return { iceServers: [{ urls, username, credential }], expiresAt };
+  }
 
   if (env.METERED_DOMAIN && env.METERED_SECRET_KEY) {
     const urls = relayUrls(env);

@@ -12,7 +12,8 @@
     "e2e:party": "node e2e/party.mjs",
     "e2e:resilience": "node e2e/resilience.mjs",
     "test": "tsx --test tests/*.test.ts",
-    "discord:register": "tsx scripts/discord/register.mjs"
+    "discord:register": "tsx scripts/discord/register.mjs",
+    "turn:check": "tsx scripts/turn/check.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
