@@ -38,7 +38,7 @@ const CODEC_ORDER = ["video/H264", "video/VP9", "video/AV1", "video/VP8"];
  * first frame in a fresh browser (about 5.5 s measured with VideoToolbox), and the call is connected
  * but blank all that time. Software VP8/VP9 starts at once, and a camera does not need the hardware.
  */
-export const CAMERA_CODEC_ORDER = (process.env.NEXT_PUBLIC_CAMERA_CODECS ?? "video/VP8,video/VP9,video/H264,video/AV1").split(",");
+export const CAMERA_CODEC_ORDER = ["video/VP8", "video/VP9", "video/H264", "video/AV1"];
 
 /** Put our preferred video codecs first in the offer so the answer picks one of them. */
 export function preferCodecs(pc: RTCPeerConnection, order: string[] = CODEC_ORDER) {
