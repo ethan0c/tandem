@@ -43,3 +43,16 @@ details { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px
 summary { cursor: pointer; color: #a1a1aa; font-size: 12px; }
 summary:hover { color: #d4d4d8; }
 details label { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; font-size: 12px; color: #a1a1aa; }
+
+#ours { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); gap: 8px; }
+.stats { margin: 0; font-size: 12px; color: var(--brand-300); }
+#shows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+#shows li { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: rgb(255 255 255 / 0.03); }
+#shows .show { flex: 1; min-width: 0; }
+#shows .title { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+#shows .meta { display: block; font-size: 11px; color: #71717a; }
+#shows .bar { display: block; height: 3px; margin-top: 5px; border-radius: 2px; background: var(--line); overflow: hidden; }
+#shows .bar i { display: block; height: 100%; background: var(--brand-500); }
+.link { all: unset; display: block; margin-top: 12px; font-size: 12px; color: var(--brand-300); cursor: pointer; }
+.link:hover { color: #fff; }
+.link:focus-visible { outline: 2px solid rgb(255 255 255 / 0.5); outline-offset: 2px; border-radius: 4px; }
