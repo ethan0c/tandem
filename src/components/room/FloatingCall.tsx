@@ -53,9 +53,11 @@ interface Props {
   onReact?: (emoji: Reaction) => void;
   /** Our own member id, to tell who is still connecting. */
   selfId?: string | null;
+  /** Width covered on the right (the open chat), which the call keeps clear of. */
+  reserveRight?: number;
 }
 
-export function FloatingCall({ containerRef, localStream, peers, members, micOn, camOn, toggleMic, toggleCam, roomUrl, poorConnection, turnCameraOff, onReact, selfId = null }: Props) {
+export function FloatingCall({ containerRef, localStream, peers, members, micOn, camOn, toggleMic, toggleCam, roomUrl, poorConnection, turnCameraOff, onReact, selfId = null, reserveRight = 0 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [minimized, setMinimized] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -64,10 +66,15 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
   const [width, setWidth] = useState<number | null>(null);
   const [resizing, setResizing] = useState(false);
   const resizeStart = useRef<{ px: number; width: number; height: number; right: number; bottom: number; maxWidth: number } | null>(null);
-  const { pos, dragging, moveTo, handlers } = useDraggable(containerRef, ref, (c, e) => ({
-    x: c.width - e.width - 16,
-    y: c.height - e.height - 88,
-  }));
+  const { pos, dragging, moveTo, handlers } = useDraggable(
+    containerRef,
+    ref,
+    (c, e) => ({
+      x: c.width - e.width - 16,
+      y: c.height - e.height - 88,
+    }),
+    reserveRight,
+  );
 
   const nameOf = (id: string) => members.find((m) => m.id === id)?.name ?? "Guest";
   // In the room, but no call with them yet.
@@ -175,7 +182,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
         width: !minimized && currentWidth ? currentWidth : undefined,
       }}
       className={`group/call @container absolute z-30 max-w-[calc(100%-16px)] overflow-hidden rounded-2xl border border-white/15 bg-ink-800/90 text-white shadow-2xl shadow-black/50 backdrop-blur ${
-        resizing ? "" : "transition-[width]"
+        resizing ? "" : dragging ? "transition-[width]" : "transition-[width,left,top] duration-200"
       } ${dragging ? "cursor-grabbing" : "cursor-grab"} ${minimized ? "w-44" : "w-56 sm:w-72"}`}
     >
       {!minimized && (

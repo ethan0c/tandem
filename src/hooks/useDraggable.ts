@@ -15,10 +15,15 @@ export function useDraggable(
   containerRef: RefObject<HTMLElement | null>,
   elementRef: RefObject<HTMLElement | null>,
   initial: (container: DOMRect, el: DOMRect) => Pos,
+  /** Pixels on the container's right that are covered (e.g. by an open side panel) and must be avoided. */
+  reserveRight = 0,
 ) {
   const [pos, setPos] = useState<Pos | null>(null);
   const [dragging, setDragging] = useState(false);
   const start = useRef<{ px: number; py: number; x: number; y: number } | null>(null);
+  const reserveRef = useRef(reserveRight);
+  /** Where the element was before a panel pushed it aside, to put it back when the panel closes. */
+  const parked = useRef<Pos | null>(null);
 
   const clamp = useCallback(
     (p: Pos): Pos => {
@@ -26,7 +31,7 @@ export function useDraggable(
       const e = elementRef.current?.getBoundingClientRect();
       if (!c || !e) return p;
       return {
-        x: Math.min(Math.max(8, p.x), Math.max(8, c.width - e.width - 8)),
+        x: Math.min(Math.max(8, p.x), Math.max(8, c.width - reserveRef.current - e.width - 8)),
         y: Math.min(Math.max(8, p.y), Math.max(8, c.height - e.height - 8)),
       };
     },
@@ -49,10 +54,29 @@ export function useDraggable(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clamp]);
 
+  // A panel opened over our side: step aside. It closed: go back to where we were, unless moved since.
+  useEffect(() => {
+    reserveRef.current = reserveRight;
+    if (reserveRight > 0) {
+      setPos((prev) => {
+        if (!prev) return prev;
+        const next = clamp(prev);
+        if (next.x !== prev.x || next.y !== prev.y) parked.current = prev;
+        return next;
+      });
+    } else if (parked.current) {
+      const back = parked.current;
+      parked.current = null;
+      setPos(clamp(back));
+    }
+  }, [reserveRight, clamp]);
+
   const onPointerDown = useCallback(
     (ev: React.PointerEvent) => {
       if ((ev.target as HTMLElement).closest("button, input, a")) return;
       if (!pos) return;
+      // Moved by hand: this is where it lives now.
+      parked.current = null;
       ev.preventDefault();
       (ev.currentTarget as HTMLElement).setPointerCapture(ev.pointerId);
       start.current = { px: ev.clientX, py: ev.clientY, x: pos.x, y: pos.y };

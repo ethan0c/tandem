@@ -6,6 +6,7 @@ import { useReleaseStream } from "@/hooks/useReleaseStream";
 import { useRoom } from "@/hooks/useRoom";
 import { useScreenShare } from "@/hooks/useScreenShare";
 import { useWebRTC } from "@/hooks/useWebRTC";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { FloatingReactions, partnerNotice, useFloatingReactions } from "@/components/Reactions";
 import { TakenOver } from "@/components/TakenOver";
 import { ChatPanel } from "./ChatPanel";
@@ -14,6 +15,9 @@ import { Player } from "./Player";
 import { ScreenStage } from "./ScreenStage";
 import { SourceDialog } from "./SourceDialog";
 import { TopBar } from "./TopBar";
+
+/** The chat panel's width on wide screens (Tailwind's w-80, in ChatPanel). */
+const CHAT_WIDTH = 320;
 
 interface Props {
   roomId: string;
@@ -42,6 +46,8 @@ export function Session({ roomId, name, localStream }: Props) {
     nameRef.current = (id) => (id === room.selfId ? "You" : (room.members.find((m) => m.id === id)?.name ?? "Guest"));
   });
   const notice = partnerNotice(room.members, room.selfId);
+  // On a wide screen the chat sits beside the show; on a phone it covers it, like a sheet.
+  const wide = useMediaQuery("(min-width: 640px)");
   const rtc = useWebRTC({
     socketRef: room.socketRef,
     selfId: room.selfId,
@@ -88,6 +94,7 @@ export function Session({ roomId, name, localStream }: Props) {
     [messageCount],
   );
   const toggleChat = useCallback(() => setChat(!chatOpen), [setChat, chatOpen]);
+  const chatBeside = chatOpen && wide;
 
   // "c" opens and closes the chat, unless you are typing somewhere.
   useEffect(() => {
@@ -143,53 +150,57 @@ export function Session({ roomId, name, localStream }: Props) {
       onTouchStart={bump}
       className="relative flex h-dvh flex-col overflow-hidden bg-black text-white"
     >
-      <TopBar
-        roomId={roomId}
-        roomUrl={roomUrl}
-        members={room.members}
-        selfId={room.selfId}
-        hostId={room.hostId}
-        status={room.status}
-        drift={isScreen ? null : drift}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={toggleFullscreen}
-        visible={chromeVisible}
-        chat={{ open: chatOpen, unread, onToggle: toggleChat }}
-      />
-
-      {room.source?.kind === "screen" ? (
-        <ScreenStage
-          isSharer={screen.isSharer}
-          label={room.source.label}
-          sharerName={room.members.find((m) => m.id === screenSharerId)?.name ?? null}
-          localScreen={screen.localScreen}
-          remoteScreen={screen.remoteScreen}
-          error={screen.error}
-          onDismissError={screen.clearError}
-          onStop={screen.stop}
-          onOpenSource={() => setSourceOpen(true)}
-          onToggleFullscreen={toggleFullscreen}
-          isFullscreen={isFullscreen}
-          chromeVisible={chromeVisible}
-        />
-      ) : (
-        <Player
-          source={room.source}
-          localFile={effectiveFile}
-          remote={room.remote}
+      {/* The show and its controls make room for the chat on wide screens instead of hiding under it. */}
+      <div className={`relative flex min-h-0 flex-1 flex-col transition-[margin] duration-200 ${chatBeside ? "mr-80" : ""}`}>
+        <TopBar
+          roomId={roomId}
+          roomUrl={roomUrl}
+          members={room.members}
           selfId={room.selfId}
-          serverNow={room.serverNow}
-          emitSync={room.emitSync}
-          onOpenSource={() => setSourceOpen(true)}
-          onPickFile={setLocalFile}
-          onToggleFullscreen={toggleFullscreen}
+          hostId={room.hostId}
+          status={room.status}
+          drift={isScreen ? null : drift}
           isFullscreen={isFullscreen}
-          onDrift={onDrift}
-          onPlayingChange={onPlayingChange}
-          chromeVisible={chromeVisible}
-          pickerName={pickerName}
+          onToggleFullscreen={toggleFullscreen}
+          visible={chromeVisible}
+          chat={{ open: chatOpen, unread, onToggle: toggleChat }}
         />
-      )}
+
+        {room.source?.kind === "screen" ? (
+          <ScreenStage
+            isSharer={screen.isSharer}
+            label={room.source.label}
+            sharerName={room.members.find((m) => m.id === screenSharerId)?.name ?? null}
+            localScreen={screen.localScreen}
+            remoteScreen={screen.remoteScreen}
+            error={screen.error}
+            onDismissError={screen.clearError}
+            onStop={screen.stop}
+            onOpenSource={() => setSourceOpen(true)}
+            onToggleFullscreen={toggleFullscreen}
+            isFullscreen={isFullscreen}
+            chromeVisible={chromeVisible}
+          />
+        ) : (
+          <Player
+            source={room.source}
+            localFile={effectiveFile}
+            remote={room.remote}
+            selfId={room.selfId}
+            serverNow={room.serverNow}
+            emitSync={room.emitSync}
+            onOpenSource={() => setSourceOpen(true)}
+            onPickFile={setLocalFile}
+            onToggleFullscreen={toggleFullscreen}
+            isFullscreen={isFullscreen}
+            onDrift={onDrift}
+            onPlayingChange={onPlayingChange}
+            chromeVisible={chromeVisible}
+            pickerName={pickerName}
+          />
+        )}
+
+      </div>
 
       <FloatingCall
         containerRef={containerRef}
@@ -205,6 +216,7 @@ export function Session({ roomId, name, localStream }: Props) {
         roomUrl={roomUrl}
         onReact={room.sendReaction}
         selfId={room.selfId}
+        reserveRight={chatBeside ? CHAT_WIDTH : 0}
       />
 
       <FloatingReactions items={floating.items} onDone={floating.remove} />
@@ -238,7 +250,9 @@ export function Session({ roomId, name, localStream }: Props) {
 
       {room.takenOver && <TakenOver onUseHere={room.useHere} />}
 
-      {room.status === "disconnected" && !room.takenOver && (
+      {/* Only when the call is down too: while the partner's video still plays, the top bar's
+          "Reconnecting…" is enough and the room should not look broken. */}
+      {room.status === "disconnected" && !room.takenOver && rtc.peers.length === 0 && (
         <div className="absolute inset-x-0 top-16 md:top-[72px] z-30 flex justify-center px-4">
           <div className="rounded-full border border-amber-400/30 bg-amber-950/80 px-4 py-1.5 text-xs text-amber-200 backdrop-blur">
             Connection lost. Trying to reconnect…
