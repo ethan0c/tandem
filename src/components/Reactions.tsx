@@ -15,6 +15,8 @@ interface Floating {
 export function useFloatingReactions() {
   const [items, setItems] = useState<Floating[]>([]);
   const add = useCallback((id: string, emoji: Reaction) => {
+    // Animations do not run in a background tab, so reactions would pile up and burst out on return.
+    if (document.hidden) return;
     setItems((prev) => [...prev.slice(-24), { id, emoji, x: 15 + Math.random() * 70 }]);
   }, []);
   const remove = useCallback((id: string) => setItems((prev) => prev.filter((r) => r.id !== id)), []);

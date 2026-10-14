@@ -41,7 +41,10 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
   const [source, setSource] = useState<Source | null>(null);
   const [remote, setRemote] = useState<RemotePlayback | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  /** Another tab of this browser opened the same room and took our place. */
+  const [takenOver, setTakenOver] = useState(false);
   const socketRef = useRef<AppSocket | null>(null);
+  const reclaimRef = useRef<() => void>(() => {});
   const offsetRef = useRef(0);
   const seqRef = useRef(0);
   // The latest callback, so the socket listener never has to be re-registered.
@@ -61,6 +64,30 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     socketRef.current = socket;
     let active = true;
     let pageHiding = false;
+    let handedOff = false;
+    // One seat per person: the newest tab in a room takes over, so nobody is in the call twice.
+    // Two tabs under different names are two people (testing on one computer), so they both stay.
+    const channel = typeof BroadcastChannel === "undefined" ? null : new BroadcastChannel(`tandem:room:${roomId}`);
+    const who = name.trim().toLowerCase();
+    const claim = () => channel?.postMessage({ type: "claim", clientId, who });
+    if (channel) {
+      channel.onmessage = (e: MessageEvent<{ type?: string; clientId?: string; who?: string }>) => {
+        if (e.data?.type !== "claim" || e.data.clientId === clientId || e.data.who !== who || handedOff) return;
+        handedOff = true;
+        setTakenOver(true);
+        // Leaving for real frees the seat at once, and an empty list ends our calls.
+        socket.io.reconnection(false);
+        socket.disconnect();
+        setMembers([]);
+      };
+    }
+    reclaimRef.current = () => {
+      if (!handedOff) return;
+      handedOff = false;
+      setTakenOver(false);
+      socket.io.reconnection(true);
+      socket.connect();
+    };
 
     const push = (playback: PlaybackState, from: string, reason: SyncReason) =>
       setRemote({ playback, from, reason, seq: ++seqRef.current });
@@ -100,8 +127,9 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     const join = () => {
       setStatus("connecting");
       // The same clientId every time, so a reconnect lands us back in our own seat.
+      claim();
       socket.emit("room:join", { roomId, name, clientId, tabId, formerTabId }, (ack) => {
-        if (!active) return;
+        if (!active || handedOff) return;
         activateSession(roomId, name);
         if (dropped) playChime("reconnect");
         dropped = false;
@@ -150,6 +178,10 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: s } : m)));
     const onReaction = (r: { id: string; from: string; emoji: Reaction }) => onReactionRef.current?.(r);
     const onDisconnect = () => {
+      if (handedOff) {
+        setStatus("disconnected");
+        return;
+      }
       dropped = true;
       playChime("disconnect");
       setStatus("disconnected");
@@ -186,6 +218,8 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
 
     return () => {
       active = false;
+      channel?.close();
+      reclaimRef.current = () => {};
       window.removeEventListener("pagehide", onPageHide);
       window.removeEventListener("pageshow", onPageShow);
       socket.off("member:joined", onJoined);
@@ -226,8 +260,13 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     socketRef.current?.emit("member:status", s);
   }, []);
 
+  /** Take the room back from the other tab. */
+  const useHere = useCallback(() => reclaimRef.current(), []);
+
   return {
     status,
+    takenOver,
+    useHere,
     selfId,
     hostId,
     members,

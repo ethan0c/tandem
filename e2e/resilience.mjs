@@ -184,9 +184,27 @@ async function diagnose(p) {
 /* Disruptions                                                         */
 /* ------------------------------------------------------------------ */
 
+/** Pretend the tab went to the background (Playwright keeps real pages visible). */
+const setHidden = (page, hidden) =>
+  page.evaluate((hidden) => {
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => (hidden ? "hidden" : "visible") });
+    Object.defineProperty(document, "hidden", { configurable: true, get: () => hidden });
+    document.dispatchEvent(new Event("visibilitychange"));
+  }, hidden);
+
+/** The same person opens the room again in a second tab of the same browser. */
+async function duplicate(p) {
+  const old = p.page;
+  await p.newPage();
+  await join(p);
+  await old.getByText("Open in another tab").waitFor({ timeout: WAIT });
+  return old;
+}
+
 /**
  * `lostPage`: the page is gone afterwards (local state such as a picked file must be redone).
  * `newSeat`: they come back as a new member rather than replacing their seat.
+ * `endsShare`: a share they were running stops (defaults to `lostPage`).
  */
 const DISRUPTIONS = {
   drop: {
@@ -272,6 +290,54 @@ const DISRUPTIONS = {
       await join(p);
     },
   },
+  hidden20s: {
+    // Switched to another tab while the other person keeps reacting. Coming back must not burst.
+    async run(p, c) {
+      await setHidden(p.page, true);
+      for (const other of c.ps.filter((o) => o !== p && !c.hits(o))) {
+        for (let i = 0; i < 3; i++) await sendReaction(other.page).catch(() => {});
+      }
+      await p.page.waitForTimeout(20_000);
+      await setHidden(p.page, false);
+      const piled = await p.page.evaluate(() => document.querySelectorAll(".reaction-float").length);
+      if (piled) throw new Error(`${piled} reactions burst out on return`);
+    },
+  },
+  frozen50s: {
+    // Chrome's strongest background treatment: no timers, no socket handling, past the server's ping
+    // timeout. Coming back must reclaim the same seat, not appear as a new person.
+    async run(p) {
+      const n = await socketCount(p);
+      const cdp = await p.ctx.newCDPSession(p.page);
+      await cdp.send("Page.setWebLifecycleState", { state: "frozen" });
+      await new Promise((r) => setTimeout(r, 50_000));
+      await cdp.send("Page.setWebLifecycleState", { state: "active" });
+      await reconnected(p, n);
+    },
+  },
+  duplicateTab: {
+    lostPage: true,
+    newSeat: true,
+    async run(p) {
+      const old = await duplicate(p);
+      await old.close();
+    },
+  },
+  duplicateUseHere: {
+    // Back to the first tab: it takes the call back and the newer one steps aside. It kept its own
+    // state (such as a picked file), but its seat is new.
+    newSeat: true,
+    endsShare: true,
+    async run(p) {
+      const old = await duplicate(p);
+      const newer = p.page;
+      p.page = old;
+      await old.getByRole("button", { name: "Use here" }).click();
+      await newer.getByText("Open in another tab").waitFor({ timeout: WAIT });
+      await old.getByText("Open in another tab").waitFor({ state: "detached", timeout: WAIT });
+      await newer.close();
+    },
+  },
   closeLostGoodbye: {
     // The old seat is a ghost until the server's reconnect grace runs out.
     lostPage: true,
@@ -335,7 +401,7 @@ const MODES = {
       await shareLive(bob);
     },
     async check([alice, bob], c) {
-      if (c.disruption.lostPage && c.hits(alice)) {
+      if ((c.disruption.endsShare ?? c.disruption.lostPage) && c.hits(alice)) {
         // A share cannot outlive the page that captured it: everyone is back to choosing.
         for (const p of [alice, bob]) await p.page.getByText("Nothing playing yet").waitFor({ timeout: WAIT });
         return;
@@ -431,14 +497,15 @@ async function synced(ps, notBefore) {
 /* The matrix                                                          */
 /* ------------------------------------------------------------------ */
 
-const ALL = ["drop", "dropTwice", "outage5s", "outage20s", "offline", "reload", "reloadTwice", "reloadLostGoodbye", "backForward", "closeReopen", "leaveRejoin"];
+const TABS = ["hidden20s", "frozen50s", "duplicateTab", "duplicateUseHere"];
+const ALL = ["drop", "dropTwice", "outage5s", "outage20s", "offline", "reload", "reloadTwice", "reloadLostGoodbye", "backForward", "closeReopen", "leaveRejoin", ...TABS];
 const PLAN = {
   idle: { disruptions: [...ALL, "closeLostGoodbye"], who: ["alice", "bob", "both"] },
   share: { disruptions: ALL, who: ["alice", "bob", "both"] },
   file: { disruptions: ALL, who: ["alice", "bob", "both"] },
   // The panel's Leave button belongs to the extension, and back/forward never applies inside its frame.
   overlay: { disruptions: ALL.filter((d) => d !== "leaveRejoin" && d !== "backForward"), who: ["alice", "bob", "both"] },
-  phone: { disruptions: ["drop", "outage20s", "offline", "reload", "closeReopen"], who: ["alice", "bob"] },
+  phone: { disruptions: ["drop", "outage20s", "offline", "reload", "closeReopen", ...TABS], who: ["alice", "bob"] },
 };
 
 const cases = [];
@@ -461,6 +528,7 @@ async function runCase(spec, index) {
   const ps = [];
   const c = {
     id,
+    ps,
     disruption,
     hits: (p) => spec.who === "both" || spec.who === p.name.toLowerCase(),
   };
@@ -474,7 +542,7 @@ async function runCase(spec, index) {
     await mode.setup?.(ps, c);
     const before = await mode.before?.(ps, c);
     stage = `disrupt (${spec.d})`;
-    await Promise.all(ps.filter(c.hits).map((p) => disruption.run(p)));
+    await Promise.all(ps.filter(c.hits).map((p) => disruption.run(p, c)));
     stage = "call recovers";
     const wait = disruption.slow ? GHOST_WAIT : WAIT;
     for (const p of ps) await healthy(p, 2, wait);

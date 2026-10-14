@@ -8,6 +8,7 @@ import { ConnectionNotice } from "@/components/ConnectionNotice";
 import { ChimeToggle } from "@/components/ChimeToggle";
 import { Participants } from "@/components/Participants";
 import { FloatingReactions, ReactionBar, partnerNotice, useFloatingReactions } from "@/components/Reactions";
+import { TakenOver } from "@/components/TakenOver";
 import { LogoMark } from "@/components/Logo";
 import { StreamVideo } from "@/components/room/StreamVideo";
 import { useReleaseStream } from "@/hooks/useReleaseStream";
@@ -179,7 +180,8 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
   const host = typeof window === "undefined" ? "" : window.location.host;
 
   return (
-    <div className={`flex flex-col bg-ink text-white ${phone ? "h-dvh" : ""}`}>
+    <div className={`relative flex flex-col bg-ink text-white ${phone ? "h-dvh" : ""}`}>
+      {room.takenOver && <TakenOver onUseHere={room.useHere} compact={!phone} />}
       <div className={`relative bg-ink-800 ${phone ? "min-h-0 flex-1" : "aspect-[4/3]"}`}>
         {peer ? (
           <>

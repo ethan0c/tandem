@@ -7,6 +7,7 @@ import { useRoom } from "@/hooks/useRoom";
 import { useScreenShare } from "@/hooks/useScreenShare";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import { FloatingReactions, partnerNotice, useFloatingReactions } from "@/components/Reactions";
+import { TakenOver } from "@/components/TakenOver";
 import { ChatPanel } from "./ChatPanel";
 import { FloatingCall } from "./FloatingCall";
 import { Player } from "./Player";
@@ -229,7 +230,9 @@ export function Session({ roomId, name, localStream }: Props) {
         </div>
       )}
 
-      {room.status === "disconnected" && (
+      {room.takenOver && <TakenOver onUseHere={room.useHere} />}
+
+      {room.status === "disconnected" && !room.takenOver && (
         <div className="absolute inset-x-0 top-16 md:top-[72px] z-30 flex justify-center px-4">
           <div className="rounded-full border border-amber-400/30 bg-amber-950/80 px-4 py-1.5 text-xs text-amber-200 backdrop-blur">
             Connection lost. Trying to reconnect…
