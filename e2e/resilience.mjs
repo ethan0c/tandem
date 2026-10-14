@@ -99,9 +99,19 @@ async function participant(name, path, roomId) {
       ws.close({ code: 1001, reason: "e2e: offline" }).catch(() => {});
       return;
     }
-    p.sockets.add({ ws, server: ws.connectToServer() });
+    // Forwarded by hand, so a socket can also go silent without closing: what a dropped Wi-Fi
+    // connection looks like, where neither end finds out until the heartbeat says so.
+    const entry = { ws, server: ws.connectToServer(), dead: false };
+    ws.onMessage((m) => { if (!entry.dead) entry.server.send(m); });
+    entry.server.onMessage((m) => { if (!entry.dead) ws.send(m); });
+    p.sockets.add(entry);
   });
   await ctx.route(/\/socket\.io\/.*transport=polling/, (route) => (p.blocked ? route.abort("internetdisconnected") : route.continue()));
+  /** Every current socket stops carrying anything, but stays open. */
+  p.silence = () => {
+    for (const entry of p.sockets) entry.dead = true;
+    p.sockets.clear();
+  };
   p.drop = async () => {
     const all = [...p.sockets];
     p.sockets.clear();
@@ -228,6 +238,32 @@ const DISRUPTIONS = {
       await reconnected(p, n);
       await p.drop();
       await reconnected(p, n + 1);
+    },
+  },
+  deadSocket: {
+    // The connection dies silently. Only the heartbeat can tell; it must not take long.
+    async run(p) {
+      const n = await socketCount(p);
+      const t0 = Date.now();
+      p.silence();
+      await reconnected(p, n);
+      p.recoveredIn = Date.now() - t0;
+      if (p.recoveredIn > 20_000) throw new Error(`took ${p.recoveredIn} ms to notice a dead connection`);
+    },
+  },
+  networkChange: {
+    // Switching networks: the old connection is dead, and the browser says offline, then online.
+    // That is enough to know; no waiting for the heartbeat.
+    async run(p) {
+      const n = await socketCount(p);
+      p.silence();
+      await p.ctx.setOffline(true);
+      await p.page.waitForTimeout(2_000);
+      const t0 = Date.now();
+      await p.ctx.setOffline(false);
+      await reconnected(p, n);
+      p.recoveredIn = Date.now() - t0;
+      if (p.recoveredIn > 8_000) throw new Error(`took ${p.recoveredIn} ms to reconnect after the network came back`);
     },
   },
   outage5s: { run: (p) => outage(p, 5_000) },
@@ -506,14 +542,14 @@ async function synced(ps, notBefore) {
 /* ------------------------------------------------------------------ */
 
 const TABS = ["hidden20s", "frozen50s", "duplicateTab", "duplicateUseHere"];
-const ALL = ["drop", "dropTwice", "outage5s", "outage20s", "offline", "reload", "reloadTwice", "reloadLostGoodbye", "backForward", "closeReopen", "leaveRejoin", ...TABS];
+const ALL = ["deadSocket", "networkChange", "drop", "dropTwice", "outage5s", "outage20s", "offline", "reload", "reloadTwice", "reloadLostGoodbye", "backForward", "closeReopen", "leaveRejoin", ...TABS];
 const PLAN = {
   idle: { disruptions: [...ALL, "closeLostGoodbye"], who: ["alice", "bob", "both"] },
   share: { disruptions: ALL, who: ["alice", "bob", "both"] },
   file: { disruptions: ALL, who: ["alice", "bob", "both"] },
   // The panel's Leave button belongs to the extension, and back/forward never applies inside its frame.
   overlay: { disruptions: ALL.filter((d) => d !== "leaveRejoin" && d !== "backForward"), who: ["alice", "bob", "both"] },
-  phone: { disruptions: ["drop", "outage20s", "offline", "reload", "closeReopen", ...TABS], who: ["alice", "bob"] },
+  phone: { disruptions: ["deadSocket", "networkChange", "drop", "outage20s", "offline", "reload", "closeReopen", ...TABS], who: ["alice", "bob"] },
 };
 
 const cases = [];
@@ -559,7 +595,8 @@ async function runCase(spec, index) {
     stage = "reactions";
     const [sender, receiver] = spec.who === "bob" ? [ps[1], ps[0]] : [ps[0], ps[1]];
     await reactionArrives(sender, receiver);
-    log(`PASS  ${spec.name} (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
+    const timed = ps.filter((p) => p.recoveredIn).map((p) => `${p.name} back in ${(p.recoveredIn / 1000).toFixed(1)}s`);
+    log(`PASS  ${spec.name} (${((Date.now() - t0) / 1000).toFixed(1)}s${timed.length ? `; ${timed.join(", ")}` : ""})`);
     return null;
   } catch (e) {
     const details = [];

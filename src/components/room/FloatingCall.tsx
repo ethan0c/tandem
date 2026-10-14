@@ -174,7 +174,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
         touchAction: "none",
         width: !minimized && currentWidth ? currentWidth : undefined,
       }}
-      className={`group/call absolute z-30 max-w-[calc(100%-16px)] overflow-hidden rounded-2xl border border-white/15 bg-ink-800/90 text-white shadow-2xl shadow-black/50 backdrop-blur ${
+      className={`group/call @container absolute z-30 max-w-[calc(100%-16px)] overflow-hidden rounded-2xl border border-white/15 bg-ink-800/90 text-white shadow-2xl shadow-black/50 backdrop-blur ${
         resizing ? "" : "transition-[width]"
       } ${dragging ? "cursor-grabbing" : "cursor-grab"} ${minimized ? "w-44" : "w-56 sm:w-72"}`}
     >
@@ -232,7 +232,8 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
                   </div>
                 ))}
               </div>
-              <div className="absolute bottom-2 right-2 h-14 w-[4.7rem] overflow-hidden rounded-lg border border-white/20 bg-ink-800 shadow">
+              {/* Our own preview scales with the call, so it never hides half of a small one. */}
+              <div className="absolute bottom-1.5 right-1.5 aspect-[4/3] w-[28%] max-w-40 overflow-hidden rounded-lg border border-white/20 bg-ink-800 shadow @3xs:bottom-2 @3xs:right-2">
                 {hasLocalVideo && camOn ? (
                   <StreamVideo stream={localStream} muted mirror className="h-full w-full object-cover" />
                 ) : (
@@ -244,8 +245,9 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
         </div>
       )}
       <ConnectionNotice poor={poorConnection} cameraOn={hasLocalVideo && camOn} onTurnCameraOff={turnCameraOff} />
-      <div className="flex items-center justify-between px-2 py-1.5">
-        <div className="flex items-center gap-1.5">
+      {/* Tighter below 16rem, so the smallest call still fits every control without them touching. */}
+      <div className="flex items-center justify-between gap-1 px-1.5 py-1.5 @3xs:px-2">
+        <div className="flex min-w-0 items-center gap-1 @3xs:gap-1.5">
           <CallButton onClick={toggleMic} active={micOn} disabled={!hasLocalAudio} label={micOn ? "Mute" : "Unmute"}>
             {micOn ? <Mic className="size-3.5" /> : <MicOff className="size-3.5" />}
           </CallButton>
