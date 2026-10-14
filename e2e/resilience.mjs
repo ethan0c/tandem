@@ -311,15 +311,16 @@ const DISRUPTIONS = {
     },
   },
   frozen50s: {
-    // Chrome's strongest background treatment: no timers, no socket handling, past the server's ping
-    // timeout. Coming back must reclaim the same seat, not appear as a new person.
+    // Chrome's strongest background treatment: no timers, past the server's ping timeout. Whether the
+    // socket survives or has to reconnect, coming back must be the same seat, not a new person.
     async run(p) {
       const n = await socketCount(p);
       const cdp = await p.ctx.newCDPSession(p.page);
       await cdp.send("Page.setWebLifecycleState", { state: "frozen" });
       await new Promise((r) => setTimeout(r, 50_000));
       await cdp.send("Page.setWebLifecycleState", { state: "active" });
-      await reconnected(p, n);
+      await p.page.waitForTimeout(2_000);
+      if ((await socketCount(p)) > n) await reconnected(p, n);
     },
   },
   duplicateTab: {
