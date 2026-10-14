@@ -8,6 +8,7 @@ export function StreamVideo({
   volume = 1,
   mirror = false,
   className = "",
+  onFirstFrame,
 }: {
   stream: MediaStream | null;
   muted?: boolean;
@@ -15,6 +16,8 @@ export function StreamVideo({
   volume?: number;
   mirror?: boolean;
   className?: string;
+  /** Called once a frame (or, for audio only, enough data) is ready to show. */
+  onFirstFrame?: () => void;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
@@ -35,6 +38,7 @@ export function StreamVideo({
       autoPlay
       playsInline
       muted={muted}
+      onLoadedData={onFirstFrame}
       className={className}
       style={mirror ? { transform: "scaleX(-1)" } : undefined}
     />

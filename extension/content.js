@@ -353,7 +353,7 @@
         sendPage(true);
         break;
       case "tandem:reaction":
-        floatReaction(m.emoji);
+        floatReaction(m.emoji, m.from);
         break;
       case "tandem:pause":
         relay({ to: "all", type: "tandem:pause" });
@@ -372,7 +372,7 @@
   /* ------------------------------------------------------------------ */
   let reactionLayer = null;
 
-  function floatReaction(emoji) {
+  function floatReaction(emoji, from) {
     if (!IS_TOP || !host || typeof emoji !== "string" || !emoji || emoji.length > 8) return;
     if (!reactionLayer?.isConnected) {
       reactionLayer = document.createElement("div");
@@ -382,6 +382,12 @@
     const el = document.createElement("span");
     el.className = "tandem-reaction";
     el.textContent = emoji;
+    if (typeof from === "string" && from) {
+      const tag = document.createElement("span");
+      tag.className = "tandem-reaction-name";
+      tag.textContent = from.slice(0, 32);
+      el.append(tag);
+    }
     el.style.left = `${10 + Math.random() * 80}%`;
     const remove = () => el.remove();
     el.addEventListener("animationend", remove);

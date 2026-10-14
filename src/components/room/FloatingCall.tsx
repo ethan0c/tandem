@@ -11,6 +11,7 @@ import type { Peer } from "@/hooks/useWebRTC";
 import type { Member, Reaction } from "@/lib/types";
 import { ReactionBar } from "@/components/Reactions";
 import { StreamVideo } from "./StreamVideo";
+import { Connecting, PeerVideo } from "@/components/Connecting";
 
 const WIDTH_KEY = "tandem:call-width";
 const MIN_WIDTH = 176;
@@ -50,9 +51,11 @@ interface Props {
   poorConnection: boolean;
   turnCameraOff: () => void;
   onReact?: (emoji: Reaction) => void;
+  /** Our own member id, to tell who is still connecting. */
+  selfId?: string | null;
 }
 
-export function FloatingCall({ containerRef, localStream, peers, members, micOn, camOn, toggleMic, toggleCam, roomUrl, poorConnection, turnCameraOff, onReact }: Props) {
+export function FloatingCall({ containerRef, localStream, peers, members, micOn, camOn, toggleMic, toggleCam, roomUrl, poorConnection, turnCameraOff, onReact, selfId = null }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [minimized, setMinimized] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -67,6 +70,8 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
   }));
 
   const nameOf = (id: string) => members.find((m) => m.id === id)?.name ?? "Guest";
+  // In the room, but no call with them yet.
+  const connecting = selfId ? members.filter((m) => m.id !== selfId && !peers.some((p) => p.id === m.id)) : [];
   const hasLocalVideo = !!localStream?.getVideoTracks().length;
   const hasLocalAudio = !!localStream?.getAudioTracks().length;
 
@@ -195,7 +200,9 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
       )}
       {!minimized && (
         <div className="relative aspect-[4/3] bg-ink-700">
-          {peers.length === 0 ? (
+          {peers.length === 0 && connecting.length > 0 ? (
+            <Connecting name={connecting[0].name} />
+          ) : peers.length === 0 ? (
             <>
               {hasLocalVideo && camOn ? (
                 <StreamVideo stream={localStream} muted mirror className="h-full w-full object-cover" />
@@ -218,7 +225,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
               <div className={`grid h-full ${peers.length > 1 ? "grid-cols-2 grid-rows-2 gap-0.5" : ""}`}>
                 {peers.map((p) => (
                   <div key={p.id} className="relative h-full overflow-hidden bg-ink-700">
-                    <StreamVideo stream={p.stream} volume={callVolume} className="h-full w-full object-cover" />
+                    <PeerVideo stream={p.stream} name={nameOf(p.id)} volume={callVolume} small={peers.length > 1} className="h-full w-full object-cover" />
                     <span className="absolute left-2 top-2 rounded-md bg-black/55 px-1.5 py-0.5 text-[11px] font-medium">
                       {nameOf(p.id)}
                     </span>

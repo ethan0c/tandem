@@ -7,6 +7,8 @@ import { REACTIONS, type Member, type Reaction } from "@/lib/types";
 interface Floating {
   id: string;
   emoji: Reaction;
+  /** Who sent it: "You" or their name. */
+  from: string;
   /** Horizontal start, as a percentage of the layer's width. */
   x: number;
 }
@@ -16,8 +18,8 @@ export function useFloatingReactions() {
   const [items, setItems] = useState<Floating[]>([]);
   const remove = useCallback((id: string) => setItems((prev) => prev.filter((r) => r.id !== id)), []);
   const add = useCallback(
-    (id: string, emoji: Reaction) => {
-      setItems((prev) => [...prev.slice(-24), { id, emoji, x: 15 + Math.random() * 70 }]);
+    (id: string, emoji: Reaction, from: string) => {
+      setItems((prev) => [...prev.slice(-24), { id, emoji, from, x: 15 + Math.random() * 70 }]);
       // Animations do not run in a background tab, so a reaction could wait there forever and burst out
       // with all the others on return. This way only the last few seconds' worth is still there.
       setTimeout(() => remove(id), 4_000);
@@ -34,10 +36,11 @@ export function FloatingReactions({ items, onDone }: { items: Floating[]; onDone
         <span
           key={r.id}
           onAnimationEnd={() => onDone(r.id)}
-          className="reaction-float absolute bottom-4 text-3xl"
+          className="reaction-float absolute bottom-4 flex flex-col items-center"
           style={{ left: `${r.x}%` }}
         >
           {r.emoji}
+          {r.from && <span className="reaction-name">{r.from}</span>}
         </span>
       ))}
     </div>

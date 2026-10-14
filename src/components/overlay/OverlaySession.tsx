@@ -11,6 +11,7 @@ import { FloatingReactions, ReactionBar, partnerNotice, useFloatingReactions } f
 import { TakenOver } from "@/components/TakenOver";
 import { LogoMark } from "@/components/Logo";
 import { StreamVideo } from "@/components/room/StreamVideo";
+import { Connecting, PeerVideo } from "@/components/Connecting";
 import { useReleaseStream } from "@/hooks/useReleaseStream";
 import { useRoom } from "@/hooks/useRoom";
 import { useWebRTC } from "@/hooks/useWebRTC";
@@ -40,11 +41,15 @@ function post(msg: Record<string, unknown>) {
 
 export function OverlaySession({ roomId, name, localStream, embedded, layout = "panel" }: Props) {
   const floating = useFloatingReactions();
+  // Reactions arrive with a member id; this turns it into "You" or their name (members as of now).
+  const nameRef = useRef<(id: string) => string>(() => "");
+  const reactionFrom = (id: string) => nameRef.current(id);
   const room = useRoom(roomId, name, {
     onReaction: (r) => {
+      const from = reactionFrom(r.from);
       // The extension floats reactions over the video itself; elsewhere they float over the call.
-      if (embedded) post({ type: "tandem:reaction", emoji: r.emoji });
-      else floating.add(r.id, r.emoji);
+      if (embedded) post({ type: "tandem:reaction", emoji: r.emoji, from });
+      else floating.add(r.id, r.emoji, from);
     },
   });
   const rtc = useWebRTC({ socketRef: room.socketRef, selfId: room.selfId, members: room.members, localStream });
@@ -154,9 +159,15 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
   const notice = partnerNotice(room.members, room.selfId);
   const phone = layout === "phone";
 
+  useEffect(() => {
+    nameRef.current = (id) => (id === room.selfId ? "You" : (room.members.find((m) => m.id === id)?.name ?? "Guest"));
+  });
+
   const peer = rtc.peers[0] ?? null;
   const callVolume = useCallOutputVolume();
   const peerName = peer ? (room.members.find((m) => m.id === peer.id)?.name ?? "Guest") : null;
+  // Someone is here, but the call with them is still connecting.
+  const arriving = peer ? null : room.members.find((m) => m.id !== room.selfId);
   const hasLocalVideo = !!localStream?.getVideoTracks().length;
   const hasLocalAudio = !!localStream?.getAudioTracks().length;
 
@@ -185,9 +196,11 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
       <div className={`relative bg-ink-800 ${phone ? "min-h-0 flex-1" : "aspect-[4/3]"}`}>
         {peer ? (
           <>
-            <StreamVideo stream={peer.stream} volume={callVolume} className="h-full w-full object-cover" />
+            <PeerVideo stream={peer.stream} name={peerName ?? "Guest"} volume={callVolume} className="h-full w-full object-cover" />
             <span className="absolute left-2 top-2 rounded-md bg-black/55 px-1.5 py-0.5 text-[11px] font-medium">{peerName}</span>
           </>
+        ) : arriving ? (
+          <Connecting name={arriving.name} />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-3 p-4 text-center">
             {hasLocalVideo && rtc.camOn ? (

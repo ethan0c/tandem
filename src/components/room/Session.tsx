@@ -35,7 +35,12 @@ export function Session({ roomId, name, localStream }: Props) {
 
   // A chat message brings the chrome back briefly, so the unread badge is seen while something plays.
   const floating = useFloatingReactions();
-  const room = useRoom(roomId, name, { onMessage: bump, onReaction: (r) => floating.add(r.id, r.emoji) });
+  // Reactions arrive with a member id; this turns it into "You" or their name (members as of now).
+  const nameRef = useRef<(id: string) => string>(() => "");
+  const room = useRoom(roomId, name, { onMessage: bump, onReaction: (r) => floating.add(r.id, r.emoji, nameRef.current(r.from)) });
+  useEffect(() => {
+    nameRef.current = (id) => (id === room.selfId ? "You" : (room.members.find((m) => m.id === id)?.name ?? "Guest"));
+  });
   const notice = partnerNotice(room.members, room.selfId);
   const rtc = useWebRTC({
     socketRef: room.socketRef,
@@ -199,6 +204,7 @@ export function Session({ roomId, name, localStream }: Props) {
         turnCameraOff={rtc.turnCameraOff}
         roomUrl={roomUrl}
         onReact={room.sendReaction}
+        selfId={room.selfId}
       />
 
       <FloatingReactions items={floating.items} onDone={floating.remove} />
