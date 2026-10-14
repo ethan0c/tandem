@@ -55,6 +55,12 @@ test('camera limits reduce bandwidth and restore without touching audio', async 
   await setCameraQuality(pc, false);
   assert.equal(latest?.encodings[0].maxBitrate, 900_000);
   assert.equal(latest?.encodings[0].scaleResolutionDownBy, 1.5);
+  // Through the metered relay: half the bitrate at 540p. A struggling link still wins.
+  await setCameraQuality(pc, false, true);
+  assert.equal(latest?.encodings[0].maxBitrate, 450_000);
+  assert.equal(latest?.encodings[0].scaleResolutionDownBy, 2);
+  await setCameraQuality(pc, true, true);
+  assert.equal(latest?.encodings[0].maxBitrate, 220_000);
 });
 
 
