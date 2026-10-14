@@ -52,6 +52,7 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
   const joinedRef = useRef(false);
   const heldChat = useRef<string[]>([]);
   const heldStatus = useRef<{ value: MemberStatus } | null>(null);
+  const heldSource = useRef<{ value: Source | null } | null>(null);
   const reclaimRef = useRef<() => void>(() => {});
   const offsetRef = useRef(0);
   const seqRef = useRef(0);
@@ -146,7 +147,9 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
         // Now that we are in, send what was held while away: chat in order, and the latest status.
         for (const text of heldChat.current.splice(0)) socket.emit("chat:send", { text });
         if (heldStatus.current) socket.emit("member:status", heldStatus.current.value);
+        if (heldSource.current) socket.emit("source:set", heldSource.current.value);
         heldStatus.current = null;
+        heldSource.current = null;
         setSelfId(ack.selfId);
         setHostId(ack.state.hostId);
         setMembers(ack.state.members);
@@ -248,6 +251,7 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       joinedRef.current = false;
       heldChat.current = [];
       heldStatus.current = null;
+      heldSource.current = null;
       channel?.close();
       reclaimRef.current = () => {};
       window.removeEventListener("pagehide", onPageHide);
@@ -278,7 +282,8 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
   }, []);
 
   const changeSource = useCallback((s: Source | null) => {
-    socketRef.current?.emit("source:set", s);
+    if (joinedRef.current) socketRef.current?.emit("source:set", s);
+    else heldSource.current = { value: s };
   }, []);
 
   const sendMessage = useCallback((text: string) => {

@@ -267,6 +267,27 @@ const DISRUPTIONS = {
     },
   },
   outage5s: { run: (p) => outage(p, 5_000) },
+  chatWhileAway: {
+    // Typed while the connection is down: it must still arrive once back, not vanish.
+    async run(p, c) {
+      const n = await socketCount(p);
+      p.blocked = true;
+      await p.drop();
+      const text = `while-away-${p.name}-${c.id}`;
+      await p.page.getByRole("button", { name: /^Open chat/ }).click();
+      await p.page.getByRole("textbox", { name: "Message", exact: true }).fill(text);
+      await p.page.getByRole("button", { name: "Send", exact: true }).click();
+      await closeChat(p.page);
+      await p.page.waitForTimeout(3_000);
+      p.blocked = false;
+      await reconnected(p, n);
+      for (const other of c.ps.filter((o) => o !== p)) {
+        await other.page.getByRole("button", { name: /^Open chat/ }).click();
+        await other.page.getByTestId("chat-message").filter({ hasText: text }).waitFor({ timeout: WAIT });
+        await closeChat(other.page);
+      }
+    },
+  },
   outage20s: { run: (p) => outage(p, 20_000) },
   offline: {
     async run(p) {
@@ -544,7 +565,7 @@ async function synced(ps, notBefore) {
 const TABS = ["hidden20s", "frozen50s", "duplicateTab", "duplicateUseHere"];
 const ALL = ["deadSocket", "networkChange", "drop", "dropTwice", "outage5s", "outage20s", "offline", "reload", "reloadTwice", "reloadLostGoodbye", "backForward", "closeReopen", "leaveRejoin", ...TABS];
 const PLAN = {
-  idle: { disruptions: [...ALL, "closeLostGoodbye"], who: ["alice", "bob", "both"] },
+  idle: { disruptions: [...ALL, "closeLostGoodbye", "chatWhileAway"], who: ["alice", "bob", "both"] },
   share: { disruptions: ALL, who: ["alice", "bob", "both"] },
   file: { disruptions: ALL, who: ["alice", "bob", "both"] },
   // The panel's Leave button belongs to the extension, and back/forward never applies inside its frame.
