@@ -15,10 +15,15 @@ export function iceServers(): RTCIceServer[] {
   const servers: RTCIceServer[] = [
     { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
   ];
-  const turn = process.env.NEXT_PUBLIC_TURN_URL;
-  if (turn) {
+  // A stray comma or typo in the setting must not take calls down: the browser refuses to create a
+  // connection at all if any address is invalid, so keep only ones that look like STUN/TURN URLs.
+  const urls = (process.env.NEXT_PUBLIC_TURN_URL ?? "")
+    .split(",")
+    .map((u) => u.trim())
+    .filter((u) => /^(stuns?|turns?):[^\s]+$/i.test(u));
+  if (urls.length) {
     servers.push({
-      urls: turn.split(",").map((u) => u.trim()),
+      urls,
       username: process.env.NEXT_PUBLIC_TURN_USERNAME,
       credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL,
     });
