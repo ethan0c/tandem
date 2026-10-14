@@ -45,8 +45,8 @@ export function ReactionBar({ onSend, collapsed = false }: { onSend: (emoji: Rea
     return (
       <button
         onClick={() => setOpen(true)}
-        aria-label="Send a reaction"
-        title="Send a reaction"
+        aria-label="Reactions"
+        title="Reactions"
         className="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
       >
         <Heart className="size-3.5" />
@@ -59,7 +59,7 @@ export function ReactionBar({ onSend, collapsed = false }: { onSend: (emoji: Rea
         <button
           key={emoji}
           onClick={() => onSend(emoji)}
-          aria-label={`Send ${emoji}`}
+          aria-label={`React with ${emoji}`}
           className="flex size-7 items-center justify-center rounded-full text-base transition hover:scale-110 hover:bg-white/10 active:scale-95"
         >
           {emoji}
