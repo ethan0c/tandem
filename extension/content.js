@@ -28,6 +28,13 @@
   let linkedVideo = false;
   let pageUrl = location.href;
   let mediaSource = "";
+  let inAd = false;
+
+  // Pages that mark an ad on the player. While one shows, this player stands down and the others
+  // wait. Sites not listed here fall back to the panel's BRB button.
+  const AD_SELECTORS = [
+    ".html5-video-player.ad-showing", // YouTube
+  ];
 
   function videoArea(v) {
     const rect = v.getBoundingClientRect();
@@ -60,7 +67,7 @@
   }
 
   function onUserEvent(e) {
-    if (!video || Date.now() < suppressUntil || !Number.isFinite(video.currentTime)) return;
+    if (!video || inAd || Date.now() < suppressUntil || !Number.isFinite(video.currentTime)) return;
     const playing = !video.paused && !video.ended;
     const time = video.currentTime;
     state = { playing, time, localUpdatedAt: Date.now() };
@@ -92,7 +99,8 @@
   }
 
   function applyState() {
-    if (!video || !state || video.readyState < 1) return;
+    // During an ad the element is playing the ad; the room's state is applied once the show is back.
+    if (!video || !state || inAd || video.readyState < 1) return;
     suppressUntil = Date.now() + 1000;
     const exp = expected();
     if (Math.abs(video.currentTime - exp) > 0.5) video.currentTime = exp;
@@ -100,8 +108,30 @@
     else if (!state.playing && !video.paused) video.pause();
   }
 
+  function checkAd() {
+    const now = !!video && AD_SELECTORS.some((selector) => document.querySelector(selector));
+    if (now === inAd) return;
+    inAd = now;
+    if (video) video.playbackRate = 1;
+    relay({ to: "top", type: "tandem:ad", inAd });
+    if (inAd) return;
+    // Back to the show: lead the room from wherever this player picks up, which releases the others.
+    setTimeout(() => {
+      if (!video || inAd || !Number.isFinite(video.currentTime)) return;
+      const playing = !video.paused && !video.ended;
+      state = { playing, time: video.currentTime, localUpdatedAt: Date.now() };
+      relay({ to: "top", type: "tandem:event", playing, time: video.currentTime, reason: "seek" });
+    }, 800);
+  }
+
+  function reportProgress() {
+    if (!video || inAd || !Number.isFinite(video.currentTime) || !Number.isFinite(video.duration)) return;
+    relay({ to: "top", type: "tandem:progress", time: video.currentTime, duration: video.duration, playing: !video.paused && !video.ended });
+  }
+
   function driftTick() {
-    if (!video || !state) return;
+    checkAd();
+    if (!video || !state || inAd) return;
     if (!state.playing || video.paused || video.seeking || video.readyState < 3) {
       if (video.playbackRate !== 1) video.playbackRate = 1;
       return;
@@ -148,6 +178,7 @@
       }
       rescan();
       reportPlayer();
+      reportProgress();
     }, 1500);
     driftTimer = setInterval(driftTick, 500);
   }
@@ -164,6 +195,10 @@
     driftTimer = null;
     detach();
     state = null;
+    if (inAd) {
+      inAd = false;
+      relay({ to: "top", type: "tandem:ad", inAd: false });
+    }
   }
 
   /* ------------------------------------------------------------------ */
@@ -173,6 +208,23 @@
   let iframe = null;
   let appOrigin = DEFAULT_ORIGIN;
   let roomId = null;
+  /** Seconds to pick the show up from, when the popup resumes one of "our shows". */
+  let resumeAt = 0;
+  let pageTimer = null;
+  let sentPage = "";
+
+  /** The episode this tab is on, for invite links and "our shows". */
+  function pageInfo() {
+    return { url: location.href.split("#")[0], title: document.title.trim().slice(0, 120) };
+  }
+
+  function sendPage(force) {
+    const page = pageInfo();
+    const key = page.url + "\n" + page.title;
+    if (!iframe?.contentWindow || (!force && key === sentPage)) return;
+    sentPage = key;
+    iframe.contentWindow.postMessage({ type: "tandem:page", ...page }, appOrigin);
+  }
 
   function mountOverlay(id, origin) {
     if (!IS_TOP) return;
@@ -219,21 +271,31 @@
     bar.append(label, close);
 
     iframe = document.createElement("iframe");
-    iframe.src = `${appOrigin}/overlay/${encodeURIComponent(id)}`;
+    iframe.src = `${appOrigin}/overlay/${encodeURIComponent(id)}${resumeAt > 0 ? `?t=${Math.floor(resumeAt)}` : ""}`;
+    resumeAt = 0;
     iframe.allow = "camera; microphone; autoplay; clipboard-write";
 
     host.append(bar, iframe);
     document.documentElement.appendChild(host);
     makeDraggable(bar, host);
+    clearInterval(pageTimer);
+    pageTimer = setInterval(() => sendPage(false), 3000);
 
     relay({ to: "all", type: "tandem:session", active: true });
   }
 
   function unmountOverlay(keepSession) {
+    flushHistory();
     host?.remove();
     host = null;
     iframe = null;
     roomId = null;
+    partnerPresent = false;
+    clearInterval(pageTimer);
+    pageTimer = null;
+    sentPage = "";
+    reactionLayer?.remove();
+    reactionLayer = null;
     if (!keepSession) {
       try {
         sessionStorage.removeItem(SESSION_KEY);
@@ -288,12 +350,106 @@
         break;
       case "tandem:ready":
         relay({ to: "all", type: "tandem:probe" });
+        sendPage(true);
+        break;
+      case "tandem:reaction":
+        floatReaction(m.emoji);
+        break;
+      case "tandem:pause":
+        relay({ to: "all", type: "tandem:pause" });
+        break;
+      case "tandem:partner":
+        partnerPresent = !!m.present;
         break;
       case "tandem:close":
         unmountOverlay(false);
         break;
     }
   });
+
+  /* ------------------------------------------------------------------ */
+  /* Reactions float up over the video                                   */
+  /* ------------------------------------------------------------------ */
+  let reactionLayer = null;
+
+  function floatReaction(emoji) {
+    if (!IS_TOP || !host || typeof emoji !== "string" || !emoji || emoji.length > 8) return;
+    if (!reactionLayer?.isConnected) {
+      reactionLayer = document.createElement("div");
+      reactionLayer.id = "tandem-reactions";
+      document.documentElement.appendChild(reactionLayer);
+    }
+    const el = document.createElement("span");
+    el.className = "tandem-reaction";
+    el.textContent = emoji;
+    el.style.left = `${10 + Math.random() * 80}%`;
+    const remove = () => el.remove();
+    el.addEventListener("animationend", remove);
+    setTimeout(remove, 4000);
+    reactionLayer.appendChild(el);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Our shows: what you watched together, kept in this browser only     */
+  /* ------------------------------------------------------------------ */
+  const HISTORY_KEY = "tandem:history";
+  const DAYS_KEY = "tandem:days";
+  const HISTORY_LIMIT = 30;
+  let partnerPresent = false;
+  let lastProgressAt = 0;
+  let lastFlushAt = 0;
+  /** Latest position plus seconds watched with someone since the last write. */
+  let progress = null;
+
+  function localDay(d = new Date()) {
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+
+  function recordProgress(msg) {
+    if (!roomId || !Number.isFinite(msg.time) || !Number.isFinite(msg.duration) || msg.duration < 60) return;
+    const now = Date.now();
+    const delta = lastProgressAt ? Math.min((now - lastProgressAt) / 1000, 5) : 0;
+    lastProgressAt = now;
+    const page = pageInfo();
+    if (progress && progress.url !== page.url) flushHistory();
+    progress = {
+      ...page,
+      roomId,
+      site: location.hostname.replace(/^www\./, ""),
+      time: msg.time,
+      duration: msg.duration,
+      together: (progress?.together ?? 0) + (msg.playing && partnerPresent ? delta : 0),
+    };
+    if (now - lastFlushAt > 10_000) flushHistory();
+  }
+
+  function flushHistory() {
+    const p = progress;
+    if (!p) return;
+    lastFlushAt = Date.now();
+    progress = { ...p, together: 0 };
+    chrome.storage.local.get([HISTORY_KEY, DAYS_KEY]).then((saved) => {
+      const history = Array.isArray(saved[HISTORY_KEY]) ? saved[HISTORY_KEY] : [];
+      const previous = history.find((h) => h.url === p.url);
+      const entry = {
+        url: p.url,
+        title: p.title || previous?.title || p.site,
+        site: p.site,
+        roomId: p.roomId,
+        time: p.time,
+        duration: p.duration,
+        together: (previous?.together ?? 0) + p.together,
+        updatedAt: Date.now(),
+      };
+      const next = [entry, ...history.filter((h) => h.url !== p.url)].slice(0, HISTORY_LIMIT);
+      const days = saved[DAYS_KEY] && typeof saved[DAYS_KEY] === "object" ? saved[DAYS_KEY] : {};
+      if (p.together > 0) days[localDay()] = (days[localDay()] ?? 0) + p.together;
+      return chrome.storage.local.set({ [HISTORY_KEY]: next, [DAYS_KEY]: days });
+    }).catch(() => {});
+  }
+
+  window.addEventListener("pagehide", () => flushHistory());
 
   /* ------------------------------------------------------------------ */
   /* Fullscreen: keep the overlay visible                                */
@@ -358,9 +514,16 @@
       case "tandem:probe":
         if (active) reportPlayer();
         break;
+      case "tandem:pause":
+        if (video && !inAd && !video.paused) video.pause();
+        break;
+      case "tandem:progress":
+        if (IS_TOP) recordProgress(msg);
+        break;
       case "tandem:event":
       case "tandem:status":
       case "tandem:drift":
+      case "tandem:ad":
         if (msg.type === "tandem:status") linkedVideo = !!msg.hasVideo;
         if (IS_TOP && iframe?.contentWindow) iframe.contentWindow.postMessage(msg, appOrigin);
         break;
@@ -377,6 +540,7 @@
       // Invite links can carry the room in the hash: https://site/…#tandem=k3f9-x2qa
       const hash = new URLSearchParams(location.hash.replace(/^#/, ""));
       const fromHash = hash.get("tandem");
+      resumeAt = Number(hash.get("tandemAt")) || 0;
       if (fromHash) {
         history.replaceState(null, "", location.pathname + location.search);
         mountOverlay(fromHash.toLowerCase());

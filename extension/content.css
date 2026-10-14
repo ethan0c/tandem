@@ -70,3 +70,28 @@
   background: #0a0a0a;
   transition: height 150ms ease;
 }
+#tandem-reactions {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  pointer-events: none;
+  overflow: hidden;
+}
+#tandem-reactions .tandem-reaction {
+  position: absolute;
+  bottom: 12%;
+  font-size: 40px;
+  line-height: 1;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  animation: tandem-float 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45));
+}
+@keyframes tandem-float {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  12% { transform: translateY(-24px) scale(1.15); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translateY(-320px) scale(1); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #tandem-reactions .tandem-reaction { animation-duration: 1.2s; }
+}

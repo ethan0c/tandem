@@ -36,7 +36,8 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
     if (session.selected !== null) send(msg, session.selected);
     return;
   }
-  if (msg.type === "tandem:event" || msg.type === "tandem:drift") {
+  // Only the elected player speaks for the tab.
+  if (msg.type === "tandem:event" || msg.type === "tandem:drift" || msg.type === "tandem:ad" || msg.type === "tandem:progress") {
     if (session?.selected !== frameId) return;
   }
   send(msg, msg.to === "top" ? 0 : undefined);
