@@ -1,15 +1,20 @@
 // Registers Tandem's slash commands with Discord. Run once, and again whenever COMMANDS changes:
 //
-//   DISCORD_APPLICATION_ID=… DISCORD_BOT_TOKEN=… npm run discord:register
+//   npm run discord:register
 //
-// Both values are in the Discord Developer Portal (General Information, and Bot → Reset Token).
-// The token is only needed here; the site itself only needs DISCORD_PUBLIC_KEY.
+// Reads DISCORD_BOT_TOKEN and the app ID (DISCORD_APPLICATION_ID, or NEXT_PUBLIC_DISCORD_APP_ID) from
+// the environment or from .env. Both are in the Discord Developer Portal (General Information, and
+// Bot → Reset Token). The token is only needed here: never add it to Vercel.
+import { existsSync } from "node:fs";
 import { COMMANDS } from "../../src/lib/discord.ts";
 
-const app = process.env.DISCORD_APPLICATION_ID;
+// Values already in the environment win; .env fills in the rest.
+if (existsSync(".env")) process.loadEnvFile(".env");
+
+const app = process.env.DISCORD_APPLICATION_ID || process.env.NEXT_PUBLIC_DISCORD_APP_ID;
 const token = process.env.DISCORD_BOT_TOKEN;
 if (!app || !token) {
-  console.error("Set DISCORD_APPLICATION_ID and DISCORD_BOT_TOKEN.");
+  console.error("Set DISCORD_BOT_TOKEN and DISCORD_APPLICATION_ID (in .env or on the command line).");
   process.exit(1);
 }
 const res = await fetch(`https://discord.com/api/v10/applications/${app}/commands`, {
