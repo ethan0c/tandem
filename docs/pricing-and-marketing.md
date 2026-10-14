@@ -77,6 +77,25 @@ A one-time-only price does not get there steadily: $5k a month at $20 means 250 
 
 **Content that keeps working**: short pages like "how to watch [show] together long distance" that answer the question and point to Tandem. Write a few, not a content farm.
 
+## Growth that runs without posting
+
+Never automate posts or comments on Reddit, TikTok or Discord. All three ban accounts that do, and Reddit
+also blocks the promoted domain, which would end the best channel for good. Build things that spread on
+their own instead:
+
+1. **Search** (done: sitemap, robots, structured data with the FAQ). Next: a handful of genuinely useful
+   guides, each answering one search ("how to watch YouTube together long distance", "long-distance movie
+   night ideas", "a Teleparty alternative with video chat"). A few good pages, never a content farm:
+   Google penalises mass-produced pages.
+2. **A Discord bot people add themselves.** `/watch` posts a room link in the channel. Every server that
+   adds it shows Tandem to its members, with no one posting anything. Runs as an HTTP endpoint on Vercel.
+3. **Things worth sharing.** Invite links already preview as "Sam invited you to watch …". Next: a
+   shareable "our year together" recap card for TikTok and Instagram stories.
+4. **One-time listings** (an afternoon, not ongoing): Chrome Web Store, AlternativeTo (as an alternative to
+   Teleparty), Product Hunt, SaaSHub.
+5. **Search Console.** Verify the site in Google Search Console and submit `/sitemap.xml`, so Google
+   indexes it within days instead of weeks.
+
 ## What to measure
 
 - Weekly active couples (both people in a room for 10+ minutes)

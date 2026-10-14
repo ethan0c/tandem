@@ -10,7 +10,7 @@ import { LandingMotion } from "@/components/landing/LandingMotion";
 import { RotatingHeadline } from "@/components/landing/RotatingHeadline";
 import { RejoinRoom } from "@/components/landing/RejoinRoom";
 import { Preview } from "@/components/landing/Preview";
-import { EXTENSION_URL, GITHUB } from "@/lib/links";
+import { EXTENSION_URL, GITHUB, SITE_URL } from "@/lib/links";
 
 const madeForTwo = [
   {
@@ -115,9 +115,34 @@ const faq = [
   },
 ];
 
+/** What search engines read about Tandem: a free browser app, and the questions below as an FAQ. */
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Tandem",
+    url: SITE_URL,
+    applicationCategory: "EntertainmentApplication",
+    operatingSystem: "Chrome, Edge, Brave",
+    description:
+      "Watch shows together with someone far away: playback stays in sync and your video call sits beside the show, even in fullscreen. Free, no account.",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+  },
+];
+
 export default function Home() {
   return (
     <LandingMotion>
+      <script
+        type="application/ld+json"
+        // Escaped so nothing in the text can close the script tag.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
+      />
       {/* Theater */}
       <section className="hero-shell relative text-white">
         <header className="relative z-10">
