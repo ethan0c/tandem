@@ -17,7 +17,7 @@ FEATURES
 • No account needed: choose a name and join.
 
 SITES YOU CAN TRY
-Miruro is included. You can also try Tandem on Netflix, Prime Video, YouTube, Disney+, Hulu, Max, Crunchyroll, Apple TV+, Paramount+, and Peacock, or turn it on for another video site from the Tandem button in your browser.
+Tandem works on many popular streaming and video sites. If a site isn't supported yet, you can turn Tandem on for it from the Tandem button in your browser.
 
 Some videos may not work yet. You both need access to the same episode, and ads can get you out of step.
 

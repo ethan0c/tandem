@@ -15,6 +15,13 @@ export interface PlaybackState {
   updatedAt: number;
 }
 
+/** The reactions anyone can send. Anything else is dropped by the server. */
+export const REACTIONS = ["❤️", "😂", "😮", "😭", "🔥"] as const;
+export type Reaction = (typeof REACTIONS)[number];
+
+/** Why a member is not watching right now: stepped away, or sitting through an ad on their site. */
+export type MemberStatus = "away" | "ad" | null;
+
 export interface Member {
   /**
    * The client id the browser chose for this page load (not the socket id). It survives a dropped and
@@ -22,6 +29,7 @@ export interface Member {
    */
   id: string;
   name: string;
+  status?: MemberStatus;
 }
 
 /** One line of room chat. The server stamps everything but the text, so a name cannot be forged. */
@@ -88,6 +96,8 @@ export interface ServerToClientEvents {
   "rtc:signal": (payload: { from: string; data: SignalData }) => void;
   "screen:signal": (payload: { from: string; data: ScreenSignal }) => void;
   "chat:message": (message: ChatMessage) => void;
+  "member:status": (payload: { id: string; status: MemberStatus }) => void;
+  "reaction": (payload: { id: string; from: string; emoji: Reaction }) => void;
 }
 
 export interface ClientToServerEvents {
@@ -105,6 +115,8 @@ export interface ClientToServerEvents {
   "rtc:signal": (payload: { to: string; data: SignalData }) => void;
   "screen:signal": (payload: { to: string; data: ScreenSignal }) => void;
   "chat:send": (payload: { text: string }) => void;
+  "member:status": (status: MemberStatus) => void;
+  "reaction:send": (payload: { emoji: string }) => void;
 }
 
 /** Where the media should be right now, given a playback state and the server clock. */

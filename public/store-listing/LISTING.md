@@ -8,7 +8,7 @@ Copy each field into the Developer Dashboard (Store listing tab and Privacy tab)
 |---|---|
 | Title | Tandem – watch together *(comes from manifest)* |
 | Summary | Watch your favorite shows together with a video call beside the video. Some streaming sites may not work yet. *(comes from manifest)* |
-| Description | Paste the contents of `description.txt` |
+| Description | Paste the contents of `description.txt`. Don't list streaming services by name: v0.2.1 was rejected for "excessive keywords" (Yellow Argon) over that list |
 | Category | Entertainment |
 | Language | English |
 | Store icon (128x128) | `icon/store-icon-128x128.png` |

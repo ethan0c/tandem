@@ -5,6 +5,7 @@ import { Server } from "socket.io";
 import {
   CHAT_HISTORY,
   CHAT_MAX_LENGTH,
+  REACTIONS,
   type ClientToServerEvents,
   type PlaybackState,
   type RoomState,
@@ -41,11 +42,16 @@ interface SocketData {
   clientId?: string;
   /** Send times of this socket's recent chat messages, for the flood check. */
   chatTimes?: number[];
+  /** Send times of this socket's recent reactions. */
+  reactionTimes?: number[];
 }
 
 /** No more than this many chat messages per socket in any `CHAT_BURST_MS` window. */
 const CHAT_BURST = 8;
 const CHAT_BURST_MS = 5_000;
+/** Reactions are tapped in bursts, so they get a looser limit than chat. */
+const REACTION_BURST = 12;
+const REACTION_BURST_MS = 3_000;
 
 function freshPlayback(): PlaybackState {
   return { playing: false, time: 0, updatedAt: Date.now() };
@@ -293,6 +299,29 @@ app.prepare().then(() => {
       room.chat.push(message);
       if (room.chat.length > CHAT_HISTORY) room.chat.splice(0, room.chat.length - CHAT_HISTORY);
       io.to(roomId).emit("chat:message", message);
+    });
+
+    socket.on("member:status", (status) => {
+      const { roomId, clientId } = socket.data;
+      const member = roomId ? rooms.get(roomId)?.members.find((m) => m.id === clientId) : undefined;
+      if (!roomId || !clientId || !member) return;
+      const next = status === "away" || status === "ad" ? status : null;
+      if ((member.status ?? null) === next) return;
+      member.status = next;
+      io.to(roomId).emit("member:status", { id: clientId, status: next });
+    });
+
+    socket.on("reaction:send", (payload) => {
+      const { roomId, clientId } = socket.data;
+      if (!roomId || !clientId || !rooms.get(roomId)?.members.some((m) => m.id === clientId)) return;
+      const emoji = REACTIONS.find((r) => r === payload?.emoji);
+      if (!emoji) return;
+      const now = Date.now();
+      const recent = (socket.data.reactionTimes ?? []).filter((t) => now - t < REACTION_BURST_MS);
+      if (recent.length >= REACTION_BURST) return;
+      recent.push(now);
+      socket.data.reactionTimes = recent;
+      io.to(roomId).emit("reaction", { id: randomUUID(), from: clientId, emoji });
     });
 
     socket.on("rtc:signal", ({ to, data }) => {

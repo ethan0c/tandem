@@ -4,7 +4,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { playChime } from "@/lib/chime";
 import { activateSession, finishSession, rememberRoom } from "@/lib/last-room";
 import { clientId, tabId, getSocket, sendGoodbye, type AppSocket } from "@/lib/socket";
-import { CHAT_HISTORY, type ChatMessage, type Member, type PlaybackState, type Source, type SyncReason } from "@/lib/types";
+import {
+  CHAT_HISTORY,
+  type ChatMessage,
+  type Member,
+  type MemberStatus,
+  type PlaybackState,
+  type Reaction,
+  type Source,
+  type SyncReason,
+} from "@/lib/types";
 
 export type RoomStatus = "connecting" | "joined" | "disconnected";
 
@@ -20,6 +29,8 @@ export interface RemotePlayback {
 interface Options {
   /** Called for every chat message that arrives, including our own echo. */
   onMessage?: (message: ChatMessage) => void;
+  /** Called for every reaction, including our own echo. */
+  onReaction?: (reaction: { id: string; from: string; emoji: Reaction }) => void;
 }
 
 export function useRoom(roomId: string, name: string | null, options?: Options) {
@@ -35,8 +46,10 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
   const seqRef = useRef(0);
   // The latest callback, so the socket listener never has to be re-registered.
   const onMessageRef = useRef(options?.onMessage);
+  const onReactionRef = useRef(options?.onReaction);
   useEffect(() => {
     onMessageRef.current = options?.onMessage;
+    onReactionRef.current = options?.onReaction;
   });
 
   /** Server clock estimate: local clock + measured offset. */
@@ -133,6 +146,9 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       setMessages((prev) => (prev.some((p) => p.id === m.id) ? prev : [...prev, m].slice(-CHAT_HISTORY)));
       onMessageRef.current?.(m);
     };
+    const onStatus = ({ id, status: s }: { id: string; status: MemberStatus }) =>
+      setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: s } : m)));
+    const onReaction = (r: { id: string; from: string; emoji: Reaction }) => onReactionRef.current?.(r);
     const onDisconnect = () => {
       dropped = true;
       playChime("disconnect");
@@ -159,6 +175,8 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     socket.on("sync:state", onSync);
     socket.on("source:changed", onSource);
     socket.on("chat:message", onMessage);
+    socket.on("member:status", onStatus);
+    socket.on("reaction", onReaction);
     socket.on("disconnect", onDisconnect);
     socket.on("connect", join);
     window.addEventListener("pagehide", onPageHide);
@@ -176,6 +194,8 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       socket.off("sync:state", onSync);
       socket.off("source:changed", onSource);
       socket.off("chat:message", onMessage);
+      socket.off("member:status", onStatus);
+      socket.off("reaction", onReaction);
       socket.off("disconnect", onDisconnect);
       socket.off("connect", join);
       socket.disconnect();
@@ -198,6 +218,14 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     if (clean) socketRef.current?.emit("chat:send", { text: clean });
   }, []);
 
+  const sendReaction = useCallback((emoji: Reaction) => {
+    socketRef.current?.emit("reaction:send", { emoji });
+  }, []);
+
+  const setMemberStatus = useCallback((s: MemberStatus) => {
+    socketRef.current?.emit("member:status", s);
+  }, []);
+
   return {
     status,
     selfId,
@@ -207,6 +235,8 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     remote,
     messages,
     sendMessage,
+    sendReaction,
+    setMemberStatus,
     serverNow,
     emitSync,
     changeSource,
