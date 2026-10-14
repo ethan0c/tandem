@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import { TopBar } from "@/components/room/TopBar";
 import { Player } from "@/components/room/Player";
-import { FloatingCall } from "@/components/room/FloatingCall";
 
 const noop = () => {};
 const preview = { poster: "/haikyu.png", time: 531, duration: 1420 };
@@ -48,20 +47,16 @@ export function Preview() {
           chromeVisible
           pickerName={null}
         />
-        <div className="hidden lg:contents">
-          <FloatingCall
-            poorConnection={false}
-            turnCameraOff={() => {}}
-            containerRef={containerRef}
-            localStream={null}
-            peers={[]}
-            members={members}
-            micOn={false}
-            camOn={false}
-            toggleMic={noop}
-            toggleCam={noop}
-            roomUrl=""
-          />
+        {/* The call as it looks mid-watch: small, in the corner, never covering the show. A still
+            illustration rather than the real FloatingCall, which is sized for a full-screen room. */}
+        <div aria-hidden="true" className="absolute bottom-[4.5rem] right-3 z-30 hidden w-[19%] overflow-hidden rounded-xl border border-white/15 bg-ink-800/90 shadow-2xl shadow-black/50 sm:block">
+          <div className="relative aspect-[4/3] bg-gradient-to-br from-brand-900 via-ink-700 to-ink-800">
+            <span className="absolute inset-0 flex items-center justify-center">
+              <span className="flex aspect-square w-[30%] items-center justify-center rounded-full bg-gradient-to-br from-pink-400 to-brand-500 text-[clamp(0.7rem,1.4vw,1.1rem)] font-semibold">M</span>
+            </span>
+            <span className="absolute left-1.5 top-1.5 rounded bg-black/55 px-1 py-px text-[clamp(0.5rem,0.8vw,0.65rem)] font-medium">Mika</span>
+            <span className="absolute bottom-1.5 right-1.5 flex aspect-[4/3] w-[32%] items-center justify-center rounded-md border border-white/20 bg-ink-700 text-[clamp(0.45rem,0.7vw,0.6rem)] text-zinc-400">You</span>
+          </div>
         </div>
       </div>
       <figcaption className="sr-only">Room preview</figcaption>
