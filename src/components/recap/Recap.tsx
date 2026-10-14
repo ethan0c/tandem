@@ -22,9 +22,17 @@ interface Story {
   top: { t: string; s: string }[];
 }
 
+/** The same hash gives back the same object: useClientValue needs a stable value, or it re-renders forever. */
+let cached: { hash: string; story: Story | null } | null = null;
+
 function readStory(): Story | null {
+  const hash = window.location.hash;
+  if (cached?.hash !== hash) cached = { hash, story: decodeStory(hash.slice(1)) };
+  return cached.story;
+}
+
+function decodeStory(packed: string): Story | null {
   try {
-    const packed = window.location.hash.slice(1);
     if (!packed) return null;
     const bytes = Uint8Array.from(atob(packed.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
     const s = JSON.parse(new TextDecoder().decode(bytes)) as Story;

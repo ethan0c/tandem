@@ -1,0 +1,15 @@
+import { chromium } from "playwright";
+import { writeFile } from "node:fs/promises";
+const story = { v: 1, h: 23.5, e: 31, n: 18, ls: 6, since: "2026-08-02", top: [{ t: "Frieren: Beyond Journey's End — Episode 12 (a very long title that should be shortened)", s: "youtube.com" }, { t: "Haikyu!! Season 4", s: "x" }, { t: "Our movie night: Spirited Away", s: "x" }] };
+const packed = Buffer.from(new TextEncoder().encode(JSON.stringify(story))).toString("base64url");
+const b = await chromium.launch({ channel: "chrome" });
+const p = await b.newPage({ viewport: { width: 1100, height: 900 } });
+p.on("pageerror", (e) => console.log("pageerror", e.message));
+await p.goto("http://localhost:3000/recap#" + packed);
+await p.getByLabel("Your names (optional)").fill("Alex & Sam");
+await p.waitForTimeout(1200);
+await p.screenshot({ path: "/private/tmp/claude-501/-Users-ethanlma-Github-tandem/c8398b72-0205-45da-8a49-8a1da03bb7e9/scratchpad/recap-page.png" });
+const png = await p.evaluate(() => document.querySelector("canvas").toDataURL("image/png"));
+await writeFile("/private/tmp/claude-501/-Users-ethanlma-Github-tandem/c8398b72-0205-45da-8a49-8a1da03bb7e9/scratchpad/recap-card.png", Buffer.from(png.split(",")[1], "base64"));
+const empty = await b.newPage(); await empty.goto("http://localhost:3000/recap"); console.log("no data:", await empty.locator("h1").innerText());
+await b.close();
