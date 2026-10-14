@@ -337,11 +337,33 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   .rotating-outgoing { display: none; }
 }
 
-/* Reactions drift up over the video and fade out. */
-.reaction-float { animation: reaction-float 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+/* Reactions pop in, then sway up over the video and fade out. Every few vary in speed, size and
+   sway, so a burst of hearts looks like a burst and not a column. */
+.reaction-float {
+  --sway: 18px;
+  --rise: 380px;
+  font-size: clamp(3.5rem, 6vw, 5.5rem);
+  line-height: 1;
+  filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.45)) drop-shadow(0 0 18px rgb(167 139 250 / 0.35));
+  animation: reaction-float 3.2s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+.reaction-float:nth-child(3n + 1) { --sway: -24px; --rise: 440px; animation-duration: 3.6s; }
+.reaction-float:nth-child(3n + 2) { --sway: 12px; --rise: 320px; font-size: clamp(2.75rem, 4.5vw, 4.25rem); animation-duration: 2.9s; }
 @keyframes reaction-float {
-  0% { transform: translateY(0) scale(0.6); opacity: 0; }
-  12% { transform: translateY(-20px) scale(1.15); opacity: 1; }
-  70% { opacity: 1; }
-  100% { transform: translateY(-260px) scale(1); opacity: 0; }
+  0% { transform: translate(0, 0) scale(0.2) rotate(0deg); opacity: 0; }
+  9% { transform: translate(0, -24px) scale(1.35) rotate(-10deg); opacity: 1; }
+  17% { transform: translate(0, calc(var(--rise) * -0.12)) scale(1) rotate(0deg); }
+  38% { transform: translate(var(--sway), calc(var(--rise) * -0.38)) rotate(8deg); }
+  60% { transform: translate(calc(var(--sway) * -1), calc(var(--rise) * -0.6)) rotate(-6deg); opacity: 1; }
+  82% { transform: translate(calc(var(--sway) * 0.6), calc(var(--rise) * -0.84)) scale(0.95) rotate(4deg); opacity: 0.85; }
+  100% { transform: translate(0, calc(var(--rise) * -1)) scale(0.85) rotate(0deg); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* The global rule cuts animations to nothing; a short, plain fade keeps reactions visible. */
+  .reaction-float { animation: reaction-fade 1.6s ease-out forwards !important; animation-duration: 1.6s !important; }
+  @keyframes reaction-fade {
+    0%, 70% { opacity: 1; transform: translateY(-20px); }
+    100% { opacity: 0; transform: translateY(-40px); }
+  }
 }

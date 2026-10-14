@@ -333,9 +333,9 @@ const DISRUPTIONS = {
   },
   duplicateUseHere: {
     // Back to the first tab: it takes the call back and the newer one steps aside. It kept its own
-    // state (such as a picked file), but its seat is new.
+    // state (a picked file, a running tab capture, which it shares again), but its seat is new.
     newSeat: true,
-    endsShare: true,
+    endsShare: false,
     async run(p) {
       const old = await duplicate(p);
       const newer = p.page;
