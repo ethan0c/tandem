@@ -31,7 +31,7 @@ Copy each field into the Developer Dashboard (Store listing tab and Privacy tab)
 
 - `storage`: Saves the Tandem app URL setting, so the popup and the content script use the same server. Also keeps "Our shows" on the device only: up to 30 episodes watched in a Tandem room (page URL and title, room code, playback position, time watched together) and minutes watched together per day for the streak counter. None of it leaves the browser.
 - `activeTab` and `scripting`: When the user presses **Enable on this site** in the popup on a site that is not listed in the manifest, Tandem injects its own packaged `content.js` and `content.css` into that tab and registers them for that site, so invite links keep working after a reload. Nothing runs on a site until the user turns it on there.
-- Host permissions (content script on Miruro, Netflix, Prime Video, YouTube, Disney+, Hulu, Max, Crunchyroll, Apple TV+, Paramount+ and Peacock): The content script has to read and control the page's HTML5 `<video>` element (play, pause, seek, current time) to keep both viewers in sync, and inject the floating call panel. It does not read page content beyond the video element.
+- Host permissions (content script on the streaming sites listed in the manifest): The content script has to read and control the page's HTML5 `<video>` element (play, pause, seek, current time) to keep both viewers in sync, and inject the floating call panel. It does not read page content beyond the video element.
 - Optional host permissions (`https://*/*`, `http://*/*`): Requested for one origin at a time, only when the user presses **Enable on this site** for that site. Never requested up front.
 - Remote code: **No.** All JavaScript ships in the package. The floating panel is an iframe of the Tandem web app, which is a web page, not executed extension code.
 
@@ -51,7 +51,7 @@ Certify all three:
 
 ## Test instructions tab (for the reviewer)
 
-1. Install the extension and open any video on https://www.youtube.com/ (or an episode on https://www.miruro.tv/).
+1. Install the extension and open any video on https://www.youtube.com/.
 2. Click the Tandem toolbar icon, then **Create a room**. A floating panel appears in the bottom-right corner.
 3. Click **Copy invite** and open the copied link in a second Chrome profile with the extension installed.
 4. Play, pause or seek in one window. The other window follows.

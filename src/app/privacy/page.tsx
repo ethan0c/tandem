@@ -35,7 +35,7 @@ const sections = [
   {
     title: "The browser extension",
     body: [
-      "The extension works on the video sites it supports, including Miruro. You can also turn it on for another site from the Tandem button in your browser. On those sites, it checks the video’s position and controls play, pause, and skipping so you can watch together. It also shows your call beside the video.",
+      "The extension works on the video sites it supports. You can also turn it on for another site from the Tandem button in your browser. On those sites, it checks the video’s position and controls play, pause, and skipping so you can watch together. It also shows your call beside the video.",
       "The extension remembers the Tandem website address using your browser’s saved settings. It remembers your room while the tab is open, so refreshing does not make you leave. The room code is cleared when you leave.",
       "To show “Our shows”, the extension keeps a list of up to 30 episodes you watched in a Tandem room: the page address and title, the room code, where you stopped, and how long you watched with someone. It also keeps how many minutes you watched together each day, for your streak. This list stays in your browser and is never sent to Tandem or anyone else. Removing the extension deletes it.",
       "On sites where Tandem can tell an ad is playing (currently YouTube), it checks the player for an ad so your partner’s show can wait. It does not record which ads you see.",

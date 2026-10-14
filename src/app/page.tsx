@@ -59,7 +59,7 @@ const streamingSites: [name: string, slug: string, invert?: boolean][] = [
 ];
 
 const ways = [
-  ["Miruro, with the extension", "Open the same episode on Miruro. Tandem keeps you watching together, with your call beside the video."],
+  ["On a streaming site, with the extension", "Open the same episode on a streaming site. Tandem keeps you watching together, with your call beside the video."],
   ["A file you both have", "Open the same video file on each computer. When one of you pauses or skips, the other follows."],
   ["Share a tab", "Share the browser tab playing your show, including its sound. Your partner watches along."],
 ];
@@ -67,7 +67,7 @@ const ways = [
 const faq = [
   {
     q: "How do we start watching?",
-    a: "Create a room and send your partner the link. Once they join, share the tab playing your show or choose a video file you both have. For Miruro, you can use the extension instead.",
+    a: "Create a room and send your partner the link. Once they join, share the tab playing your show or choose a video file you both have. On a streaming site, you can use the extension instead.",
   },
   {
     q: "Do we both need the same video file?",
@@ -79,7 +79,7 @@ const faq = [
   },
   {
     q: "What does the extension do?",
-    a: "It keeps your videos playing together and puts your call beside the show. You both need the extension and access to the same episode. It works with Miruro; other sites may not always work.",
+    a: "It keeps your videos playing together and puts your call beside the show. You both need the extension and access to the same episode. Some sites may not always work.",
   },
   {
     q: "What happens when one of us gets an ad?",
@@ -226,7 +226,7 @@ export default function Home() {
           <ol className="divide-y divide-white/10 border-y border-white/10">
             {[
               ["Create a room", "Send your partner the room link so they can join."],
-              ["Choose what to watch", "Share a browser tab, open a file you both have, or use the extension on Miruro."],
+              ["Choose what to watch", "Share a browser tab, open a file you both have, or use the extension on a streaming site."],
               ["Press play", "When you each open the same video, either of you can pause or skip and the other follows. Keep talking as you watch."],
             ].map(([t, b], i) => (
               <li key={t} className="grid gap-3 py-7 sm:grid-cols-[3rem_1fr]">
@@ -249,7 +249,7 @@ export default function Home() {
               Watch on the site you already use.
             </h2>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-brand-100">
-              Add Tandem to your browser to watch on Miruro. You can also try it on the sites above, though some videos may not work yet.
+              Add Tandem to your browser to watch on the sites above. Some videos may not work yet.
             </p>
           </div>
           <div className="flex flex-wrap gap-3 lg:justify-end">

@@ -11,7 +11,7 @@ The web app's server does all the work; this extension only bridges the page's `
 
 ## Use
 
-1. Open an episode on miruro.tv.
+1. Open an episode on a supported site (a YouTube video is the quickest to test with).
 2. Click the Tandem icon and press **Create a room**. A floating panel appears. Pick a name, allow the camera, join.
 3. Press **Copy invite** in the popup and send the link. It opens `/join/<room>` on the Tandem site, which helps
    your partner install the extension and then sends them to the episode URL with `#tandem=<room>` on the end,
@@ -46,7 +46,7 @@ Compatibility depends on the site’s player; see the experimental coverage and 
 
 Version 0.2 adds injection on Netflix, Prime Video (`primevideo.com` and the US Amazon video paths),
 YouTube, Disney+, Hulu, Max (including `hbomax.com`), Crunchyroll, Apple TV+, Paramount+, and Peacock.
-These are ten initial targets, not a traffic ranking or a verified compatibility claim. Miruro remains included.
+These are ten initial targets, not a traffic ranking or a verified compatibility claim.
 Each viewer must have authorized access to the same episode. DRM does not itself prevent synchronizing controls;
 Tandem does not extract or redistribute protected media.
 
