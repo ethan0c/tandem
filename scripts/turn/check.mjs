@@ -3,6 +3,8 @@
 //
 //   npm run turn:check                       (reads TURN_SECRET + TURN_URLS, or Metered/Cloudflare, from .env)
 //   TURN_SECRET=… TURN_URLS=… npm run turn:check
+//   TURN_CHECK_RESOLVE=turn.example.com=1.2.3.4 npm run turn:check   (skip local DNS, e.g. a router still
+//                                                                   caching an old answer after a DNS change)
 import { existsSync } from "node:fs";
 import { chromium } from "playwright";
 import { mintIceServers } from "../../src/lib/turn.ts";
@@ -17,7 +19,11 @@ const { username, credential } = minted.iceServers[0];
 const urls = minted.iceServers.flatMap((s) => [].concat(s.urls));
 console.log(`Password minted, valid until ${new Date(minted.expiresAt).toLocaleString()}. Testing ${urls.length} addresses:`);
 
-const browser = await chromium.launch({ channel: "chrome" });
+const resolve = process.env.TURN_CHECK_RESOLVE?.match(/^([\w.-]+)=([\d.]+)$/);
+const browser = await chromium.launch({
+  channel: "chrome",
+  args: resolve ? [`--host-resolver-rules=MAP ${resolve[1]} ${resolve[2]}`] : [],
+});
 const page = await browser.newPage();
 let failed = 0;
 for (const url of urls) {

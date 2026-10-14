@@ -96,6 +96,8 @@ their own instead:
 5. **Search Console.** Verify the site in Google Search Console and submit `/sitemap.xml`, so Google
    indexes it within days instead of weeks.
 
+The step-by-step version for Reddit and Discord is in [reddit-discord-playbook.md](reddit-discord-playbook.md).
+
 ## What to measure
 
 - Weekly active couples (both people in a room for 10+ minutes)
