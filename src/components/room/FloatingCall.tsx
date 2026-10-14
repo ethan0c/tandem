@@ -8,7 +8,8 @@ import { useClientValue } from "@/hooks/useClientValue";
 import { useDraggable } from "@/hooks/useDraggable";
 import { useCallOutputVolume } from "@/lib/call-volume";
 import type { Peer } from "@/hooks/useWebRTC";
-import type { Member } from "@/lib/types";
+import type { Member, Reaction } from "@/lib/types";
+import { ReactionBar } from "@/components/Reactions";
 import { StreamVideo } from "./StreamVideo";
 
 const WIDTH_KEY = "tandem:call-width";
@@ -48,9 +49,10 @@ interface Props {
   roomUrl: string;
   poorConnection: boolean;
   turnCameraOff: () => void;
+  onReact?: (emoji: Reaction) => void;
 }
 
-export function FloatingCall({ containerRef, localStream, peers, members, micOn, camOn, toggleMic, toggleCam, roomUrl, poorConnection, turnCameraOff }: Props) {
+export function FloatingCall({ containerRef, localStream, peers, members, micOn, camOn, toggleMic, toggleCam, roomUrl, poorConnection, turnCameraOff, onReact }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [minimized, setMinimized] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -244,6 +246,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
             {camOn ? <Video className="size-3.5" /> : <VideoOff className="size-3.5" />}
           </CallButton>
           <CallVolumeControl buttonClassName="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20" />
+          {!minimized && onReact && peers.length > 0 && <ReactionBar onSend={onReact} collapsed />}
         </div>
         {minimized && (
           <span className="truncate px-1 text-[11px] text-zinc-400">

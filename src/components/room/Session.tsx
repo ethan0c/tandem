@@ -6,6 +6,7 @@ import { useReleaseStream } from "@/hooks/useReleaseStream";
 import { useRoom } from "@/hooks/useRoom";
 import { useScreenShare } from "@/hooks/useScreenShare";
 import { useWebRTC } from "@/hooks/useWebRTC";
+import { FloatingReactions, partnerNotice, useFloatingReactions } from "@/components/Reactions";
 import { ChatPanel } from "./ChatPanel";
 import { FloatingCall } from "./FloatingCall";
 import { Player } from "./Player";
@@ -32,7 +33,9 @@ export function Session({ roomId, name, localStream }: Props) {
   }, []);
 
   // A chat message brings the chrome back briefly, so the unread badge is seen while something plays.
-  const room = useRoom(roomId, name, { onMessage: bump });
+  const floating = useFloatingReactions();
+  const room = useRoom(roomId, name, { onMessage: bump, onReaction: (r) => floating.add(r.id, r.emoji) });
+  const notice = partnerNotice(room.members, room.selfId);
   const rtc = useWebRTC({
     socketRef: room.socketRef,
     selfId: room.selfId,
@@ -194,7 +197,10 @@ export function Session({ roomId, name, localStream }: Props) {
         poorConnection={rtc.poorConnection}
         turnCameraOff={rtc.turnCameraOff}
         roomUrl={roomUrl}
+        onReact={room.sendReaction}
       />
+
+      <FloatingReactions items={floating.items} onDone={floating.remove} />
 
       <ChatPanel
         open={chatOpen}
@@ -214,6 +220,14 @@ export function Session({ roomId, name, localStream }: Props) {
         onScreen={screen.start}
         screenError={isScreen ? null : screen.error}
       />
+
+      {notice && room.status !== "disconnected" && (
+        <div role="status" className="absolute inset-x-0 top-16 md:top-[72px] z-30 flex justify-center px-4">
+          <div className="rounded-full border border-amber-400/30 bg-amber-950/80 px-4 py-1.5 text-xs text-amber-200 backdrop-blur">
+            {notice}
+          </div>
+        </div>
+      )}
 
       {room.status === "disconnected" && (
         <div className="absolute inset-x-0 top-16 md:top-[72px] z-30 flex justify-center px-4">
