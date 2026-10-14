@@ -5,6 +5,8 @@
  * CLOUDFLARE_TURN_API_TOKEN). Server-only: the secrets never reach the browser.
  */
 
+type Env = Record<string, string | undefined>;
+
 export interface MintedIce {
   iceServers: RTCIceServer[];
   /** ms since epoch. */
@@ -15,14 +17,14 @@ export interface MintedIce {
 export const TURN_TTL_S = 12 * 60 * 60;
 
 /** Relay addresses are not secret: TURN_URLS, or the public setting the page already uses. */
-function relayUrls(env: NodeJS.ProcessEnv) {
+function relayUrls(env: Env) {
   return (env.TURN_URLS ?? env.NEXT_PUBLIC_TURN_URL ?? "")
     .split(",")
     .map((u) => u.trim())
     .filter((u) => /^turns?:\S+$/i.test(u));
 }
 
-export async function mintIceServers(env: NodeJS.ProcessEnv = process.env, fetchImpl: typeof fetch = fetch, now = Date.now()): Promise<MintedIce | null> {
+export async function mintIceServers(env: Env = process.env, fetchImpl: typeof fetch = fetch, now = Date.now()): Promise<MintedIce | null> {
   const expiresAt = now + TURN_TTL_S * 1000;
 
   if (env.METERED_DOMAIN && env.METERED_SECRET_KEY) {

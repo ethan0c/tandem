@@ -41,7 +41,46 @@ function streak(days) {
 }
 
 /** "Our shows": recorded by content.js while you watch in a room, kept in this browser only. */
-async function showHistory() {
+/** Longest run of days with at least a few minutes together. */
+function longestStreak(days) {
+  const sorted = Object.keys(days).filter((d) => days[d] >= 180).sort();
+  let best = 0;
+  let run = 0;
+  let previous = null;
+  for (const day of sorted) {
+    const date = new Date(`${day}T12:00:00`);
+    run = previous && Math.round((date - previous) / 86_400_000) === 1 ? run + 1 : 1;
+    best = Math.max(best, run);
+    previous = date;
+  }
+  return best;
+}
+
+/**
+ * The numbers for the shareable story card, packed into the part of the link after "#": browsers never
+ * send that to a server, so the history still never leaves the device except as a picture you share.
+ */
+function storyLink(appOrigin, history, days) {
+  const together = Object.values(days).reduce((sum, s) => sum + (Number(s) || 0), 0);
+  const story = {
+    v: 1,
+    h: Math.round((together / 3600) * 10) / 10,
+    e: history.filter((h) => h.together >= 300).length,
+    n: Object.values(days).filter((s) => s >= 180).length,
+    ls: longestStreak(days),
+    since: Object.keys(days).sort()[0] ?? null,
+    top: [...history]
+      .sort((a, b) => (b.together ?? 0) - (a.together ?? 0))
+      .filter((h) => h.together >= 60)
+      .slice(0, 3)
+      .map((h) => ({ t: String(h.title).slice(0, 60), s: h.site })),
+  };
+  const json = new TextEncoder().encode(JSON.stringify(story));
+  const packed = btoa(String.fromCharCode(...json)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return `${appOrigin}/recap#${packed}`;
+}
+
+async function showHistory(appOrigin) {
   const saved = await chrome.storage.local.get(["tandem:history", "tandem:days"]);
   const history = Array.isArray(saved["tandem:history"]) ? saved["tandem:history"] : [];
   const days = saved["tandem:days"] && typeof saved["tandem:days"] === "object" ? saved["tandem:days"] : {};
@@ -56,6 +95,13 @@ async function showHistory() {
   if (hours >= 0.1) parts.push(`${hours < 10 ? hours.toFixed(1) : Math.round(hours)} h watched`);
   if (run > 1) parts.push(`${run}-day streak 🔥`);
   $("#stats").textContent = parts.length ? parts.join(" · ") : "Watch with someone to start your story.";
+  if (hours >= 0.1) {
+    $("#share-story").hidden = false;
+    $("#share-story").addEventListener("click", () => {
+      chrome.tabs.create({ url: storyLink(appOrigin, history, days) });
+      window.close();
+    });
+  }
 
   for (const entry of history.slice(0, 4)) {
     const li = document.createElement("li");
@@ -99,7 +145,7 @@ async function main() {
     chrome.tabs.create({ url: `${origin}/plan` });
     window.close();
   });
-  showHistory().catch(() => {});
+  showHistory(appOrigin).catch(() => {});
   $("#origin").addEventListener("change", () => {
     const v = $("#origin").value.trim().replace(/\/+$/, "") || "https://www.ilovemygf.site";
     $("#origin").value = v;
