@@ -25,7 +25,7 @@ export function Participants({ members, selfId, hostId, compact = false }: { mem
         aria-haspopup="dialog"
         title="View participants"
         onClick={() => { if (!dialog.current?.open) dialog.current?.showModal(); }}
-        className="flex shrink-0 items-center rounded-full transition hover:brightness-125 focus-visible:outline-2 focus-visible:outline-brand-400 focus-visible:outline-offset-2"
+        className="control-button p-0.5"
       >
         <span className={`${compact ? "flex" : "hidden sm:flex"} -space-x-2`}>
           {members.map((m) => (

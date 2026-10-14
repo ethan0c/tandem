@@ -197,7 +197,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
           onDoubleClick={toggleSize}
           aria-label="Resize call (arrow keys, double-click to toggle size)"
           title="Drag to resize · double-click to toggle size"
-          className={`absolute left-0 top-0 z-10 flex size-7 cursor-nwse-resize items-start justify-start rounded-br-xl p-1.5 text-white/80 transition-opacity focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-brand-400 group-hover/call:opacity-100 ${
+          className={`control-button control-sm absolute left-0 top-0 z-10 cursor-nwse-resize rounded-br-xl p-1.5 text-white/80 transition-opacity focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-brand-400 group-hover/call:opacity-100 ${
             resizing ? "bg-black/40 opacity-100" : "bg-black/30 opacity-0"
           }`}
           style={{ touchAction: "none" }}

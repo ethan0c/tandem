@@ -239,8 +239,8 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
               onClick={toggleAway}
               aria-pressed={away}
               title={away ? "I'm back" : "Be right back: pauses the show"}
-              className={`flex h-7 items-center gap-1 rounded-full px-2 text-[11px] transition ${
-                away ? "bg-amber-400/90 text-ink hover:bg-amber-300" : "bg-white/10 text-zinc-200 hover:bg-white/20"
+              className={`btn3d btn3d-xs ${
+                away ? "btn3d-light" : "btn3d-ghost"
               }`}
             >
               <Coffee className="size-3" /> {away ? "I'm back" : "BRB"}

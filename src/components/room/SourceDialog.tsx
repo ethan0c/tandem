@@ -82,7 +82,7 @@ export function SourceDialog({ open, onClose, onFile, onScreen, screenError }: P
               </p>
               <button
                 onClick={() => fileInput.current?.click()}
-                className="flex h-28 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 bg-ink-700/60 text-sm text-zinc-300 transition hover:border-brand-400 hover:bg-brand-500/10"
+                className="btn3d btn3d-ghost h-28 w-full flex-col border-dashed text-sm hover:border-brand-400"
               >
                 <FolderOpen className="size-5 text-brand-300" />
                 Choose a video file
@@ -123,8 +123,8 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium transition ${
-        active ? "bg-brand-600 text-white" : "text-zinc-400 hover:bg-white/5 hover:text-white"
+      className={`btn3d btn3d-sm flex-1 ${
+        active ? "btn3d-brand" : "btn3d-ghost"
       }`}
     >
       {icon}

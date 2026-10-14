@@ -15,7 +15,7 @@ interface BaseProps {
   children: ReactNode;
 }
 
-/** Shared action button. Only the brand variant has a raised press effect. */
+/** Shared action button. All variants share the raised press effect. */
 export function Button({
   variant = "brand",
   size = "md",

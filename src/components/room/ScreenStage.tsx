@@ -148,7 +148,7 @@ export function ScreenStage({
         <div className="absolute inset-x-0 bottom-24 z-10 flex justify-center px-4">
           <button
             onClick={onDismissError}
-            className="max-w-md rounded-xl border border-amber-400/30 bg-amber-950/80 px-4 py-2.5 text-center text-sm text-amber-200 backdrop-blur"
+            className="btn3d btn3d-ghost max-w-md whitespace-normal border-amber-400/30 bg-amber-950/80 px-4 py-2.5 text-center text-sm text-amber-200 backdrop-blur"
           >
             {error}
           </button>
