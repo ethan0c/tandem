@@ -173,7 +173,7 @@ export function ScreenStage({
             {isSharer ? (
               <button
                 onClick={onStop}
-                className="flex h-9 items-center gap-2 rounded-full bg-red-600 px-3.5 text-sm font-medium hover:bg-red-500"
+                className="btn3d btn3d-danger btn3d-sm"
               >
                 <ScreenShareOff className="size-4" /> Stop sharing
               </button>

@@ -107,7 +107,7 @@ export function PlanForm() {
         </p>
         <div className="flex flex-wrap gap-2 border-t border-white/10 pt-4">
           <ButtonLink href={new URL(result.url).pathname + new URL(result.url).search} variant="ghost" size="sm">Preview the invite</ButtonLink>
-          <button onClick={() => setResult(null)} className="px-2 text-sm text-zinc-400 hover:text-white">Plan another</button>
+          <button onClick={() => setResult(null)} className="btn3d btn3d-ghost btn3d-sm">Plan another</button>
         </div>
       </section>
     );
