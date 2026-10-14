@@ -48,11 +48,11 @@ export function preferCodecs(pc: RTCPeerConnection) {
 }
 
 /** How long a call may sit "disconnected" before we restart it. */
-const STALL_MS = 2_500;
+export const STALL_MS = 2_500;
 /** How long an offer may go unanswered (or unconnected) before the connection is rebuilt. */
 const OFFER_TIMEOUT_MS = 15_000;
 /** After reconnecting, how long to wait for the room to be rejoined before sending signals. */
-const REJOIN_SETTLE_MS = 1_000;
+export const REJOIN_SETTLE_MS = 1_000;
 
 interface Options {
   socketRef: RefObject<AppSocket | null>;

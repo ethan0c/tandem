@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from "react"
 import type { AppSocket } from "@/lib/socket";
 import type { Member, ScreenSignal, Source } from "@/lib/types";
 import { ShareAdaptation, setShareQuality } from "@/lib/connection-quality";
-import { iceServers, preferCodecs } from "./useWebRTC";
+import { iceServers, preferCodecs, REJOIN_SETTLE_MS, STALL_MS } from "./useWebRTC";
 
 /** A viewer with no picture asks the sharer again this often, in case a request or offer was lost. */
 const REQUEST_RETRY_MS = 5_000;
@@ -64,8 +64,17 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
       pc.onicecandidate = (e) => {
         if (e.candidate) send(peerId, { type: "candidate", candidate: e.candidate.toJSON() });
       };
+      // Chrome takes about 30 s to call a lost connection "failed", which would leave a frozen picture
+      // that long. A share is one-way and quick to rebuild, so a few seconds of "disconnected" will do.
+      let stalled: ReturnType<typeof setTimeout> | undefined;
       pc.onconnectionstatechange = () => {
+        clearTimeout(stalled);
         if (pc.connectionState === "failed") onFailed();
+        else if (pc.connectionState === "disconnected") {
+          stalled = setTimeout(() => {
+            if (pc.connectionState === "disconnected") onFailed();
+          }, STALL_MS);
+        }
       };
       return pc;
     },
@@ -203,8 +212,31 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
       onSignal(payload).catch(() => {});
     };
     socket.on("screen:signal", handler);
+    // Back on the signalling server: a picture that is not connected may have lost its signals while
+    // we were away, so ask the sharer for a fresh one. After a network change ask anyway, since a
+    // picture that still looks fine is usually dead. Signals only go through once we have rejoined.
+    let networkChanged = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const onConnect = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const sharer = sharerRef.current;
+        if (sharer && sharer !== selfId && (networkChanged || recvPc.current?.connectionState !== "connected")) {
+          send(sharer, { type: "request" });
+        }
+        networkChanged = false;
+      }, REJOIN_SETTLE_MS);
+    };
+    const onOnline = () => {
+      networkChanged = true;
+    };
+    socket.on("connect", onConnect);
+    window.addEventListener("online", onOnline);
     return () => {
+      clearTimeout(timer);
       socket.off("screen:signal", handler);
+      socket.off("connect", onConnect);
+      window.removeEventListener("online", onOnline);
     };
   }, [socketRef, selfId, offerTo, newPc, closeViewer, dropViewer, flushIce, send]);
 
