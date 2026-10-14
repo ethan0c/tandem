@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useId, useState } from "react";
 import { Heart } from "lucide-react";
 import { REACTIONS, type Member, type Reaction } from "@/lib/types";
 
@@ -44,38 +44,56 @@ export function FloatingReactions({ items, onDone }: { items: Floating[]; onDone
   );
 }
 
-/** One button per reaction. With `collapsed`, a heart that opens the row. */
+/** The collapsed picker sits above its positioned call container's toolbar. */
 export function ReactionBar({ onSend, collapsed = false }: { onSend: (emoji: Reaction) => void; collapsed?: boolean }) {
-  const [open, setOpen] = useState(!collapsed);
-  if (!open) {
-    return (
-      <button
-        onClick={() => setOpen(true)}
-        aria-label="Reactions"
-        title="Reactions"
-        className="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
-      >
-        <Heart className="size-3.5" />
-      </button>
-    );
-  }
-  return (
-    <div className="flex items-center gap-0.5" role="group" aria-label="Reactions">
+  const [open, setOpen] = useState(false);
+  const pickerId = useId();
+  const picker = (
+    <div
+      id={pickerId}
+      role="group"
+      aria-label="Reactions"
+      className={collapsed
+        ? "absolute inset-x-2 bottom-12 z-20 flex flex-wrap items-center justify-center gap-1 rounded-xl border border-white/15 bg-ink-800/95 p-2 shadow-lg"
+        : "flex min-w-0 flex-wrap items-center gap-0.5"}
+      onKeyDown={(event) => {
+        if (collapsed && event.key === "Escape") {
+          setOpen(false);
+          document.querySelector<HTMLButtonElement>(`[aria-controls="${pickerId}"]`)?.focus();
+        }
+      }}
+    >
       {REACTIONS.map((emoji) => (
         <button
           key={emoji}
           onClick={() => onSend(emoji)}
           aria-label={`React with ${emoji}`}
-          className="flex size-7 items-center justify-center rounded-full text-base transition hover:scale-110 hover:bg-white/10 active:scale-95"
+          className="flex size-7 shrink-0 items-center justify-center rounded-full text-base transition hover:scale-110 hover:bg-white/10 active:scale-95"
         >
           {emoji}
         </button>
       ))}
       {collapsed && (
-        <button onClick={() => setOpen(false)} aria-label="Hide reactions" className="px-1 text-xs text-zinc-500 hover:text-white">
+        <button onClick={() => setOpen(false)} aria-label="Hide reactions" className="flex size-7 shrink-0 items-center justify-center rounded-full text-xs text-zinc-400 hover:bg-white/10 hover:text-white">
           ×
         </button>
       )}
+    </div>
+  );
+  if (!collapsed) return picker;
+  return (
+    <div className="flex shrink-0 items-center">
+      <button
+        onClick={() => setOpen((value) => !value)}
+        aria-label="Reactions"
+        aria-expanded={open}
+        aria-controls={pickerId}
+        title="Reactions"
+        className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+      >
+        <Heart className="size-3.5" />
+      </button>
+      {open && picker}
     </div>
   );
 }

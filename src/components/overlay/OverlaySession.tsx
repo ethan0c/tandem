@@ -216,9 +216,9 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
       </div>
 
       <ConnectionNotice poor={rtc.poorConnection} cameraOn={hasLocalVideo && rtc.camOn} onTurnCameraOff={rtc.turnCameraOff} />
-      <div className="flex items-center gap-1 border-b border-white/10 px-2 py-1.5">
+      <div className="flex flex-wrap items-center gap-1 border-b border-white/10 px-2 py-1.5">
         <ReactionBar onSend={room.sendReaction} />
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           {!phone && (
             <button
               onClick={toggleAway}
