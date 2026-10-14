@@ -17,7 +17,8 @@ test('room codes and invite details never reach analytics', () => {
 
 test('story numbers in the hash and any query string are dropped', () => {
   assert.equal(cleanAnalyticsUrl('https://www.ilovemygf.site/recap#eyJ2IjoxfQ'), 'https://www.ilovemygf.site/recap');
-  assert.equal(cleanAnalyticsUrl('https://www.ilovemygf.site/?utm_source=reddit'), 'https://www.ilovemygf.site/');
+  assert.equal(cleanAnalyticsUrl('https://www.ilovemygf.site/?ref=x&name=Sam'), 'https://www.ilovemygf.site/');
+  assert.equal(cleanAnalyticsUrl('https://www.ilovemygf.site/join/abcd?from=Sam&utm_source=discord'), 'https://www.ilovemygf.site/join/[id]?utm_source=discord');
 });
 
 test('the extension call window is not counted', () => {

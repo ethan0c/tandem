@@ -35,6 +35,7 @@ test('/watch posts a join button for a new room, named after whoever typed it', 
   assert.equal(url.pathname, '/join/abcd-efgh');
   assert.equal(url.searchParams.get('from'), 'Sam');
   assert.equal(url.searchParams.get('to'), 'https://www.youtube.com/watch?v=x');
+  assert.equal(url.searchParams.get('utm_source'), 'discord');
   assert.deepEqual(reply.data.allowed_mentions, { parse: [] });
 });
 

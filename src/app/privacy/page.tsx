@@ -14,7 +14,7 @@ const sections = [
     title: "Your privacy at a glance",
     body: [
       "You do not need an account. Tandem has no ads. We do not record your call or the video you watch. Room details are deleted 10 minutes after everyone leaves.",
-      "The website counts page visits with Vercel Web Analytics, so we know which pages are useful and which sites send people here. It uses no cookies and builds no profile of you. Before anything is counted, room codes, invite details (names, what you are watching, links) and story-card numbers are removed from the address, and the extension’s call window is not counted at all.",
+      "The website counts page visits with privacy-friendly analytics, so we know which pages are useful and which sites send people here. It uses no cookies and builds no profile of you. Before anything is counted, room codes, invite details (names, what you are watching, links) and story-card numbers are removed from the address, and the extension’s call window is not counted at all.",
     ],
   },
   {
@@ -30,7 +30,7 @@ const sections = [
     title: "Your camera and microphone",
     body: [
       "Your camera and microphone are used only for the call, after you allow them. You can turn either off at any time, or watch without using them.",
-      "Your browser uses Google’s connection services to help the call reach the other people in your room. Those services can see your internet address (IP address). Depending on how Tandem is hosted, another connection service may help carry the call when a direct connection is not possible.",
+      "To connect the call, your browser uses connection services that help it find a route to the other people in your room. Those services can see your internet address (IP address). When a direct connection is not possible, a relay service carries the call; it passes the encrypted call along and cannot see or hear it.",
     ],
   },
   {

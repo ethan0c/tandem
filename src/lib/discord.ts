@@ -72,6 +72,8 @@ export function respond(interaction: Interaction, roomId = newRoomId()) {
   const params = new URLSearchParams({ from });
   if (what) params.set("what", what);
   if (link) params.set("to", link.slice(0, 500));
+  // Shows up in analytics as visits from Discord.
+  params.set("utm_source", "discord");
   const url = `${SITE_URL}/join/${roomId}?${params}`;
   return {
     type: CHANNEL_MESSAGE,
