@@ -32,17 +32,16 @@ export function iceServers(): RTCIceServer[] {
 }
 
 /**
- * H.264 first: it is hardware-encoded on nearly every machine (VideoToolbox, NVENC, QuickSync),
- * which is what keeps a 4K share smooth. VP9 is the best software fallback; VP8 last, it blurs
- * high-resolution content.
+ * Software codecs first, for the share and the camera alike. A hardware encoder (VideoToolbox, and the
+ * like) can take 5–13 s to produce its first frame in a fresh browser, and while it starts every other
+ * video encoder in the browser stalls too: measured in a real Chrome window, a tab share took 13 s to
+ * appear and froze the camera call to 2 fps meanwhile. VP9 starts in under half a second, keeps text
+ * sharp, and held 1080p at full frame rate without CPU limits; the share's adaptation steps down if a
+ * machine cannot keep up. H.264 stays as a fallback for browsers without VP9 or VP8.
  */
-const CODEC_ORDER = ["video/H264", "video/VP9", "video/AV1", "video/VP8"];
+const CODEC_ORDER = ["video/VP9", "video/VP8", "video/H264", "video/AV1"];
 
-/**
- * The camera call is the other way round. A hardware encoder can take several seconds to produce its
- * first frame in a fresh browser (about 5.5 s measured with VideoToolbox), and the call is connected
- * but blank all that time. Software VP8/VP9 starts at once, and a camera does not need the hardware.
- */
+/** The camera: VP8 is the lightest to encode, and a camera picture does not need VP9's extra detail. */
 export const CAMERA_CODEC_ORDER = ["video/VP8", "video/VP9", "video/H264", "video/AV1"];
 
 /** Put our preferred video codecs first in the offer so the answer picks one of them. */
