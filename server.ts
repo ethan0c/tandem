@@ -28,6 +28,11 @@ const EMPTY_ROOM_TTL_MS = 10 * 60 * 1000;
  * reconnects. Socket.IO needs up to 45 s to notice a dead connection, plus the reconnect backoff.
  */
 const RECONNECT_GRACE_MS = 60 * 1000;
+/**
+ * A page that said goodbye while unloading may be reloading (and back in a moment), or may have been
+ * closed. Either way it is not a network problem, so it gets a much shorter hold before its seat goes.
+ */
+const UNLOAD_GRACE_MS = 15 * 1000;
 
 /** The live socket for each member, so signals follow a member across reconnects. */
 const socketOf = new Map<string, string>();
@@ -131,7 +136,7 @@ app.prepare().then(() => {
     if (room.members.length === 0) scheduleCleanup(roomId);
   };
 
-  const holdSeat = (roomId: string, clientId: string) => {
+  const holdSeat = (roomId: string, clientId: string, ms = RECONNECT_GRACE_MS) => {
     const previous = pendingLeave.get(clientId);
     if (previous) clearTimeout(previous.timer);
     pendingLeave.set(clientId, {
@@ -139,7 +144,7 @@ app.prepare().then(() => {
       timer: setTimeout(() => {
         pendingLeave.delete(clientId);
         leave(roomId, clientId);
-      }, RECONNECT_GRACE_MS),
+      }, ms),
     });
   };
 
@@ -185,7 +190,7 @@ app.prepare().then(() => {
       const roomId = pending?.roomId ?? (sid ? io.sockets.sockets.get(sid)?.data.roomId : undefined);
       socketOf.delete(clientId);
       if (roomId) {
-        if (reconnecting) holdSeat(roomId, clientId);
+        if (reconnecting) holdSeat(roomId, clientId, UNLOAD_GRACE_MS);
         else leave(roomId, clientId);
       }
       res.writeHead(204).end();
@@ -193,11 +198,21 @@ app.prepare().then(() => {
   };
 
   io.on("connection", (socket) => {
-    socket.on("room:join", ({ roomId: id, name, clientId: requested, tabId }, ack) => {
+    socket.on("room:join", ({ roomId: id, name, clientId: requested, tabId, formerTabId }, ack) => {
       // Older clients send no id; their socket id then plays the part, as it used to.
       const clientId = typeof requested === "string" && requested ? requested.slice(0, 64) : socket.id;
       const tab = typeof tabId === "string" && tabId ? tabId.slice(0, 64) : undefined;
-      const previous = tab ? seatByTab.get(tab) : undefined;
+      let previous = tab ? seatByTab.get(tab) : undefined;
+      // Back in the same tab after going somewhere else: take over our old seat, but only if its page is
+      // gone. A duplicated tab carries the same former id while the original is still connected.
+      const former = typeof formerTabId === "string" && formerTabId ? formerTabId.slice(0, 64) : undefined;
+      if (!previous && former) {
+        const seat = seatByTab.get(former);
+        if (seat && pendingLeave.has(seat.clientId)) {
+          previous = seat;
+          seatByTab.delete(former);
+        }
+      }
       let replaced = false;
       if (previous && previous.clientId !== clientId) {
         const pending = pendingLeave.get(previous.clientId);

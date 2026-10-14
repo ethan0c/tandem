@@ -102,7 +102,7 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
   "room:join": (
-    payload: { roomId: string; name: string; clientId: string; tabId?: string },
+    payload: { roomId: string; name: string; clientId: string; tabId?: string; formerTabId?: string },
     ack: (res: JoinAck) => void,
   ) => void;
   "time:ping": (ack: (serverNow: number) => void) => void;

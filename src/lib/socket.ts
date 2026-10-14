@@ -11,22 +11,29 @@ export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
  */
 export const clientId = nanoid(12);
 
-/** Reuse a tab's seat only on reload; new tabs may inherit a copy of sessionStorage. */
-function reloadTabId() {
+/**
+ * Reuse a tab's seat only on reload; new tabs may inherit a copy of sessionStorage. Any other return
+ * to the page (back/forward, a link) offers the old id as `former`: the server lets it take that seat
+ * over only if the seat's own page is gone, so a duplicated tab can never steal a live one.
+ */
+function reloadTabId(): { id: string; former?: string } {
   const fresh = nanoid(24);
-  if (typeof window === "undefined") return fresh;
+  if (typeof window === "undefined") return { id: fresh };
   try {
     const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
     const saved = sessionStorage.getItem("tandem:tab-id");
-    const id = navigation?.type === "reload" && saved ? saved : fresh;
+    const reload = navigation?.type === "reload" && !!saved;
+    const id = reload && saved ? saved : fresh;
     sessionStorage.setItem("tandem:tab-id", id);
-    return id;
+    return { id, former: !reload && saved ? saved : undefined };
   } catch {
-    return fresh;
+    return { id: fresh };
   }
 }
 
-export const tabId = reloadTabId();
+const tab = reloadTabId();
+export const tabId = tab.id;
+export const formerTabId = tab.former;
 
 let socket: AppSocket | null = null;
 

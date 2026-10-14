@@ -315,14 +315,14 @@ const MODES = {
       await alice.page.getByRole("textbox", { name: "Message", exact: true }).fill(c.message);
       await alice.page.getByRole("button", { name: "Send", exact: true }).click();
       await bob.page.getByRole("button", { name: /^Open chat/ }).waitFor({ timeout: WAIT });
-      await alice.page.getByRole("button", { name: "Close chat", exact: true }).first().click();
+      await closeChat(alice.page);
     },
     async check(ps, c) {
       // The conversation so far survives, for whoever came back.
       for (const p of ps) {
         await p.page.getByRole("button", { name: /^Open chat/ }).click();
         await p.page.getByTestId("chat-message").filter({ hasText: c.message }).waitFor({ timeout: WAIT });
-        await p.page.getByRole("button", { name: "Close chat", exact: true }).first().click();
+        await closeChat(p.page);
       }
     },
   },
@@ -386,6 +386,9 @@ const MODES = {
     paths: ["/overlay/", "/call/"],
   },
 };
+
+const closeChat = (page) =>
+  page.getByRole("complementary", { name: "Chat", exact: true }).getByRole("button", { name: "Close chat", exact: true }).click();
 
 async function shareLive(viewer) {
   await viewer.page.getByText("is sharing").waitFor({ timeout: WAIT });
