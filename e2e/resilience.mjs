@@ -135,7 +135,13 @@ async function join(p) {
 const inRoom = (p) => p.page.locator('button[aria-label="View participants"]').first().waitFor({ timeout: WAIT });
 
 const socketCount = (p) => p.page.evaluate(() => window.__sockets);
-const reconnected = (p, before) => p.page.waitForFunction((n) => window.__sockets > n, before, { timeout: WAIT });
+/** A new signalling socket, and the room joined on it (no connecting or reconnecting notice left). */
+const reconnected = (p, before) =>
+  p.page.waitForFunction(
+    (n) => window.__sockets > n && !/Connection lost|Reconnecting…|Connecting…/.test(document.body.innerText),
+    before,
+    { timeout: WAIT },
+  );
 
 /** Exactly `n` people, a connected call to each of the others, and their cameras live on screen. */
 async function healthy(p, n = 2, timeout = WAIT) {
@@ -299,6 +305,7 @@ const DISRUPTIONS = {
       }
       await p.page.waitForTimeout(20_000);
       await setHidden(p.page, false);
+      // Anything older than a few seconds is gone by now, rather than all floating out at once.
       const piled = await p.page.evaluate(() => document.querySelectorAll(".reaction-float").length);
       if (piled) throw new Error(`${piled} reactions burst out on return`);
     },

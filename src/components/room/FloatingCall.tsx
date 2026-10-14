@@ -246,7 +246,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
             {camOn ? <Video className="size-3.5" /> : <VideoOff className="size-3.5" />}
           </CallButton>
           <CallVolumeControl buttonClassName="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20" />
-          {!minimized && onReact && peers.length > 0 && <ReactionBar onSend={onReact} collapsed />}
+          {!minimized && onReact && <ReactionBar onSend={onReact} collapsed />}
         </div>
         {minimized && (
           <span className="truncate px-1 text-[11px] text-zinc-400">

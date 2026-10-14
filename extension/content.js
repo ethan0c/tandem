@@ -373,8 +373,7 @@
   let reactionLayer = null;
 
   function floatReaction(emoji) {
-    // A hidden tab runs no animations: they would pile up and all float out when you come back.
-    if (!IS_TOP || !host || document.hidden || typeof emoji !== "string" || !emoji || emoji.length > 8) return;
+    if (!IS_TOP || !host || typeof emoji !== "string" || !emoji || emoji.length > 8) return;
     if (!reactionLayer?.isConnected) {
       reactionLayer = document.createElement("div");
       reactionLayer.id = "tandem-reactions";
@@ -386,6 +385,7 @@
     el.style.left = `${10 + Math.random() * 80}%`;
     const remove = () => el.remove();
     el.addEventListener("animationend", remove);
+    // A hidden tab runs no animations; this keeps reactions from piling up and bursting out on return.
     setTimeout(remove, 4000);
     reactionLayer.appendChild(el);
   }
