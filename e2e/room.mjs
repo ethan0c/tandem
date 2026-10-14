@@ -6,6 +6,7 @@
 //
 // Exits non-zero on the first failed step and prints what each browser saw.
 import { chromium } from "playwright";
+import { noTurn } from "./no-turn.mjs";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const HEADLESS = process.env.HEADED !== "1";
@@ -119,6 +120,7 @@ async function open(name) {
     viewport: { width: 1280, height: 720 },
     screen: { width: SCREEN_W, height: SCREEN_H },
   });
+  await ctx.addInitScript(noTurn);
   await ctx.addInitScript(pcSpy);
   await routeSockets(ctx, name);
   const page = await ctx.newPage();

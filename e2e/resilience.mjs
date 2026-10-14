@@ -13,6 +13,7 @@ import { existsSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join as pathJoin } from "node:path";
 import { chromium } from "playwright";
+import { noTurn } from "./no-turn.mjs";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const CONCURRENCY = Number(process.env.CONCURRENCY ?? 3);
@@ -91,6 +92,7 @@ await shareTab.setContent(
 
 async function participant(name, path, roomId) {
   const ctx = await browser.newContext({ permissions: ["camera", "microphone"], viewport: { width: 1280, height: 720 } });
+  await ctx.addInitScript(noTurn);
   await ctx.addInitScript(instrument);
   const p = { name, ctx, path, roomId, page: null, blocked: false, sockets: new Set(), errors: [] };
   // Every signalling socket goes through here, so the test can cut it or refuse new ones.

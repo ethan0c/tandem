@@ -7,6 +7,7 @@
 // Drives the installed Google Chrome with fake camera/mic and an auto-picked capture source.
 // Exits non-zero on the first failed step and prints what each browser saw.
 import { chromium } from "playwright";
+import { noTurn } from "./no-turn.mjs";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 const HEADLESS = process.env.HEADED !== "1";
@@ -77,6 +78,7 @@ const browser = await chromium.launch({
 
 async function open(name) {
   const ctx = await browser.newContext({ permissions: ["camera", "microphone"], viewport: { width: 1280, height: 720 } });
+  await ctx.addInitScript(noTurn);
   await ctx.addInitScript(pcSpy);
   const page = await ctx.newPage();
   page.on("pageerror", (e) => log(name, `pageerror: ${e.message}`));

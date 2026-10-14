@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
+import { noTurn } from './no-turn.mjs';
 
 const base = process.env.BASE_URL ?? 'http://localhost:3000';
 const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] });
 try {
   const context = await browser.newContext({ permissions: ['camera', 'microphone'], viewport: { width: 1280, height: 900 } });
+  await context.addInitScript(noTurn);
   await context.addInitScript(() => {
     window.__notes = 0;
     const start = OscillatorNode.prototype.start;
