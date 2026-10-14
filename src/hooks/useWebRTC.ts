@@ -11,17 +11,41 @@ export interface Peer {
   stream: MediaStream;
 }
 
+/** Relay credentials from /api/turn: short-lived, so a copied one is worthless soon after. */
+let minted: { servers: RTCIceServer[]; expiresAt: number } | null = null;
+let minting: Promise<void> | null = null;
+
+/**
+ * Fetch fresh relay credentials ahead of a call (the join screen calls this, so they are usually in
+ * hand before the first connection). Cheap to call repeatedly: it only asks again near expiry.
+ */
+export function prefetchIceServers() {
+  if (typeof window === "undefined") return;
+  if (minting || (minted && minted.expiresAt - Date.now() > 30 * 60 * 1000)) return;
+  minting = fetch("/api/turn", { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d: { iceServers?: RTCIceServer[]; expiresAt?: number } | null) => {
+      if (d?.iceServers?.length && d.expiresAt) minted = { servers: d.iceServers, expiresAt: d.expiresAt };
+    })
+    .catch(() => {})
+    .finally(() => {
+      minting = null;
+    });
+}
+
 export function iceServers(): RTCIceServer[] {
   const servers: RTCIceServer[] = [
     { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
   ];
-  // A stray comma or typo in the setting must not take calls down: the browser refuses to create a
-  // connection at all if any address is invalid, so keep only ones that look like STUN/TURN URLs.
+  if (minted && minted.expiresAt > Date.now()) return [...servers, ...minted.servers];
+  // No fresh credentials (the server has no provider set up, or could not be reached): use the public
+  // setting, if there is one. A stray comma or typo must not take calls down: the browser refuses to
+  // create a connection at all if any address is invalid, so keep only ones that look like TURN URLs.
   const urls = (process.env.NEXT_PUBLIC_TURN_URL ?? "")
     .split(",")
     .map((u) => u.trim())
     .filter((u) => /^(stuns?|turns?):[^\s]+$/i.test(u));
-  if (urls.length) {
+  if (urls.length && process.env.NEXT_PUBLIC_TURN_CREDENTIAL) {
     servers.push({
       urls,
       username: process.env.NEXT_PUBLIC_TURN_USERNAME,

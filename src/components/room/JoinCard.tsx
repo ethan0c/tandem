@@ -8,6 +8,7 @@ import { ArrowRight, Mic, MicOff, Video, VideoOff } from "lucide-react";
 import { HeaderFrame } from "@/components/HeaderFrame";
 import { Logo } from "@/components/Logo";
 import { StreamVideo } from "./StreamVideo";
+import { prefetchIceServers } from "@/hooks/useWebRTC";
 
 export interface JoinResult {
   name: string;
@@ -40,6 +41,9 @@ export function JoinCard({
   const [camOn, setCamOn] = useState(true);
   const [micOn, setMicOn] = useState(true);
   const handedOff = useRef(false);
+
+  // Fresh relay credentials, fetched while the camera starts and the name is typed.
+  useEffect(() => prefetchIceServers(), []);
 
   useEffect(() => {
     let cancelled = false;
