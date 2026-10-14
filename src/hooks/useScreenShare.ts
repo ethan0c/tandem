@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from "react"
 import type { AppSocket } from "@/lib/socket";
 import type { Member, ScreenSignal, Source } from "@/lib/types";
 import { ShareAdaptation, setShareQuality } from "@/lib/connection-quality";
+import { warmVideoEncoder } from "@/lib/warm-encoder";
 import { iceServers, preferCodecs, REJOIN_SETTLE_MS, STALL_MS } from "./useWebRTC";
 
 /** A viewer with no picture asks the sharer again this often, in case a request or offer was lost. */
@@ -270,6 +271,11 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
       if (!members.some((m) => m.id === id)) dropViewer(id);
     }
   }, [members, dropViewer]);
+
+  // Get the share encoder going in the background once we are in, so a share starts at once.
+  useEffect(() => {
+    if (selfId) warmVideoEncoder();
+  }, [selfId]);
 
   // Leaving the room ends everything.
   useEffect(() => {
