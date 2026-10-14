@@ -430,12 +430,13 @@ async function outage(p, ms) {
 /* Modes                                                               */
 /* ------------------------------------------------------------------ */
 
-const playerVideo = "video:not(.object-cover):not(.object-contain)";
+/** The file player is the video playing a local file, as opposed to a live camera or share stream. */
+const findPlayer = () => [...document.querySelectorAll("video")].find((v) => !v.srcObject && v.currentSrc.startsWith("blob:"));
 const playback = (p) =>
-  p.page.evaluate((sel) => {
-    const v = document.querySelector(sel);
+  p.page.evaluate(`(() => {
+    const v = (${findPlayer})();
     return v ? { t: v.currentTime, paused: v.paused, ready: v.readyState } : null;
-  }, playerVideo);
+  })()`);
 
 const MODES = {
   idle: {
@@ -483,8 +484,8 @@ const MODES = {
       await alice.page.getByRole("button", { name: "Video file" }).click();
       await alice.page.locator('[role="dialog"] input[type="file"]').setInputFiles(VIDEO);
       await pickFile(bob);
-      await alice.page.waitForFunction((sel) => document.querySelector(sel)?.readyState >= 2, playerVideo, { timeout: WAIT });
-      await alice.page.evaluate((sel) => document.querySelector(sel).click(), playerVideo);
+      await alice.page.waitForFunction(`(${findPlayer})()?.readyState >= 2`, null, { timeout: WAIT });
+      await alice.page.evaluate(`(${findPlayer})().click()`);
       await synced([alice, bob], 0);
     },
     async before([alice]) {

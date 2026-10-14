@@ -10,6 +10,7 @@ const columns = [
     links: [
       { label: "Start a room", href: "/#start" },
       { label: "Plan a watch night", href: "/plan" },
+      { label: "Guides", href: "/guides" },
       { label: "How it works", href: "/#sync" },
       { label: "Questions", href: "/#faq" },
       { label: "Privacy", href: "/privacy" },

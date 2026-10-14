@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "e2e": "node e2e/room.mjs",
     "e2e:party": "node e2e/party.mjs",
-    "e2e:resilience": "node e2e/resilience.mjs"
+    "e2e:resilience": "node e2e/resilience.mjs",
+    "test": "tsx --test tests/*.test.ts",
+    "discord:register": "tsx scripts/discord/register.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.56.0",

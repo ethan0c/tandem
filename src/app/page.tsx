@@ -10,7 +10,7 @@ import { LandingMotion } from "@/components/landing/LandingMotion";
 import { RotatingHeadline } from "@/components/landing/RotatingHeadline";
 import { RejoinRoom } from "@/components/landing/RejoinRoom";
 import { Preview } from "@/components/landing/Preview";
-import { EXTENSION_URL, GITHUB, SITE_URL } from "@/lib/links";
+import { DISCORD_ADD_URL, EXTENSION_URL, GITHUB, SITE_URL } from "@/lib/links";
 
 const madeForTwo = [
   {
@@ -197,8 +197,11 @@ export default function Home() {
               </li>
             ))}
           </ul>
-          <div className="mt-10">
+          <div className="mt-10 flex flex-wrap gap-3">
             <ButtonLink href="/plan" variant="ghost">Plan a watch night</ButtonLink>
+            {DISCORD_ADD_URL && (
+              <ButtonLink href={DISCORD_ADD_URL} variant="ghost">Add to Discord: type /watch</ButtonLink>
+            )}
           </div>
         </div>
       </section>
