@@ -33,13 +33,20 @@ export function iceServers(): RTCIceServer[] {
  */
 const CODEC_ORDER = ["video/H264", "video/VP9", "video/AV1", "video/VP8"];
 
+/**
+ * The camera call is the other way round. A hardware encoder can take several seconds to produce its
+ * first frame in a fresh browser (about 5.5 s measured with VideoToolbox), and the call is connected
+ * but blank all that time. Software VP8/VP9 starts at once, and a camera does not need the hardware.
+ */
+export const CAMERA_CODEC_ORDER = (process.env.NEXT_PUBLIC_CAMERA_CODECS ?? "video/VP8,video/VP9,video/H264,video/AV1").split(",");
+
 /** Put our preferred video codecs first in the offer so the answer picks one of them. */
-export function preferCodecs(pc: RTCPeerConnection) {
+export function preferCodecs(pc: RTCPeerConnection, order: string[] = CODEC_ORDER) {
   const caps = RTCRtpSender.getCapabilities?.("video");
   if (!caps) return;
   const rank = (mime: string) => {
-    const i = CODEC_ORDER.indexOf(mime);
-    return i === -1 ? CODEC_ORDER.length : i;
+    const i = order.indexOf(mime);
+    return i === -1 ? order.length : i;
   };
   const ranked = [...caps.codecs].sort((a, b) => rank(a.mimeType) - rank(b.mimeType));
   for (const t of pc.getTransceivers()) {
@@ -152,7 +159,7 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
   const negotiate = useCallback(
     async (id: string, pc: RTCPeerConnection, iceRestart = false) => {
       try {
-        if (!iceRestart) preferCodecs(pc);
+        if (!iceRestart) preferCodecs(pc, CAMERA_CODEC_ORDER);
         const offer = await pc.createOffer(iceRestart ? { iceRestart: true } : undefined);
         await pc.setLocalDescription(offer);
         send(id, { type: "offer", sdp: offer });
