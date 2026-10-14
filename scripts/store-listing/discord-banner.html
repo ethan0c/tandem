@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="shared.css">
+<!-- Discord app profile banner, 680x240 rendered at 2x. Discord's round avatar covers the bottom-left
+     corner, so nothing important sits there. The room mock-up is drawn at its native (marquee) size
+     and scaled down whole, so its text never wraps. -->
+<style>
+  .cmd { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 9px; background: rgb(255 255 255 / 0.1); border: 1px solid rgb(255 255 255 / 0.16); font-size: 14px; font-weight: 600; color: #fff; white-space: nowrap; }
+  .cmd b { color: var(--brand-300); font-weight: 700; }
+  .mock { position: absolute; left: 330px; top: 24px; width: 640px; height: 360px; transform: scale(0.5); transform-origin: top left; }
+</style></head>
+<body class="dark" style="width:680px;height:240px">
+  <div class="horizon" style="--line:40px;height:90px"></div>
+  <span class="abs" data-logo="22" style="left:40px;top:28px"></span>
+  <h1 class="abs" style="left:40px;top:66px;font-size:31px;line-height:1.08">Watch together,<br><span class="accent">apart.</span></h1>
+  <div class="abs" style="left:40px;top:146px"><span class="cmd"><b>/watch</b> to start a room</span></div>
+  <div class="mock">
+    <div class="abs" data-video="bar" data-progress="46%" style="left:0;top:0;width:540px;height:304px"></div>
+    <div class="abs" data-panel="0.66" style="left:340px;top:120px"></div>
+  </div>
+  <script src="shared.js"></script>
+</body></html>
