@@ -60,7 +60,7 @@ export function TopBar({ roomId, roomUrl, members, selfId, hostId, status, drift
           </Link>
           <button
             onClick={copy}
-            className="group flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-sans text-xs text-zinc-200 transition hover:bg-white/10"
+            className="group btn3d btn3d-ghost btn3d-xs"
             title="Copy invite link"
             aria-label="Copy invite link"
           >
@@ -77,9 +77,7 @@ export function TopBar({ roomId, roomUrl, members, selfId, hostId, status, drift
               aria-label={chat.open ? "Close chat" : "Open chat"}
               aria-pressed={chat.open}
               title="Chat (c)"
-              className={`relative flex size-8 items-center justify-center rounded-lg transition hover:bg-white/10 ${
-                chat.open ? "bg-white/10 text-white" : "text-zinc-300 hover:text-white"
-              }`}
+              className="relative control-button control-md"
             >
               <MessageSquare className="size-4" />
               {chat.unread > 0 && (
@@ -92,10 +90,10 @@ export function TopBar({ roomId, roomUrl, members, selfId, hostId, status, drift
               )}
             </button>
           )}
-          <ChimeToggle className="flex size-8 items-center justify-center rounded-lg text-zinc-300 transition hover:bg-white/10 hover:text-white" />
+          <ChimeToggle className="control-button control-md" />
           <button
             onClick={onToggleFullscreen}
-            className="flex size-8 items-center justify-center rounded-lg transition hover:bg-white/10"
+            className="control-button control-md"
             aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
             title="Fullscreen (f)"
           >
@@ -104,7 +102,7 @@ export function TopBar({ roomId, roomUrl, members, selfId, hostId, status, drift
           <Link
             href="/"
             aria-label="Leave room"
-            className="flex h-8 items-center gap-1.5 rounded-lg border border-white/10 px-2.5 text-xs text-zinc-300 transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-white"
+            className="btn3d btn3d-ghost btn3d-xs"
           >
             <LogOut className="size-3.5" /> <span className="hidden sm:inline">Leave</span>
           </Link>

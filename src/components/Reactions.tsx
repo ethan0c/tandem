@@ -71,13 +71,13 @@ export function ReactionBar({ onSend, collapsed = false }: { onSend: (emoji: Rea
           key={emoji}
           onClick={() => onSend(emoji)}
           aria-label={`React with ${emoji}`}
-          className="flex size-7 shrink-0 items-center justify-center rounded-full text-base transition hover:scale-110 hover:bg-white/10 active:scale-95"
+          className="control-button control-sm text-base"
         >
           {emoji}
         </button>
       ))}
       {collapsed && (
-        <button onClick={() => setOpen(false)} aria-label="Hide reactions" className="flex size-7 shrink-0 items-center justify-center rounded-full text-xs text-zinc-400 hover:bg-white/10 hover:text-white">
+        <button onClick={() => setOpen(false)} aria-label="Hide reactions" className="control-button control-sm text-xs">
           ×
         </button>
       )}
@@ -92,7 +92,7 @@ export function ReactionBar({ onSend, collapsed = false }: { onSend: (emoji: Rea
         aria-expanded={open}
         aria-controls={pickerId}
         title="Reactions"
-        className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+        className="control-button control-sm"
       >
         <Heart className="size-3.5" />
       </button>

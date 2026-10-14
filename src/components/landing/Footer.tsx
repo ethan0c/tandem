@@ -42,7 +42,7 @@ export function Footer() {
           <div>
             <Logo size={30} light />
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-zinc-400">
-              Watch your favorite shows together, with your call beside the video.
+              Shows in sync. Time together.
             </p>
           </div>
           {columns.map((col) => (

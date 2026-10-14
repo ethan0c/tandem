@@ -1,5 +1,7 @@
 "use client";
 
+import { IconButton as ControlButton } from "@/components/Button";
+
 import { useEffect, useRef, useState } from "react";
 import { Film, Maximize, Minimize, MonitorUp, Play, ScreenShareOff, Volume2, VolumeX } from "lucide-react";
 
@@ -213,13 +215,13 @@ export function ScreenStage({
 
 function IconButton({ children, onClick, label }: { children: React.ReactNode; onClick: () => void; label: string }) {
   return (
-    <button
+    <ControlButton
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="flex size-9 items-center justify-center rounded-full transition hover:bg-white/15"
+      size="lg"
     >
       {children}
-    </button>
+    </ControlButton>
   );
 }

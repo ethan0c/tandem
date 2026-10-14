@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 const WORDS = ["anime", "shows", "movies", "streams", "sports"];
 const INTERVAL = 3200;
+/** Fired on window with the word now showing, for anything on the page that follows along. */
+export const HEADLINE_EVENT = "tandem:headline";
 
 export function RotatingHeadline() {
   const ref = useRef<HTMLHeadingElement>(null);
@@ -22,6 +24,11 @@ export function RotatingHeadline() {
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, []);
+
+  // The hero preview lifts the card that matches the current word.
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent(HEADLINE_EVENT, { detail: WORDS[rotation.index] }));
+  }, [rotation.index]);
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");

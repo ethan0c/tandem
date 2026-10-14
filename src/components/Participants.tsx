@@ -49,7 +49,7 @@ export function Participants({ members, selfId, hostId, compact = false }: { mem
         <div className="overflow-hidden rounded-2xl">
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
             <div><h2 id={headingId} className="text-base font-medium">Participants</h2><p className="mt-0.5 text-xs text-zinc-400">{members.length} {members.length === 1 ? "person" : "people"} in this room</p></div>
-            <button ref={closeButton} type="button" aria-label="Close participants" onClick={() => dialog.current?.close()} className="flex size-8 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-400"><X className="size-4" /></button>
+            <button ref={closeButton} type="button" aria-label="Close participants" onClick={() => dialog.current?.close()} className="control-button control-md"><X className="size-4" /></button>
           </div>
           <ul className="max-h-[50dvh] overflow-y-auto p-3">
             {members.map((m) => (

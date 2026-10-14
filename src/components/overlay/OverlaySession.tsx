@@ -1,5 +1,7 @@
 "use client";
 
+import { IconButton as ControlButton } from "@/components/Button";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, Coffee, Copy, LogOut, Mic, MicOff, Smartphone, Video, VideoOff } from "lucide-react";
@@ -209,7 +211,7 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
             <div className="relative">
               <p className="text-sm font-medium">Waiting for your partner…</p>
               <p className="mt-0.5 text-[11px] text-zinc-400">Send them the invite link. It helps them get set up.</p>
-              <button onClick={copyInvite} className="btn3d btn3d-brand btn3d-sm mt-3 !h-8">
+              <button onClick={copyInvite} className="btn3d btn3d-brand btn3d-xs mt-3">
                 {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
                 {copied ? "Copied" : "Copy invite"}
               </button>
@@ -250,7 +252,7 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
               aria-expanded={phoneOpen}
               aria-label="Join the call from a phone"
               title="Join the call from a phone"
-              className={`flex size-7 items-center justify-center rounded-full transition ${phoneOpen ? "bg-white/25" : "bg-white/10 hover:bg-white/20"}`}
+              className="control-button control-sm"
             >
               <Smartphone className="size-3.5" />
             </button>
@@ -269,8 +271,8 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
         <Toggle on={rtc.camOn} onClick={rtc.toggleCam} disabled={!hasLocalVideo} label={rtc.camOn ? "Camera off" : "Camera on"}>
           {rtc.camOn ? <Video className="size-3.5" /> : <VideoOff className="size-3.5" />}
         </Toggle>
-        <CallVolumeControl buttonClassName="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20" />
-        <ChimeToggle className="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20 [&_svg]:size-3.5" />
+        <CallVolumeControl buttonClassName="control-button control-sm" />
+        <ChimeToggle className="control-button control-sm [&_svg]:size-3.5" />
         <div className="ml-auto"><Participants members={room.members} selfId={room.selfId} hostId={room.hostId} compact /></div>
         {phone ? (
           <Link href="/" className={LEAVE_CLASS} title="Leave room">
@@ -294,7 +296,7 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
 }
 
 const LEAVE_CLASS =
-  "ml-1 flex h-7 items-center gap-1 rounded-full border border-white/10 px-2 text-[11px] text-zinc-300 transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-white";
+  "btn3d btn3d-ghost btn3d-xs ml-1";
 
 function Toggle({
   on,
@@ -310,16 +312,15 @@ function Toggle({
   children: React.ReactNode;
 }) {
   return (
-    <button
+    <ControlButton
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
       title={label}
-      className={`flex size-7 items-center justify-center rounded-full transition disabled:opacity-40 ${
-        on ? "bg-white/10 hover:bg-white/20" : "bg-red-500/90 hover:bg-red-500"
-      }`}
+      size="sm"
+      tone={on ? "neutral" : "danger"}
     >
       {children}
-    </button>
+    </ControlButton>
   );
 }

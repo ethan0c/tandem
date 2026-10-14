@@ -152,8 +152,8 @@ export function JoinCard({
                 type="button"
                 onClick={toggleMic}
                 disabled={!stream?.getAudioTracks().length}
-                className={`flex size-10 items-center justify-center rounded-full border transition disabled:opacity-40 ${
-                  micOn ? "border-white/15 bg-black/50 hover:bg-black/70" : "border-red-500/40 bg-red-500/80"
+                className={`control-button control-xl ${
+                  micOn ? "bg-black/50" : "control-danger"
                 }`}
                 aria-label={micOn ? "Mute microphone" : "Unmute microphone"}
               >
@@ -163,8 +163,8 @@ export function JoinCard({
                 type="button"
                 onClick={toggleCam}
                 disabled={!hasVideo}
-                className={`flex size-10 items-center justify-center rounded-full border transition disabled:opacity-40 ${
-                  camOn ? "border-white/15 bg-black/50 hover:bg-black/70" : "border-red-500/40 bg-red-500/80"
+                className={`control-button control-xl ${
+                  camOn ? "bg-black/50" : "control-danger"
                 }`}
                 aria-label={camOn ? "Turn camera off" : "Turn camera on"}
               >

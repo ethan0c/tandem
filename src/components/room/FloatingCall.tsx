@@ -1,5 +1,7 @@
 "use client";
 
+import { IconButton as ControlButton } from "@/components/Button";
+
 import { useRef, useState, type RefObject } from "react";
 import { Check, Copy, Mic, MicOff, Minimize2, Maximize2, Video, VideoOff } from "lucide-react";
 import { CallVolumeControl } from "@/components/CallVolumeControl";
@@ -220,7 +222,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
                 <p className="text-xs text-zinc-300">Waiting for your partner…</p>
                 <button
                   onClick={copy}
-                  className="btn3d btn3d-brand btn3d-sm mt-1.5 !h-8"
+                  className="btn3d btn3d-brand btn3d-xs mt-1.5"
                 >
                   {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
                   {copied ? "Copied" : "Copy invite link"}
@@ -261,7 +263,7 @@ export function FloatingCall({ containerRef, localStream, peers, members, micOn,
           <CallButton onClick={toggleCam} active={camOn} disabled={!hasLocalVideo} label={camOn ? "Camera off" : "Camera on"}>
             {camOn ? <Video className="size-3.5" /> : <VideoOff className="size-3.5" />}
           </CallButton>
-          <CallVolumeControl buttonClassName="flex size-7 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20" />
+          <CallVolumeControl buttonClassName="control-button control-sm" />
           {!minimized && onReact && <ReactionBar onSend={onReact} collapsed />}
         </div>
         {minimized && (
@@ -305,17 +307,16 @@ function CallButton({
   label: string;
 }) {
   return (
-    <button
+    <ControlButton
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
       title={label}
-      className={`flex size-7 items-center justify-center rounded-full transition disabled:opacity-40 ${
-        active ? "bg-white/10 hover:bg-white/20" : "bg-red-500/90 hover:bg-red-500"
-      }`}
+      size="sm"
+      tone={active ? "neutral" : "danger"}
     >
       {children}
-    </button>
+    </ControlButton>
   );
 }
 

@@ -34,7 +34,7 @@ export function RejoinRoom() {
         <span><span className="block text-sm font-medium text-white">Rejoin your last room</span><span className="mt-0.5 block text-xs text-zinc-400">Pick up where you left off.</span></span>
         <ArrowRight className="size-4 shrink-0 text-zinc-400 transition group-hover:translate-x-1 group-hover:text-white" />
       </Link>
-      <button onClick={() => { forgetLastRoom(); setRoomId(null); }} aria-label="Dismiss last room" className="rounded-md p-1 text-zinc-500 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-400"><X className="size-4" /></button>
+      <button onClick={() => { forgetLastRoom(); setRoomId(null); }} aria-label="Dismiss last room" className="control-button control-md"><X className="size-4" /></button>
     </div>
   );
 }

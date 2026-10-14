@@ -37,7 +37,7 @@ export function SourceDialog({ open, onClose, onFile, onScreen, screenError }: P
       >
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-3.5">
           <h2 className="text-sm font-semibold">Choose a video</h2>
-          <button onClick={onClose} className="rounded-md p-1 text-zinc-400 hover:bg-white/10 hover:text-white" aria-label="Close">
+          <button onClick={onClose} className="control-button control-md" aria-label="Close">
             <X className="size-4" />
           </button>
         </div>

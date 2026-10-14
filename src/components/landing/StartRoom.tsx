@@ -58,7 +58,7 @@ export function StartRoom({ tone = "light" }: { tone?: "light" | "dark" | "brand
             aria-label="Room link or code"
             aria-invalid={!!error}
           />
-          <button type="submit" className={`btn3d ${dark ? "btn3d-ghost" : "btn3d-dark"} btn3d-icon !h-9 !w-9 !rounded-xl`} aria-label="Join room">
+          <button type="submit" className={`btn3d ${dark ? "btn3d-ghost" : "btn3d-dark"} btn3d-icon-sm`} aria-label="Join room">
             <ArrowRight className="size-4" />
           </button>
         </div>

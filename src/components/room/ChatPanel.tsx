@@ -65,7 +65,7 @@ export function ChatPanel({ open, onClose, messages, selfId, onSend }: Props) {
         <button
           onClick={onClose}
           aria-label="Close chat"
-          className="flex size-8 items-center justify-center rounded-lg text-zinc-300 transition hover:bg-white/10 hover:text-white"
+          className="control-button control-md"
         >
           <X className="size-4" />
         </button>
@@ -115,7 +115,7 @@ export function ChatPanel({ open, onClose, messages, selfId, onSend }: Props) {
           type="submit"
           disabled={!draft.trim()}
           aria-label="Send"
-          className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white transition hover:bg-brand-500 disabled:opacity-40"
+          className="control-button control-xl control-primary"
         >
           <SendHorizontal className="size-4" />
         </button>

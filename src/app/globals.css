@@ -129,7 +129,7 @@ input[type="range"].tandem-range:hover::-webkit-slider-thumb {
   transform: translateY(var(--btn-lift));
   box-shadow: 0 0 0 0 var(--btn-shadow);
 }
-.btn3d:focus-visible { outline: 3px solid rgb(255 255 255 / 0.5); outline-offset: 2px; }
+.btn3d:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: 2px; }
 .btn3d:disabled { opacity: 0.55; pointer-events: none; }
 
 .btn3d-brand { background: var(--color-brand-600); color: #fff; --btn-shadow: var(--color-brand-800); --btn-lift: 4px; }
@@ -137,6 +137,35 @@ input[type="range"].tandem-range:hover::-webkit-slider-thumb {
 .btn3d-light { background: #fff; color: var(--color-ink); }
 .btn3d-ghost { background: rgb(255 255 255 / 0.08); color: #fff; border-color: rgb(255 255 255 / 0.12); }
 .btn3d-danger { background: #ef4444; color: #fff; }
+
+/* Compact actions use the same tokens without local height or radius overrides. */
+.btn3d-xs { height: 2rem; padding: 0 0.75rem; font-size: 0.75rem; border-radius: 0.7rem; }
+.btn3d-icon-sm { width: 2.25rem; height: 2.25rem; padding: 0; border-radius: 0.75rem; }
+
+.control-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  color: #d4d4d8;
+  background: rgb(255 255 255 / 0.08);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, transform 90ms ease;
+}
+.control-sm { width: 1.75rem; height: 1.75rem; }
+.control-md { width: 2rem; height: 2rem; }
+.control-lg { width: 2.25rem; height: 2.25rem; }
+.control-xl { width: 2.5rem; height: 2.5rem; }
+.control-button:hover { background: rgb(255 255 255 / 0.16); color: white; }
+.control-button:active { transform: scale(0.95); }
+.control-button[aria-pressed="true"], .control-button[aria-expanded="true"] { background: rgb(255 255 255 / 0.2); color: white; }
+.control-primary { background: var(--color-brand-600); color: white; }
+.control-primary:hover { background: var(--color-brand-500); }
+.control-danger { background: #ef4444; color: white; }
+.control-danger:hover { background: #dc2626; }
+.control-button:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: 2px; }
+.control-button:disabled { opacity: 0.4; pointer-events: none; }
 
 .btn3d-sm { height: 2.25rem; padding: 0 0.9rem; font-size: 0.8125rem; border-radius: 0.7rem; }
 .btn3d-md { height: 2.75rem; padding: 0 1.25rem; font-size: 0.875rem; }
@@ -383,3 +412,78 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
     100% { opacity: 0; transform: translateY(-40px); }
   }
 }
+
+/* The hero's side cards: a match and a series, fanned out behind the anime preview. Dimmed and
+   tilted so they read as depth, not as competition; the one the headline names lifts a little. */
+.hero-side {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.8);
+  filter: brightness(0.62) saturate(0.9);
+  pointer-events: none;
+  transition: transform 800ms cubic-bezier(0.22, 1, 0.36, 1), filter 800ms ease;
+}
+.hero-side-left { transform-origin: 100% 100%; transform: translateX(-44%) translateY(-9%) rotate(-6deg) scale(0.72); }
+.hero-side-right { transform-origin: 0% 100%; transform: translateX(44%) translateY(-9%) rotate(6deg) scale(0.72); }
+.hero-side-left[data-active] { transform: translateX(-46%) translateY(-13%) rotate(-7deg) scale(0.74); filter: brightness(0.92) saturate(1); }
+.hero-side-right[data-active] { transform: translateX(46%) translateY(-13%) rotate(7deg) scale(0.74); filter: brightness(0.92) saturate(1); }
+/* Only where there is room beside the preview. */
+@media (max-width: 1023px) { .hero-side { display: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-side { transition: none; } }
+
+/* The homepage intro (IntroLoader): only shown while <head> holds <style id="intro-on">, which a
+   tiny inline script adds on the first visit of a session. Two frames slide together, the name fades in,
+   a line fills for 2 s, then it fades away and the hero's own entrance plays. */
+.intro-loader { display: none; }
+html:has(#intro-on) .intro-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(60% 50% at 50% 45%, rgb(139 92 246 / 0.16), transparent 70%), #0c0b10;
+  animation: intro-out 400ms ease 2s forwards;
+}
+html:has(#intro-on) { overflow: hidden; }
+.intro-mark { display: flex; align-items: center; gap: 14px; }
+.intro-frame-a { animation: intro-frame-a 900ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.intro-frame-b { animation: intro-frame-b 900ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.intro-word {
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  color: #fff;
+  animation: intro-word 600ms ease 500ms both;
+}
+.intro-bar {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 62px);
+  width: 180px;
+  height: 2px;
+  margin-left: -90px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.1);
+  overflow: hidden;
+}
+.intro-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #8b5cf6;
+  transform-origin: left;
+  animation: intro-bar 1.9s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+/* The hero waits for the intro, so its own entrance is not wasted behind it. */
+html:has(#intro-on) .hero-intro { animation-delay: 2.15s; }
+html:has(#intro-on) .hero-preview > figure { animation-delay: 2.3s; }
+@keyframes intro-frame-a { from { transform: translate(-6px, -6px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes intro-frame-b { from { transform: translate(6px, 6px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes intro-word { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+@keyframes intro-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes intro-out { to { opacity: 0; visibility: hidden; } }

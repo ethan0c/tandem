@@ -10,38 +10,39 @@ import { LandingMotion } from "@/components/landing/LandingMotion";
 import { RotatingHeadline } from "@/components/landing/RotatingHeadline";
 import { RejoinRoom } from "@/components/landing/RejoinRoom";
 import { Preview } from "@/components/landing/Preview";
+import { IntroLoader } from "@/components/landing/IntroLoader";
 import { DISCORD_ADD_URL, EXTENSION_URL, GITHUB, SITE_URL } from "@/lib/links";
 
 const madeForTwo = [
   {
     icon: Video,
-    title: "Faces, not a chat box",
-    body: "Your call floats right over the show and stays there in fullscreen. Laugh at the same moment and actually see it.",
+    title: "Stay face to face",
+    body: "Keep your video call over the show, even in fullscreen.",
   },
   {
     icon: CalendarHeart,
-    title: "Plan your watch nights",
-    body: "Pick a time and send one link. You each see it in your own time zone, with a countdown and a calendar reminder.",
+    title: "Plan a night",
+    body: "Pick a time. Share a link. Get a reminder in your time zone.",
   },
   {
     icon: History,
-    title: "Pick up where you left off",
-    body: "Tandem remembers your shows and where you stopped. Hit resume and you’re both back in the same room, at the same second.",
+    title: "Resume your show",
+    body: "The extension saves your place so you can pick up next time.",
   },
   {
     icon: Heart,
-    title: "Little things, together",
-    body: "Send hearts and reactions that float across both screens. Need a minute? Tap BRB and the show waits for you.",
+    title: "Send a little love",
+    body: "Send floating reactions. Tap BRB when you need a break.",
   },
   {
     icon: Clapperboard,
-    title: "Ads don’t split you up",
-    body: "On YouTube, when one of you gets an ad, the other’s show waits until it’s over. On other sites, BRB does the same.",
+    title: "Wait out ads together",
+    body: "YouTube ads pause your partner’s video. On other sites, tap BRB.",
   },
   {
     icon: Smartphone,
     title: "Join from your phone",
-    body: "Watching on a TV, or one of you has no laptop? Open the call on a phone and stay face to face.",
+    body: "Watch on a bigger screen. Keep the call on your phone.",
   },
 ];
 
@@ -59,59 +60,59 @@ const streamingSites: [name: string, slug: string, invert?: boolean][] = [
 ];
 
 const ways = [
-  ["On a streaming site, with the extension", "Open the same episode on a streaming site. Tandem keeps you watching together, with your call beside the video."],
-  ["A file you both have", "Open the same video file on each computer. When one of you pauses or skips, the other follows."],
-  ["Share a tab", "Share the browser tab playing your show, including its sound. Your partner watches along."],
+  ["Use the extension", "Open the same episode on your own computers. Tandem keeps playback in sync."],
+  ["A file you both have", "Each open the same file. Pause and skip together."],
+  ["Share a tab", "Share your show’s browser tab with sound."],
 ];
 
 const faq = [
   {
     q: "How do we start watching?",
-    a: "Create a room and send your partner the link. Once they join, share the tab playing your show or choose a video file you both have. On a streaming site, you can use the extension instead.",
+    a: "Create a room and share the link. Then share a tab, open a file you both have, or use the extension.",
   },
   {
     q: "Do we both need the same video file?",
-    a: "Yes, if you watch a video file. You each need a copy on your computer. If you share a browser tab instead, only one of you needs the video. Turn on “Share tab audio” when choosing the tab so your partner can hear it.",
+    a: "For files, yes—each person needs a copy. For tab sharing, only the sharer needs the video. Enable “Share tab audio” to include sound.",
   },
   {
     q: "Does it work with Netflix or Prime Video?",
-    a: "You can try the extension on these sites, but it may not work with every video. You both need access to the same episode, and ads can get you out of step. Some sites block screen sharing, so your partner may see a black screen.",
+    a: "Try the extension; support varies by video. You both need access to the episode. Ads can interrupt sync, and screen sharing may show a black screen.",
   },
   {
     q: "What does the extension do?",
-    a: "It keeps your videos playing together and puts your call beside the show. You both need the extension and access to the same episode. Some sites may not always work.",
+    a: "It syncs playback and adds your call beside the show. You both need the extension and episode access. Site support varies.",
   },
   {
     q: "What happens when one of us gets an ad?",
-    a: "On YouTube, Tandem notices the ad and pauses the other person’s show until it’s over, then you carry on together. On other sites, press BRB in the call window while your ad plays and the show waits for you.",
+    a: "On YouTube, your partner’s video pauses until your ad ends. On other sites, tap BRB during the ad.",
   },
   {
     q: "Can I join from my phone?",
-    a: "Yes, for the call. If you’re watching on a TV or one of you has no laptop, open the phone link from the Tandem window (it looks like ilovemygf.site/call/your-room) to see and hear each other. Syncing the video itself needs the extension on a computer.",
+    a: "Yes, for the call. Open the phone link in the Tandem window. Video sync still needs the extension on a computer.",
   },
   {
     q: "Does Tandem remember what we watched?",
-    a: "The extension keeps a short list of the episodes you watched in Tandem, where you stopped, and how long you watched together. It stays in your browser and is never sent to us. Open the Tandem button to resume a show.",
+    a: "The extension saves recent episodes, your place, and time watched in your browser only. Open Tandem to resume.",
   },
   {
     q: "Which browser should we use?",
-    a: "Use Chrome or Edge on a computer to share a tab with sound. The extension also works in Brave. If you watch a file, MP4 and WebM are good options.",
+    a: "Use Chrome or Edge for tab sharing with sound. The extension also supports Brave. For files, try MP4 or WebM.",
   },
   {
     q: "Do I have to turn my camera on?",
-    a: "No. You can watch with your camera and microphone off. You can also join without giving Tandem access to them.",
+    a: "No. Join with your camera and microphone off, even without granting access.",
   },
   {
     q: "Does Tandem record the video or call?",
-    a: "No. Tandem does not record your call or the video you watch. Video files stay on your computer. Room details are kept only while needed and deleted 10 minutes after everyone leaves.",
+    a: "No. Calls and videos aren’t recorded. Files stay on your computer. Room details are deleted 10 minutes after everyone leaves.",
   },
   {
     q: "Can more than two people join?",
-    a: "Yes, but Tandem works best for two. Bigger groups need a stronger internet connection.",
+    a: "Yes. Tandem works best for two; larger groups need a stronger connection.",
   },
   {
     q: "Is it free?",
-    a: "Yes. It is free to use, and you do not need an account.",
+    a: "Yes. Free, with no account needed.",
   },
 ];
 
@@ -138,6 +139,7 @@ const structuredData = [
 export default function Home() {
   return (
     <LandingMotion>
+      <IntroLoader />
       <script
         type="application/ld+json"
         // Escaped so nothing in the text can close the script tag.
@@ -168,7 +170,7 @@ export default function Home() {
           <div className="hero-intro flex flex-col items-center text-center">
             <RotatingHeadline />
             <p className="mt-3 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
-              Long-distance date night, on the same couch. Watch the same moment with your call right beside the show, even in fullscreen. Free, no account.
+              Your show in sync. Your favorite person on call. Free, no account.
             </p>
             <div id="start" className="mt-6 flex w-full scroll-mt-24 justify-center">
               <StartRoom tone="dark" />
@@ -187,7 +189,7 @@ export default function Home() {
       <section id="two" className="scroll-mt-10 pt-16 sm:pt-24">
         <div data-reveal className="mx-auto site-width site-gutter">
           <h2 className="font-display text-3xl font-medium tracking-[-0.03em] sm:text-4xl">Made for two</h2>
-          <p className="mt-3 max-w-xl text-zinc-400">Watch party apps are built for groups in a chat sidebar. Tandem is built for the two of you.</p>
+          <p className="mt-3 max-w-xl text-zinc-400">Everything you need for a watch night, wherever you are.</p>
           <ul className="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {madeForTwo.map(({ icon: Icon, title, body }) => (
               <li key={title} className="border-t border-white/15 pt-5">
@@ -200,7 +202,7 @@ export default function Home() {
           <div className="mt-10 flex flex-wrap gap-3">
             <ButtonLink href="/plan" variant="ghost">Plan a watch night</ButtonLink>
             {DISCORD_ADD_URL && (
-              <ButtonLink href={DISCORD_ADD_URL} variant="ghost">Add to Discord: type /watch</ButtonLink>
+              <ButtonLink href={DISCORD_ADD_URL} variant="ghost">Add to Discord</ButtonLink>
             )}
           </div>
         </div>
@@ -225,7 +227,7 @@ export default function Home() {
               </li>
             ))}
           </ul>
-          <p className="mt-5 text-sm text-zinc-500">Some videos may not work with Tandem yet. You both need access to the same episode, and ads can get you out of step.</p>
+          <p className="mt-5 text-sm text-zinc-500">Support varies by video. You both need episode access. Ads may interrupt sync.</p>
         </div>
       </section>
 
@@ -248,14 +250,14 @@ export default function Home() {
       <section id="sync" className="scroll-mt-20 border-t border-white/10">
         <div data-reveal className="mx-auto grid site-width gap-12 site-gutter py-20 lg:grid-cols-[0.8fr_1.2fr] lg:py-28">
           <div>
-            <h2 className="font-display text-4xl font-medium leading-tight tracking-[-0.03em]">Pause, skip, and catch up together.</h2>
-            <p className="mt-5 max-w-sm leading-relaxed text-zinc-400">If one video falls behind or stops to load, Tandem helps you get back to the same moment.</p>
+            <h2 className="font-display text-4xl font-medium leading-tight tracking-[-0.03em]">One play button. Two screens.</h2>
+            <p className="mt-5 max-w-sm leading-relaxed text-zinc-400">Pause, skip, and catch up together.</p>
           </div>
           <ol className="divide-y divide-white/10 border-y border-white/10">
             {[
-              ["Create a room", "Send your partner the room link so they can join."],
-              ["Choose what to watch", "Share a browser tab, open a file you both have, or use the extension on a streaming site."],
-              ["Press play", "When you each open the same video, either of you can pause or skip and the other follows. Keep talking as you watch."],
+              ["Create a room", "Send your partner the link."],
+              ["Choose what to watch", "Share a tab, open a file, or use the extension."],
+              ["Press play", "With synced playback, either person can pause or skip for both."],
             ].map(([t, b], i) => (
               <li key={t} className="grid gap-3 py-7 sm:grid-cols-[3rem_1fr]">
                 <span className="font-sans text-sm text-zinc-500">0{i + 1}</span>
@@ -274,10 +276,10 @@ export default function Home() {
         <div data-reveal className="relative mx-auto grid site-width gap-10 site-gutter py-20 lg:grid-cols-[1.2fr_0.8fr] lg:items-end lg:py-28">
           <div>
             <h2 className="font-display text-4xl font-medium leading-[1] tracking-[-0.03em] sm:text-5xl lg:text-6xl">
-              Watch on the site you already use.
+              Your usual sites. Together.
             </h2>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-brand-100">
-              Add Tandem to your browser to watch on the sites above. Some videos may not work yet.
+              Sync your shows with the browser extension. Support varies by video.
             </p>
           </div>
           <div className="flex flex-wrap gap-3 lg:justify-end">
@@ -318,7 +320,7 @@ export default function Home() {
           <div className="w-full max-w-xl">
             <StartRoom tone="dark" />
             <Link href="/plan" className="mt-4 inline-block text-sm text-zinc-400 hover:text-white">
-              Or plan a watch night for later →
+              Plan a night for later →
             </Link>
           </div>
         </div>

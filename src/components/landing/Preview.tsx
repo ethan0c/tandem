@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { HEADLINE_EVENT } from "./RotatingHeadline";
+import Image from "next/image";
 import { TopBar } from "@/components/room/TopBar";
 import { Player } from "@/components/room/Player";
 
@@ -11,13 +13,28 @@ const members = [{ id: "preview", name: "Cash" }];
 /** Render the real room components with local sample state and no live session. */
 export function Preview() {
   const containerRef = useRef<HTMLDivElement>(null);
+  // Which side card the headline is talking about right now.
+  const [word, setWord] = useState<string | null>(null);
+  useEffect(() => {
+    const onWord = (e: Event) => setWord((e as CustomEvent<string>).detail);
+    window.addEventListener(HEADLINE_EVENT, onWord);
+    return () => window.removeEventListener(HEADLINE_EVENT, onWord);
+  }, []);
 
   return (
-    <figure className="room-preview">
+    <figure className="room-preview relative">
+      {/* A series and a match fanned out behind the anime: everything you can watch together. Only
+          each card's outer side shows, so the crops keep the subject there (public/hero). */}
+      <div aria-hidden="true" className="hero-side hero-side-left" data-active={word === "shows" || word === "movies" || undefined}>
+        <Image src="/hero/series-dragon.jpg" alt="" fill sizes="(min-width: 1024px) 45vw, 1px" className="object-cover" />
+      </div>
+      <div aria-hidden="true" className="hero-side hero-side-right" data-active={word === "sports" || undefined}>
+        <Image src="/hero/sports-match.jpg" alt="" fill sizes="(min-width: 1024px) 45vw, 1px" className="object-cover" />
+      </div>
       <div
         ref={containerRef}
         inert
-        className="relative flex aspect-video overflow-hidden rounded-xl border border-white/10 bg-black text-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/5"
+        className="relative z-10 flex aspect-video overflow-hidden rounded-xl border border-white/10 bg-black text-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/5"
       >
         <TopBar
           roomId="k3f9-x2qa"

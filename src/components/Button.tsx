@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
 type Variant = "brand" | "dark" | "light" | "ghost" | "danger";
-type Size = "sm" | "md" | "lg" | "icon";
+type Size = "xs" | "sm" | "md" | "lg" | "icon" | "icon-sm";
 
 function classes(variant: Variant, size: Size, extra = "") {
   return `btn3d btn3d-${variant} btn3d-${size} ${extra}`.trim();
@@ -15,7 +15,7 @@ interface BaseProps {
   children: ReactNode;
 }
 
-/** Chunky 3D button. Press it and it sinks into its shadow. */
+/** Shared action button. Only the brand variant has a raised press effect. */
 export function Button({
   variant = "brand",
   size = "md",
@@ -51,4 +51,18 @@ export function ButtonLink({
       {children}
     </Link>
   );
+}
+
+/** Compact controls share geometry and interaction states across rooms and dialogs. */
+export function IconButton({
+  size = "md",
+  tone = "neutral",
+  className = "",
+  type = "button",
+  ...rest
+}: Omit<ComponentProps<"button">, "size"> & {
+  size?: "sm" | "md" | "lg" | "xl";
+  tone?: "neutral" | "primary" | "danger";
+}) {
+  return <button type={type} className={`control-button control-${size} control-${tone} ${className}`} {...rest} />;
 }

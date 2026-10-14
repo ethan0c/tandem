@@ -1,5 +1,7 @@
 "use client";
 
+import { IconButton as ControlButton } from "@/components/Button";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Film,
@@ -437,15 +439,14 @@ function IconButton({
   primary?: boolean;
 }) {
   return (
-    <button
+    <ControlButton
       onClick={onClick}
       aria-label={label}
       title={label}
-      className={`flex size-9 items-center justify-center rounded-full transition ${
-        primary ? "bg-brand-600 hover:bg-brand-500" : "hover:bg-white/15"
-      }`}
+      size="lg"
+      tone={primary ? "primary" : "neutral"}
     >
       {children}
-    </button>
+    </ControlButton>
   );
 }
