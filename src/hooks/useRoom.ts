@@ -44,6 +44,14 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
   /** Another tab of this browser opened the same room and took our place. */
   const [takenOver, setTakenOver] = useState(false);
   const socketRef = useRef<AppSocket | null>(null);
+  /**
+   * Whether the server has us in the room right now. Socket.IO sends anything emitted while
+   * disconnected before our rejoin, and the server drops events from a socket that has not joined,
+   * so what the user does in that gap is held here and sent once we are back in.
+   */
+  const joinedRef = useRef(false);
+  const heldChat = useRef<string[]>([]);
+  const heldStatus = useRef<{ value: MemberStatus } | null>(null);
   const reclaimRef = useRef<() => void>(() => {});
   const offsetRef = useRef(0);
   const seqRef = useRef(0);
@@ -134,6 +142,11 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
         if (dropped) playChime("reconnect");
         dropped = false;
         offsetRef.current = ack.serverNow - Date.now();
+        joinedRef.current = true;
+        // Now that we are in, send what was held while away: chat in order, and the latest status.
+        for (const text of heldChat.current.splice(0)) socket.emit("chat:send", { text });
+        if (heldStatus.current) socket.emit("member:status", heldStatus.current.value);
+        heldStatus.current = null;
         setSelfId(ack.selfId);
         setHostId(ack.state.hostId);
         setMembers(ack.state.members);
@@ -178,6 +191,7 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, status: s } : m)));
     const onReaction = (r: { id: string; from: string; emoji: Reaction }) => onReactionRef.current?.(r);
     const onDisconnect = () => {
+      joinedRef.current = false;
       if (handedOff) {
         setStatus("disconnected");
         return;
@@ -231,6 +245,9 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
 
     return () => {
       active = false;
+      joinedRef.current = false;
+      heldChat.current = [];
+      heldStatus.current = null;
       channel?.close();
       reclaimRef.current = () => {};
       window.removeEventListener("pagehide", onPageHide);
@@ -254,8 +271,10 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     };
   }, [roomId, name]);
 
+  // Play, pause and seek while away are dropped: on rejoin the room's state is applied to our player,
+  // and replaying a stale pause after that would put us out of step with everyone.
   const emitSync = useCallback((playing: boolean, time: number, reason: SyncReason) => {
-    socketRef.current?.emit("sync:update", { playing, time, reason });
+    if (joinedRef.current) socketRef.current?.emit("sync:update", { playing, time, reason });
   }, []);
 
   const changeSource = useCallback((s: Source | null) => {
@@ -264,15 +283,19 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
 
   const sendMessage = useCallback((text: string) => {
     const clean = text.trim();
-    if (clean) socketRef.current?.emit("chat:send", { text: clean });
+    if (!clean) return;
+    if (joinedRef.current) socketRef.current?.emit("chat:send", { text: clean });
+    else heldChat.current = [...heldChat.current, clean].slice(-20);
   }, []);
 
+  // A reaction is only worth anything right now, so one sent while away is dropped.
   const sendReaction = useCallback((emoji: Reaction) => {
-    socketRef.current?.emit("reaction:send", { emoji });
+    if (joinedRef.current) socketRef.current?.emit("reaction:send", { emoji });
   }, []);
 
   const setMemberStatus = useCallback((s: MemberStatus) => {
-    socketRef.current?.emit("member:status", s);
+    if (joinedRef.current) socketRef.current?.emit("member:status", s);
+    else heldStatus.current = { value: s };
   }, []);
 
   /** Take the room back from the other tab. */
