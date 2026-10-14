@@ -13,9 +13,19 @@ The web app's server does all the work; this extension only bridges the page's `
 
 1. Open an episode on miruro.tv.
 2. Click the Tandem icon and press **Create a room**. A floating panel appears. Pick a name, allow the camera, join.
-3. Press **Copy invite** in the popup and send the link. It is the episode URL with `#tandem=<room>` on the end,
-   so your partner just opens it (with the extension installed) and lands in the same room.
+3. Press **Copy invite** in the popup and send the link. It opens `/join/<room>` on the Tandem site, which helps
+   your partner install the extension and then sends them to the episode URL with `#tandem=<room>` on the end,
+   so they land in the same room.
 4. Play, pause and seek on either side. The other side follows, and drift is corrected automatically.
+
+Since 0.3:
+
+- **Our shows**: while you watch in a room, `content.js` keeps the last 30 episodes in `chrome.storage.local`
+  (`tandem:history`) and minutes watched together per day (`tandem:days`). The popup lists them with **Resume**, which
+  opens the episode with `#tandem=<room>&tandemAt=<seconds>`. Into an empty room that starts playback at that second.
+- **Ads**: on YouTube the player gets `.ad-showing` during ads. The controller stands down and the panel sets your
+  status to `ad`, which pauses everyone else until the show is back. Add selectors for more sites to `AD_SELECTORS`.
+- **BRB**, **reactions** and the **phone link** (`/call/<room>`) live in the panel (`src/components/overlay`).
 
 The player's own fullscreen button still works: the extension swaps it for a page-level fullscreen so the call stays
 visible.

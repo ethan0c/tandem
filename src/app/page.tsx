@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, CalendarHeart, Clapperboard, Heart, History, Smartphone, Video } from "lucide-react";
 import { HeaderFrame } from "@/components/HeaderFrame";
 import { Logo } from "@/components/Logo";
 import { ButtonLink } from "@/components/Button";
@@ -10,8 +10,40 @@ import { LandingMotion } from "@/components/landing/LandingMotion";
 import { RotatingHeadline } from "@/components/landing/RotatingHeadline";
 import { RejoinRoom } from "@/components/landing/RejoinRoom";
 import { Preview } from "@/components/landing/Preview";
+import { EXTENSION_URL, GITHUB } from "@/lib/links";
 
-const GITHUB = "https://github.com/ethan0c";
+const madeForTwo = [
+  {
+    icon: Video,
+    title: "Faces, not a chat box",
+    body: "Your call floats right over the show and stays there in fullscreen. Laugh at the same moment and actually see it.",
+  },
+  {
+    icon: CalendarHeart,
+    title: "Plan your watch nights",
+    body: "Pick a time and send one link. You each see it in your own time zone, with a countdown and a calendar reminder.",
+  },
+  {
+    icon: History,
+    title: "Pick up where you left off",
+    body: "Tandem remembers your shows and where you stopped. Hit resume and you’re both back in the same room, at the same second.",
+  },
+  {
+    icon: Heart,
+    title: "Little things, together",
+    body: "Send hearts and reactions that float across both screens. Need a minute? Tap BRB and the show waits for you.",
+  },
+  {
+    icon: Clapperboard,
+    title: "Ads don’t split you up",
+    body: "On YouTube, when one of you gets an ad, the other’s show waits until it’s over. On other sites, BRB does the same.",
+  },
+  {
+    icon: Smartphone,
+    title: "Join from your phone",
+    body: "Watching on a TV, or one of you has no laptop? Open the call on a phone and stay face to face.",
+  },
+];
 
 const streamingSites: [name: string, slug: string, invert?: boolean][] = [
   ["Netflix", "netflix"],
@@ -50,6 +82,18 @@ const faq = [
     a: "It keeps your videos playing together and puts your call beside the show. You both need the extension and access to the same episode. It works with Miruro; other sites may not always work.",
   },
   {
+    q: "What happens when one of us gets an ad?",
+    a: "On YouTube, Tandem notices the ad and pauses the other person’s show until it’s over, then you carry on together. On other sites, press BRB in the call window while your ad plays and the show waits for you.",
+  },
+  {
+    q: "Can I join from my phone?",
+    a: "Yes, for the call. If you’re watching on a TV or one of you has no laptop, open the phone link from the Tandem window (it looks like ilovemygf.site/call/your-room) to see and hear each other. Syncing the video itself needs the extension on a computer.",
+  },
+  {
+    q: "Does Tandem remember what we watched?",
+    a: "The extension keeps a short list of the episodes you watched in Tandem, where you stopped, and how long you watched together. It stays in your browser and is never sent to us. Open the Tandem button to resume a show.",
+  },
+  {
     q: "Which browser should we use?",
     a: "Use Chrome or Edge on a computer to share a tab with sound. The extension also works in Brave. If you watch a file, MP4 and WebM are good options.",
   },
@@ -82,7 +126,8 @@ export default function Home() {
               <Logo size={24} />
             </Link>
             <nav aria-label="Main navigation" className="hero-nav flex items-center gap-1 text-sm text-zinc-400">
-              <a href="#sync" className="hidden md:block">How it works</a>
+              <a href="#two" className="hidden md:block">Made for two</a>
+              <Link href="/plan" className="hidden md:block">Plan a night</Link>
               <a href="#sources" className="hidden md:block">Works with</a>
               <a href="#faq" className="hidden md:block">Questions</a>
               <a href={GITHUB} target="_blank" rel="noreferrer" className="hidden sm:flex items-center gap-1">
@@ -98,7 +143,7 @@ export default function Home() {
           <div className="hero-intro flex flex-col items-center text-center">
             <RotatingHeadline />
             <p className="mt-3 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
-              Watch the same moment, even when you are apart. Start a video call, share your show, and watch together.
+              Long-distance date night, on the same couch. Watch the same moment with your call right beside the show, even in fullscreen. Free, no account.
             </p>
             <div id="start" className="mt-6 flex w-full scroll-mt-24 justify-center">
               <StartRoom tone="dark" />
@@ -111,6 +156,26 @@ export default function Home() {
         </div>
         {/* The planet sits behind the lower part of the preview, so the showcase stands on the horizon. */}
         <div aria-hidden="true" className="hero-horizon" />
+      </section>
+
+      {/* Made for two */}
+      <section id="two" className="scroll-mt-10 pt-16 sm:pt-24">
+        <div data-reveal className="mx-auto site-width site-gutter">
+          <h2 className="font-display text-3xl font-medium tracking-[-0.03em] sm:text-4xl">Made for two</h2>
+          <p className="mt-3 max-w-xl text-zinc-400">Watch party apps are built for groups in a chat sidebar. Tandem is built for the two of you.</p>
+          <ul className="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+            {madeForTwo.map(({ icon: Icon, title, body }) => (
+              <li key={title} className="border-t border-white/15 pt-5">
+                <Icon className="size-5 text-brand-300" aria-hidden="true" />
+                <h3 className="mt-3 font-display text-lg font-medium">{title}</h3>
+                <p className="mt-2 leading-relaxed text-zinc-400">{body}</p>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-10">
+            <ButtonLink href="/plan" variant="ghost">Plan a watch night</ButtonLink>
+          </div>
+        </div>
       </section>
 
       {/* Works with */}
@@ -188,7 +253,7 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3 lg:justify-end">
-            <ButtonLink href={GITHUB} variant="light" size="lg">
+            <ButtonLink href={EXTENSION_URL} variant="light" size="lg">
               Get the extension
             </ButtonLink>
             <ButtonLink href="#faq" variant="ghost" size="lg">
@@ -224,6 +289,9 @@ export default function Home() {
           </h2>
           <div className="w-full max-w-xl">
             <StartRoom tone="dark" />
+            <Link href="/plan" className="mt-4 inline-block text-sm text-zinc-400 hover:text-white">
+              Or plan a watch night for later →
+            </Link>
           </div>
         </div>
       </section>

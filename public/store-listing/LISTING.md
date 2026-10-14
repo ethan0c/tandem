@@ -29,7 +29,7 @@ Copy each field into the Developer Dashboard (Store listing tab and Privacy tab)
 
 **Permission justifications**
 
-- `storage`: Saves one setting, the Tandem app URL, so the popup and the content script use the same server. Nothing else is stored with this permission.
+- `storage`: Saves the Tandem app URL setting, so the popup and the content script use the same server. Also keeps "Our shows" on the device only: up to 30 episodes watched in a Tandem room (page URL and title, room code, playback position, time watched together) and minutes watched together per day for the streak counter. None of it leaves the browser.
 - `activeTab` and `scripting`: When the user presses **Enable on this site** in the popup on a site that is not listed in the manifest, Tandem injects its own packaged `content.js` and `content.css` into that tab and registers them for that site, so invite links keep working after a reload. Nothing runs on a site until the user turns it on there.
 - Host permissions (content script on Miruro, Netflix, Prime Video, YouTube, Disney+, Hulu, Max, Crunchyroll, Apple TV+, Paramount+ and Peacock): The content script has to read and control the page's HTML5 `<video>` element (play, pause, seek, current time) to keep both viewers in sync, and inject the floating call panel. It does not read page content beyond the video element.
 - Optional host permissions (`https://*/*`, `http://*/*`): Requested for one origin at a time, only when the user presses **Enable on this site** for that site. Never requested up front.
@@ -37,7 +37,8 @@ Copy each field into the Developer Dashboard (Store listing tab and Privacy tab)
 
 **Data usage** (tick these)
 
-- Website content: the video's playing/paused state and current time are sent to the Tandem server for the user's room.
+- Website content: the video's playing/paused state and current time are sent to the Tandem server for the user's room. Whether an ad is showing (YouTube only) is sent as a yes/no so the partner's video waits.
+- Web history: the page URL and title of episodes watched in a room are stored locally for "Our shows". When the user copies an invite, the current episode URL and title are put in that link so the partner lands on the same episode; Tandem does not store them.
 - Personally identifiable information: the display name the user types is shared with others in the room (kept in memory only).
 - Everything else: not collected.
 

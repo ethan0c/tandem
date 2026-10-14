@@ -13,7 +13,13 @@ FEATURES
 • Catch up automatically: if one video stops to load or falls behind, Tandem helps you get back to the same moment.
 • Keep your call beside the show: see and hear each other in a small window. Move it anywhere or make it smaller.
 • Keep talking in fullscreen: your call stays visible when you make the video fill the screen.
-• Invite with one link: your partner opens the episode and joins your room.
+• Invite with one link: your partner gets set up, then lands on the same episode in your room.
+• Plan watch nights: pick a time, and you each see it in your own time zone with a calendar reminder.
+• Our shows: Tandem remembers where you stopped. Resume and you're both back at the same second.
+• Send hearts and reactions that float across both screens.
+• BRB: step away and the show waits for you.
+• Ads don't split you up: on sites where Tandem can spot an ad, the other person's show waits until it's over.
+• Join from your phone: watching on a TV? Keep the call on a phone.
 • No account needed: choose a name and join.
 
 SITES YOU CAN TRY
@@ -22,6 +28,6 @@ Tandem works on many popular streaming and video sites. If a site isn't supporte
 Some videos may not work yet. You both need access to the same episode, and ads can get you out of step.
 
 PRIVACY
-Tandem works on supported sites and additional sites you allow. It checks whether the video is playing or paused and where you are in it so you can watch together. Camera and microphone are used only for the call, after you allow them. Tandem does not read your browsing history, sell your information, or show ads. Read the full privacy details at https://www.ilovemygf.site/privacy.
+Tandem works on supported sites and additional sites you allow. It checks whether the video is playing or paused and where you are in it so you can watch together. Your list of shows stays in your browser and is never uploaded. Camera and microphone are used only for the call, after you allow them. Tandem does not read your browsing history, sell your information, or show ads. Read the full privacy details at https://www.ilovemygf.site/privacy.
 
 Made for long-distance watch nights. 💜

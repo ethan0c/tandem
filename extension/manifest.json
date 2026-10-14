@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tandem \u2013 watch together",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Watch your favorite shows together with a video call beside the video. Some streaming sites may not work yet.",
   "icons": {
     "16": "icons/16.png",

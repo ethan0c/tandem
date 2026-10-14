@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { EXTENSION_URL, GITHUB } from "@/lib/links";
 
-const GITHUB = "https://github.com/ethan0c";
 const OCELABS = "https://ocelabs.xyz";
 
 const columns = [
@@ -9,6 +9,7 @@ const columns = [
     title: "Tandem",
     links: [
       { label: "Start a room", href: "/#start" },
+      { label: "Plan a watch night", href: "/plan" },
       { label: "How it works", href: "/#sync" },
       { label: "Questions", href: "/#faq" },
       { label: "Privacy", href: "/privacy" },
@@ -17,7 +18,7 @@ const columns = [
   {
     title: "Extension",
     links: [
-      { label: "Chrome · Edge · Brave", href: `${GITHUB}`, external: true },
+      { label: "Chrome · Edge · Brave", href: EXTENSION_URL, external: true },
       { label: "Supported sites", href: "/#sources" },
       { label: "Project on GitHub", href: GITHUB, external: true },
     ],
