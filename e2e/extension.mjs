@@ -58,6 +58,29 @@ test('late frames join an active session; leaving and tab removal clear state', 
   assert.equal(b.sent.length, after);
 });
 
+test('ad and progress reports only come from the elected player', () => {
+  const b = background();
+  b.send(0, { type: 'tandem:session', active: true });
+  b.send(0, { type: 'tandem:status', hasVideo: true, area: 100 });
+  b.send(2, { type: 'tandem:status', hasVideo: true, area: 10000 });
+  const before = b.sent.length;
+  b.send(0, { type: 'tandem:ad', inAd: true });
+  b.send(0, { type: 'tandem:progress', time: 5, duration: 600, playing: true });
+  assert.equal(b.sent.length, before);
+  b.send(2, { type: 'tandem:ad', inAd: true });
+  assert.deepEqual([b.sent.at(-1).message.type, b.sent.at(-1).options.frameId], ['tandem:ad', 0]);
+  b.send(2, { type: 'tandem:progress', time: 5, duration: 600, playing: true });
+  assert.deepEqual([b.sent.at(-1).message.type, b.sent.at(-1).options.frameId], ['tandem:progress', 0]);
+});
+
+test('a pause from the panel reaches every frame', () => {
+  const b = background();
+  b.send(0, { type: 'tandem:session', active: true });
+  b.send(0, { to: 'all', type: 'tandem:pause' });
+  assert.equal(b.sent.at(-1).message.type, 'tandem:pause');
+  assert.equal(b.sent.at(-1).options.frameId, undefined);
+});
+
 test('manifest configures all ten service targets and optional site access', () => {
   const m = JSON.parse(readFileSync(new URL('../extension/manifest.json', import.meta.url), 'utf8'));
   for (const host of ['netflix.com', 'primevideo.com', 'youtube.com', 'disneyplus.com', 'hulu.com', 'max.com', 'crunchyroll.com', 'tv.apple.com', 'paramountplus.com', 'peacocktv.com']) {

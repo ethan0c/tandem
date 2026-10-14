@@ -271,9 +271,11 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 }
 .site-header { min-height: 72px; flex-shrink: 0; }
 .hero-body { gap: clamp(24px, 4vh, 40px); padding-top: clamp(16px, 4vh, 40px); padding-bottom: clamp(24px, 4vh, 40px); min-height: 0; }
+.hero-intro { flex-shrink: 0; }
 .hero-title { font-size: clamp(2.5rem, 5vw, 4.25rem); line-height: 1; }
 /* The preview takes whatever height is left in the viewport, keeping 16:9, so the whole hero fits above the fold. */
-.hero-preview { flex: 1; min-height: 0; max-width: 1080px; container-type: size; display: flex; align-items: flex-end; justify-content: center; }
+/* Reserve the minimum figure height so extra intro content can grow the hero without overlapping the preview. */
+.hero-preview { flex: 1; min-height: 315px; max-width: 1080px; container-type: size; display: flex; align-items: flex-end; justify-content: center; }
 .hero-preview > figure { width: min(100cqw, 100cqh * 16 / 9); min-width: min(100cqw, 560px); }
 .hero-nav a { padding: 8px 12px; border-radius: 8px; transition: color 180ms ease; }
 .hero-nav a:hover, .hero-nav a:focus-visible { color: white; }
@@ -283,7 +285,7 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   /* On phones the preview is full width, so the line goes under it instead of behind it. */
   .hero-horizon { --line: 72px; height: 180px; }
   .hero-horizon::before { width: 280vw; }
-  .hero-preview { flex: none; container-type: normal; display: block; }
+  .hero-preview { flex: none; min-height: 0; container-type: normal; display: block; }
   .hero-preview > figure { width: 100%; min-width: 0; }
   .site-header { min-height: 64px; }
   .hero-body { gap: 28px; padding-top: 24px; padding-bottom: 112px; }
