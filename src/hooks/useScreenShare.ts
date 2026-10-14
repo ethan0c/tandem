@@ -274,7 +274,7 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
 
   // Get the share encoder going in the background once we are in, so a share starts at once.
   useEffect(() => {
-    if (selfId && false) warmVideoEncoder();
+    if (selfId) warmVideoEncoder();
   }, [selfId]);
 
   // Leaving the room ends everything.
