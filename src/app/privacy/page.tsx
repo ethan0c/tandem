@@ -13,7 +13,8 @@ const sections = [
   {
     title: "Your privacy at a glance",
     body: [
-      "You do not need an account. Tandem has no ads and does not track how you use the app. We do not record your call or the video you watch. Room details are deleted 10 minutes after everyone leaves.",
+      "You do not need an account. Tandem has no ads. We do not record your call or the video you watch. Room details are deleted 10 minutes after everyone leaves.",
+      "The website counts page visits with Vercel Web Analytics, so we know which pages are useful and which sites send people here. It uses no cookies and builds no profile of you. Before anything is counted, room codes, invite details (names, what you are watching, links) and story-card numbers are removed from the address, and the extension’s call window is not counted at all.",
     ],
   },
   {
