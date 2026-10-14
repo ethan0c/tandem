@@ -152,7 +152,7 @@ async function main() {
     return;
   }
 
-  $("#compatibility").hidden = /(^|\.)miruro\.(tv|to|online)$/.test(new URL(tab.url).hostname);
+  $("#compatibility").hidden = false;
   const send = (msg) => chrome.tabs.sendMessage(tab.id, msg, { frameId: 0 });
 
   if (status?.roomId) {

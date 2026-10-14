@@ -28,9 +28,6 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*.miruro.tv/*",
-        "*://*.miruro.to/*",
-        "*://*.miruro.online/*",
         "*://*.netflix.com/*",
         "*://*.primevideo.com/*",
         "*://*.youtube.com/*",
