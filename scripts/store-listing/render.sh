@@ -19,6 +19,9 @@ icon() {
 icon 16 0 3
 icon 48 2 2.5
 icon 128 8 2.25
+# Discord app icon: full bleed (Discord crops it to a circle), 1024 square.
+"$CHROME" --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=1 --default-background-color=00000000 \
+  --virtual-time-budget=1000 --window-size=1024,1024 --screenshot="$OUT/discord-icon-1024.png" "file://$PWD/icon.html?size=1024&pad=0&stroke=2.25" 2>/dev/null
 shot screenshot-1.html 1280,800 $OUT/02-screenshot-1-1280x800.png
 shot screenshot-2.html 1280,800 $OUT/03-screenshot-2-1280x800.png
 shot screenshot-3.html 1280,800 $OUT/04-screenshot-3-1280x800.png

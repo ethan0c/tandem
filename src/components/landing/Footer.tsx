@@ -14,6 +14,7 @@ const columns = [
       { label: "How it works", href: "/#sync" },
       { label: "Questions", href: "/#faq" },
       { label: "Privacy", href: "/privacy" },
+      { label: "Terms", href: "/terms" },
     ],
   },
   {

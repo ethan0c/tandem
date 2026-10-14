@@ -43,6 +43,12 @@ const sections = [
     ],
   },
   {
+    title: "The Discord app",
+    body: [
+      "When you type /watch in Discord, Discord sends Tandem your display name and anything you typed into the command (what you are watching and an optional link). Tandem uses them only to write the reply with the room link, and does not store them. The reply is visible to everyone in that channel or conversation.",
+    ],
+  },
+  {
     title: "What stays in your browser",
     body: [
       "Tandem remembers the name you last used so you do not need to type it again. It also remembers your call volume, notification sound preference, and call window size. These settings stay in your browser.",
