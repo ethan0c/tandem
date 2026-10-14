@@ -5,9 +5,10 @@ let warmed = false;
 /**
  * A hardware video encoder can take several seconds to produce its first frame in a fresh browser
  * (about 6 s measured for a screen share with VideoToolbox), and a viewer stares at a blank share all
- * that time. Starting it once is enough for the rest of the browser session, so do it in the
- * background as soon as someone is in a room: a hidden connection to ourselves encodes a few frames
- * of a blank canvas with the same codec a share uses, then everything is closed again.
+ * that time. Starting it once is enough for the rest of the browser session, so do it ahead of a
+ * share: a hidden connection to ourselves encodes a few frames of a blank canvas with the same codec
+ * a share uses, then everything is closed again. While it starts, other video encoding in the
+ * browser stalls too, so never call this on the way into a call.
  */
 export function warmVideoEncoder() {
   if (warmed || typeof RTCPeerConnection === "undefined") return;

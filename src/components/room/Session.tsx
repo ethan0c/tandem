@@ -7,6 +7,7 @@ import { useRoom } from "@/hooks/useRoom";
 import { useScreenShare } from "@/hooks/useScreenShare";
 import { useWebRTC } from "@/hooks/useWebRTC";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { warmVideoEncoder } from "@/lib/warm-encoder";
 import { FloatingReactions, partnerNotice, useFloatingReactions } from "@/components/Reactions";
 import { TakenOver } from "@/components/TakenOver";
 import { ChatPanel } from "./ChatPanel";
@@ -96,6 +97,14 @@ export function Session({ roomId, name, localStream }: Props) {
   const toggleChat = useCallback(() => setChat(!chatOpen), [setChat, chatOpen]);
   const chatBeside = chatOpen && wide;
 
+  // Someone is about to pick what to watch: get the share encoder going now. Starting a hardware
+  // encoder stalls every video encoder in the browser for a few seconds, so doing it on join froze
+  // the camera call instead; here it overlaps with choosing a tab, and the share starts at once.
+  const openSource = useCallback(() => {
+    warmVideoEncoder();
+    setSourceOpen(true);
+  }, []);
+
   // "c" opens and closes the chat, unless you are typing somewhere.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -176,7 +185,7 @@ export function Session({ roomId, name, localStream }: Props) {
             error={screen.error}
             onDismissError={screen.clearError}
             onStop={screen.stop}
-            onOpenSource={() => setSourceOpen(true)}
+            onOpenSource={openSource}
             onToggleFullscreen={toggleFullscreen}
             isFullscreen={isFullscreen}
             chromeVisible={chromeVisible}
@@ -189,7 +198,7 @@ export function Session({ roomId, name, localStream }: Props) {
             selfId={room.selfId}
             serverNow={room.serverNow}
             emitSync={room.emitSync}
-            onOpenSource={() => setSourceOpen(true)}
+            onOpenSource={openSource}
             onPickFile={setLocalFile}
             onToggleFullscreen={toggleFullscreen}
             isFullscreen={isFullscreen}
