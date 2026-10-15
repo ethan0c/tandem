@@ -3,6 +3,8 @@ import { chromium } from 'playwright';
 import { noTurn } from './no-turn.mjs';
 
 const base = process.env.BASE_URL ?? 'http://localhost:3000';
+// Where server.ts runs, when the site is hosted separately (NEXT_PUBLIC_SOCKET_URL).
+const socketBase = process.env.SOCKET_URL ?? base;
 const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] });
 try {
   const context = await browser.newContext({ permissions: ['camera', 'microphone'], viewport: { width: 1280, height: 900 } });
@@ -57,7 +59,7 @@ try {
   await alice.getByRole('link', { name: 'Leave room', exact: true }).click();
   await bob.getByRole('link', { name: 'Leave room', exact: true }).click();
   await bob.getByRole('link', { name: 'Rejoin your last room', exact: false }).waitFor();
-  const response = await bob.request.get(`${base}/room-status/${code}`);
+  const response = await bob.request.get(`${socketBase}/room-status/${code}`);
   const status = await response.json();
   assert.equal(status.exists, true);
   assert(status.expiresAt > Date.now() && status.expiresAt <= Date.now() + 600_000);
