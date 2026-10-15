@@ -173,10 +173,7 @@ try {
   const resynced = await inSync('Resync pauses both on Alice\'s spot', false);
   assert.ok(Math.abs(resynced.alice.time - resynced.bob.time) < 0.1, 'same frame after Resync');
   await until('Bob\'s panel says Alice resynced', async () => (await overlay(bob).locator('body').innerText()).includes('Alice resynced'));
-  // A play pressed the instant a resync lands is undone, so both stay paused together.
-  await bob.page.evaluate(() => document.querySelector('video').play());
-  await new Promise((r) => setTimeout(r, 2000));
-  await inSync('a too-early play is put back on the room', false);
+  // Straight away, while the resync's own pause is still settling: a real press must still get through.
   await bob.page.evaluate(() => document.querySelector('video').play());
   await inSync('Bob presses play after the resync, Alice follows', true);
   await until('the resync notice clears once playing', async () => !(await overlay(bob).locator('body').innerText()).includes('resynced'));

@@ -67,9 +67,12 @@
   }
 
   function onUserEvent(e) {
-    if (!video || inAd || Date.now() < suppressUntil || !Number.isFinite(video.currentTime)) return;
+    if (!video || inAd || !Number.isFinite(video.currentTime)) return;
     const playing = !video.paused && !video.ended;
     const time = video.currentTime;
+    // Right after we move the video, its events are echoes of that: ignore the ones that agree with the
+    // room. Anything else is the viewer acting, and must not be lost or the two of you drift apart.
+    if (Date.now() < suppressUntil && state && playing === state.playing && Math.abs(time - expected()) < 1) return;
     state = { playing, time, localUpdatedAt: Date.now() };
     const reason = e.type === "seeked" ? "seek" : playing ? "play" : "pause";
     relay({ to: "top", type: "tandem:event", playing, time, reason });
