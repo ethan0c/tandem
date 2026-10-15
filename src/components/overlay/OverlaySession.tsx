@@ -4,7 +4,7 @@ import { IconButton as ControlButton } from "@/components/Button";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Check, Coffee, Copy, LogOut, Mic, MicOff, Smartphone, Video, VideoOff } from "lucide-react";
+import { Check, Coffee, Copy, LogOut, Mic, MicOff, RefreshCw, Smartphone, Video, VideoOff } from "lucide-react";
 import { CallVolumeControl } from "@/components/CallVolumeControl";
 import { ConnectionNotice } from "@/components/ConnectionNotice";
 import { ChimeToggle } from "@/components/ChimeToggle";
@@ -61,6 +61,10 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
   const [page, setPage] = useState<{ url: string; title: string } | null>(null);
   const [phoneOpen, setPhoneOpen] = useState(false);
   const [resumeAt] = useState(readResume);
+  /** Set once the extension says it can resync (0.3+); older versions never answer. */
+  const [canResync, setCanResync] = useState(false);
+  /** The remote change our own last action superseded. */
+  const [handledSeq, setHandledSeq] = useState(0);
   const resumeChecked = useRef(false);
 
   useReleaseStream(localStream);
@@ -85,6 +89,12 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
     });
   }, [remote, selfId, serverNow, emitSync, resumeAt]);
 
+  // Which remote change is current, for the page's next action to supersede.
+  const remoteSeq = useRef(0);
+  useEffect(() => {
+    remoteSeq.current = remote?.seq ?? 0;
+  }, [remote]);
+
   // Local user actions arrive from the page.
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
@@ -99,11 +109,16 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
         inAd?: boolean;
         url?: string;
         title?: string;
+        resync?: boolean;
       };
       if (!m || typeof m !== "object") return;
       if (m.type === "tandem:event") {
-        const reason: SyncReason = m.reason === "seek" ? "seek" : m.playing ? "play" : "pause";
+        const reason: SyncReason =
+          m.reason === "seek" || m.reason === "resync" ? m.reason : m.playing ? "play" : "pause";
         emitSync(!!m.playing, Number(m.time) || 0, reason);
+        setHandledSeq(remoteSeq.current);
+      } else if (m.type === "tandem:caps") {
+        setCanResync(!!m.resync);
       } else if (m.type === "tandem:status") {
         setHasVideo(!!m.hasVideo);
       } else if (m.type === "tandem:drift") {
@@ -119,6 +134,13 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
     post({ type: "tandem:ready" });
     return () => window.removeEventListener("message", onMessage);
   }, [emitSync, setMemberStatus]);
+
+  // A partner's Resync pauses us on their spot; say so, or it looks like a glitch. Our own next
+  // play, pause or seek moves on from it.
+  const resyncedBy =
+    remote && remote.reason === "resync" && remote.from !== "server" && remote.from !== selfId && remote.seq !== handledSeq
+      ? (room.members.find((m) => m.id === remote.from)?.name ?? "Your partner")
+      : null;
 
   // The invite opens a page that gets the guest set up, then sends them to this same episode.
   const copyInvite = useCallback(async () => {
@@ -159,6 +181,8 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
   }, [together]);
 
   const notice = partnerNotice(room.members, room.selfId);
+  // Playing but more than a moment apart: make Resync stand out.
+  const outOfStep = drift !== null && Math.abs(drift) >= 0.3;
   const phone = layout === "phone";
 
   useEffect(() => {
@@ -180,6 +204,8 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
         ? { text: notice, tone: "text-amber-300" }
         : away
           ? { text: "You stepped away", tone: "text-amber-300" }
+          : resyncedBy
+            ? { text: `${resyncedBy} resynced. Press play when you’re ready.`, tone: "text-amber-300" }
           : phone
             ? { text: room.remote?.playback.playing ? "Playing together" : "Paused", tone: "text-zinc-400" }
             : hasVideo === false
@@ -234,6 +260,15 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
       <div className="flex flex-wrap items-center gap-1 border-b border-white/10 px-2 py-1.5">
         <ReactionBar onSend={room.sendReaction} />
         <div className="ml-auto flex shrink-0 items-center gap-1">
+          {!phone && canResync && (
+            <button
+              onClick={() => post({ type: "tandem:resync" })}
+              title="Out of step? Pauses everyone at your spot, then press play."
+              className={`btn3d btn3d-xs ${outOfStep ? "btn3d-brand" : "btn3d-light"}`}
+            >
+              <RefreshCw className="size-3" /> Resync
+            </button>
+          )}
           {!phone && (
             <button
               onClick={toggleAway}

@@ -351,6 +351,11 @@
       case "tandem:ready":
         relay({ to: "all", type: "tandem:probe" });
         sendPage(true);
+        // The panel only offers what this version of the extension can do.
+        iframe.contentWindow.postMessage({ type: "tandem:caps", resync: true }, appOrigin);
+        break;
+      case "tandem:resync":
+        relay({ to: "all", type: "tandem:resync" });
         break;
       case "tandem:reaction":
         floatReaction(m.emoji, m.from);
@@ -523,6 +528,14 @@
         break;
       case "tandem:pause":
         if (video && !inAd && !video.paused) video.pause();
+        break;
+      case "tandem:resync":
+        // Pause right here and put everyone else on this exact spot.
+        if (!video || inAd || !Number.isFinite(video.currentTime)) return;
+        suppressUntil = Date.now() + 1000;
+        video.pause();
+        state = { playing: false, time: video.currentTime, localUpdatedAt: Date.now() };
+        relay({ to: "top", type: "tandem:event", playing: false, time: state.time, reason: "resync" });
         break;
       case "tandem:progress":
         if (IS_TOP) recordProgress(msg);
