@@ -5,6 +5,10 @@ The web app's server does all the work; this extension only bridges the page's `
 
 ## Install (Chrome, Edge, Brave, Arc)
 
+Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/cbllpgpbalhffmpnalmmehkcgcjajjck).
+
+To run it from source instead:
+
 1. Run the Tandem web app (`npm run dev` in the repo root, or your deployed URL).
 2. Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked**, and pick this `extension/` folder.
 3. The extension talks to `https://www.ilovemygf.site` by default. For local development, open the popup, expand **Settings**, and set the **Tandem website address**.

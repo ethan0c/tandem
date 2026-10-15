@@ -84,7 +84,8 @@ set `NEXT_PUBLIC_TURN_*` where the site is built. Everything else works without 
 | Local file       | Nothing is uploaded. Your partner is prompted to pick the same file on their machine.   |
 
 Streaming sites with protected or proprietary players cannot be driven from an unrelated web page. The
-browser extension bridges the site's HTML5 player to the app using the same Socket.IO sync events. See
+browser extension bridges the site's HTML5 player to the app using the same Socket.IO sync events. Install it from the
+[Chrome Web Store](https://chromewebstore.google.com/detail/cbllpgpbalhffmpnalmmehkcgcjajjck); see
 [extension/README.md](extension/README.md) for supported domains, permissions, and compatibility limitations.
 
 ## Call quality on weak connections
