@@ -55,8 +55,9 @@ Each viewer must have authorized access to the same episode. DRM does not itself
 Tandem does not extract or redistribute protected media.
 
 Other HTTP/HTTPS sites can be enabled from the popup with a per-origin permission request. Access is persistent,
-so invite links work after reloading. Cross-origin embedded players need separate permission for their origin;
-otherwise their video may not be discovered. Browser internal pages and extension-store pages cannot be enabled.
+so invite links work after reloading. Many sites play the show in an iframe from another domain (Miruro's player is on `strm.cx`).
+That origin needs its own permission, so **Enable on this site** asks for the most likely player frame too, and
+when a room finds no video the popup offers **Turn on the video player** for it. Browser internal pages and extension-store pages cannot be enabled.
 
 The generic controller searches visible videos and open shadow roots, re-scans after navigation and player replacement,
 and elects one player frame per tab. This is generic HTML5 control, not verified service-specific adapters.

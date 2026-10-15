@@ -136,6 +136,62 @@ async function showHistory(appOrigin) {
   }
 }
 
+/**
+ * The site the page's video player is embedded from, when it is not the page's own: many sites play the
+ * show in an iframe from another domain, which needs its own permission before Tandem can see the video.
+ * Only the most likely player: frames that allow fullscreen or autoplay first, then the most on screen, so
+ * comment and ad widgets (often bigger, but further down) do not end up in the permission prompt.
+ */
+async function playerOrigin(tab, appOrigin) {
+  try {
+    const [{ result }] = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => [...document.querySelectorAll("iframe")].map((f) => {
+        const r = f.getBoundingClientRect();
+        const visible = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) *
+          Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0));
+        return {
+          src: f.src,
+          area: r.width >= 300 && r.height >= 150 ? visible : 0,
+          player: f.allowFullscreen || /fullscreen|autoplay|encrypted-media/.test(f.allow),
+        };
+      }),
+    });
+    const own = new URL(tab.url).origin;
+    const app = new URL(appOrigin).origin;
+    const largest = result
+      .filter((f) => f.area > 0 && /^https?:\/\//.test(f.src))
+      .map((f) => ({ ...f, origin: new URL(f.src).origin }))
+      .filter((f) => f.origin !== own && f.origin !== app)
+      .sort((a, b) => Number(b.player) - Number(a.player) || b.area - a.area)[0];
+    return largest?.origin ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Runs content.js on these origins from now on, and in this tab's frames right away. */
+async function turnOn(tab, origins) {
+  for (const origin of origins) {
+    const id = `tandem-${origin.replace(/[^a-z0-9]/gi, "-")}`;
+    const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [id] });
+    if (!existing.length) {
+      await chrome.scripting.registerContentScripts([{
+        id, matches: [`${origin}/*`], js: ["content.js"], css: ["content.css"],
+        allFrames: true, runAt: "document_idle", persistAcrossSessions: true,
+      }]);
+    }
+  }
+  // activeTab covers the current top frame; frames from other origins need the access just granted.
+  try {
+    await chrome.scripting.insertCSS({ target: { tabId: tab.id, allFrames: true }, files: ["content.css"] });
+    await chrome.scripting.executeScript({ target: { tabId: tab.id, allFrames: true }, files: ["content.js"] });
+  } catch {
+    await chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ["content.css"] });
+    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
+  }
+}
+
 async function main() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const { appOrigin = "https://www.ilovemygf.site" } = await chrome.storage.sync.get("appOrigin");
@@ -164,31 +220,19 @@ async function main() {
     status = await chrome.tabs.sendMessage(tab.id, { type: "tandem:get" }, { frameId: 0 });
   } catch {
     $("#unsupported").hidden = false;
+    // Worked out before the click: the permission prompt has to open straight from it.
+    const player = await playerOrigin(tab, appOrigin);
     $("#enable").addEventListener("click", async () => {
-      const origin = `${new URL(tab.url).origin}/*`;
+      const page = new URL(tab.url).origin;
+      const origins = player ? [page, player] : [page];
       try {
-        const granted = await chrome.permissions.request({ origins: [origin] });
+        const granted = await chrome.permissions.request({ origins: origins.map((o) => `${o}/*`) });
         if (!granted) {
           $("#access-error").hidden = false;
           $("#access-error").textContent = "Allow Tandem to use this site, then try again.";
           return;
         }
-        const id = `tandem-${new URL(tab.url).origin.replace(/[^a-z0-9]/gi, "-")}`;
-        const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [id] });
-        if (!existing.length) {
-          await chrome.scripting.registerContentScripts([{
-            id, matches: [origin], js: ["content.js"], css: ["content.css"],
-            allFrames: true, runAt: "document_idle", persistAcrossSessions: true,
-          }]);
-        }
-        // activeTab covers the current top frame; cross-origin frames require their own access.
-        try {
-          await chrome.scripting.insertCSS({ target: { tabId: tab.id, allFrames: true }, files: ["content.css"] });
-          await chrome.scripting.executeScript({ target: { tabId: tab.id, allFrames: true }, files: ["content.js"] });
-        } catch {
-          await chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ["content.css"] });
-          await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
-        }
+        await turnOn(tab, origins);
         window.location.reload();
       } catch {
         $("#access-error").hidden = false;
@@ -205,6 +249,25 @@ async function main() {
     $("#active").hidden = false;
     $("#current").textContent = status.roomId;
     $("#player").textContent = status.hasVideo ? "Ready to watch together." : "Looking for a video on this page…";
+    if (!status.hasVideo) {
+      // The video may be in a player frame from another site that Tandem has no access to yet.
+      const player = await playerOrigin(tab, status.appOrigin || appOrigin);
+      if (player && !(await chrome.permissions.contains({ origins: [`${player}/*`] }))) {
+        $("#player").textContent = `The video plays from ${new URL(player).hostname}. Turn Tandem on there to sync it.`;
+        $("#enable-player").hidden = false;
+        $("#enable-player").addEventListener("click", async () => {
+          try {
+            if (!(await chrome.permissions.request({ origins: [`${player}/*`] }))) return;
+            await turnOn(tab, [player]);
+            $("#enable-player").hidden = true;
+            $("#player").textContent = "Looking for a video on this page…";
+          } catch {
+            $("#player-error").hidden = false;
+            $("#player-error").textContent = "Could not turn on the player. Refresh the page and try again.";
+          }
+        });
+      }
+    }
     $("#copy").addEventListener("click", async () => {
       // The invite page helps a partner without the extension get it first, then opens this episode.
       const invite = new URL(`${status.appOrigin || appOrigin}/join/${status.roomId}`);
