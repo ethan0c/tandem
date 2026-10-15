@@ -116,6 +116,8 @@
     relay({ to: "top", type: "tandem:ad", inAd });
     if (inAd) return;
     // Back to the show: lead the room from wherever this player picks up, which releases the others.
+    // Until then the room's paused state must not be forced onto this player.
+    suppressUntil = Date.now() + 1200;
     setTimeout(() => {
       if (!video || inAd || !Number.isFinite(video.currentTime)) return;
       const playing = !video.paused && !video.ended;
@@ -132,6 +134,12 @@
   function driftTick() {
     checkAd();
     if (!video || !state || inAd) return;
+    // A play or pause the page swallowed, or the site's player undid, would otherwise leave us apart
+    // for good: drift correction only runs while both are playing. Put the video back on the room.
+    if (Date.now() > suppressUntil && !video.ended && video.paused === state.playing) {
+      applyState();
+      return;
+    }
     if (!state.playing || video.paused || video.seeking || video.readyState < 3) {
       if (video.playbackRate !== 1) video.playbackRate = 1;
       return;

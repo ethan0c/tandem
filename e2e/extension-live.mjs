@@ -65,6 +65,8 @@ async function launch(name) {
       '--use-fake-device-for-media-stream',
       '--use-fake-ui-for-media-stream',
       '--autoplay-policy=no-user-gesture-required',
+      // Otherwise Chrome blocks the panel when BASE_URL is localhost: a public site may not embed a local one.
+      '--disable-features=LocalNetworkAccessChecks,PrivateNetworkAccessSendPreflights,PrivateNetworkAccessRespectPreflightResults',
     ],
   });
   await context.addInitScript(noTurn);
@@ -165,6 +167,21 @@ try {
   await inSync('both play again once the ad is over', true);
   step('an ad on Alice\'s side pauses Bob, and they resume together after it');
   } else console.log(`- skipped ad handling (not in ${version})`);
+
+  if (since03) {
+  await overlay(alice).getByRole('button', { name: 'Resync' }).click();
+  const resynced = await inSync('Resync pauses both on Alice\'s spot', false);
+  assert.ok(Math.abs(resynced.alice.time - resynced.bob.time) < 0.1, 'same frame after Resync');
+  await until('Bob\'s panel says Alice resynced', async () => (await overlay(bob).locator('body').innerText()).includes('Alice resynced'));
+  // A play pressed the instant a resync lands is undone, so both stay paused together.
+  await bob.page.evaluate(() => document.querySelector('video').play());
+  await new Promise((r) => setTimeout(r, 2000));
+  await inSync('a too-early play is put back on the room', false);
+  await bob.page.evaluate(() => document.querySelector('video').play());
+  await inSync('Bob presses play after the resync, Alice follows', true);
+  await until('the resync notice clears once playing', async () => !(await overlay(bob).locator('body').innerText()).includes('resynced'));
+  step(`Resync pauses everyone on the same frame (gap ${Math.abs(resynced.alice.time - resynced.bob.time).toFixed(3)}s) and tells the partner`);
+  } else console.log(`- skipped Resync (not in ${version})`);
 
   await bob.page.reload();
   await until('Bob\'s panel comes back after a reload', async () => !!overlay(bob));
