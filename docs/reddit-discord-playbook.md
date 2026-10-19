@@ -62,7 +62,9 @@ Communities that explicitly welcome "I built this" posts, at the right time and 
 | r/SideProject | A short build story: why you made it (long-distance), what it does, a screenshot or 20-second clip, the link. Ask for feedback. |
 | r/chrome_extensions | What the extension does, which sites, privacy (no account, history stays local). |
 | r/webdev | Only in the weekly **Showoff Saturday**; post on a Saturday as the rules say. Lead with the technical story (sync, reconnects, video call over the show). |
-| r/InternetIsBeautiful | Strict: only if the site is useful without signing up and the post follows their format. Read the rules first. |
+| ~~r/InternetIsBeautiful~~ | Not allowed: its rules ban extensions and sites that need a webcam. |
+
+Every candidate subreddit and what its rules allow: [reddit-subreddit-rules.md](reddit-subreddit-rules.md).
 
 What works in these posts: a real reason ("my partner and I are long distance and every watch app was a
 chat box"), one clear visual (the call floating over the show), and replying to every comment for the
@@ -71,6 +73,8 @@ first few hours.
 ### Long-distance communities (careful, but this is the core audience)
 
 r/LongDistance and similar are where your users are, and they are protective of their space.
+r/LongDistance's rule 1 bans links to apps and hidden ads (ban on first offence), so there it is modmail
+only: never post or comment about Tandem without the moderators' written OK.
 
 1. **Message the moderators first.** "I built a free tool for long-distance watch nights. Would you be
    OK with me sharing it, or is there a resources thread it could go in?" Many subs keep a wiki or

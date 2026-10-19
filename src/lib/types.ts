@@ -16,7 +16,7 @@ export interface PlaybackState {
 }
 
 /** The reactions anyone can send. Anything else is dropped by the server. */
-export const REACTIONS = ["❤️", "😂", "😮", "😭", "🔥"] as const;
+export const REACTIONS = ["❤️", "😂", "😮", "😭", "🔥", "🍆", "😈", "👀", "🥺", "💀", "😍", "👏"] as const;
 export type Reaction = (typeof REACTIONS)[number];
 
 /** Why a member is not watching right now: stepped away, or sitting through an ad on their site. */
