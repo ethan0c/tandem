@@ -5,6 +5,7 @@ import seed from "@/content/catalog.json";
 import type { CatalogTitle, MediaKind } from "@/lib/catalog-types";
 import { MediaCard } from "./MediaCard";
 import { Button } from "@/components/Button";
+import Link from "next/link";
 
 export function Browse({ kind }: { kind: MediaKind }) {
   const [q, setQ] = useState("");
@@ -75,7 +76,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
           <input
             value={q}
             onChange={(e) => change(setQ, e.target.value)}
-            placeholder={`Search ${kind} or an alternative title…`}
+            placeholder="Search titles…"
             className="field w-full pl-10"
           />
         </label>
@@ -203,6 +204,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
           </Button>
         </div>
       )}
+      {kind === "anime" && <p className="mt-10 border-t border-white/10 pt-6 text-sm text-zinc-400"><Link href="/play/anime/4650" className="hover:text-white">Watch Namakura Gatana (1917) in Tandem →</Link></p>}
     </>
   );
 }

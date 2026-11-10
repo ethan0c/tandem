@@ -2,6 +2,7 @@ export interface ReadingState {
   chapter: number;
   page: number;
   hostOnly: boolean;
+  unit?: string;
 }
 export interface RoomStory {
   id: string;
@@ -20,6 +21,7 @@ export function readingUpdate(
 ): ReadingState | null {
   if (!value || typeof value !== "object") return null;
   const patch = value as Partial<ReadingState>;
+  if (patch.unit !== undefined && (typeof patch.unit !== "string" || (patch.unit !== "" && !/^[a-f0-9-]{36}$/i.test(patch.unit)))) return null;
   if (current.hostOnly && !isHost) return null;
   if (
     patch.hostOnly !== undefined &&
@@ -39,6 +41,7 @@ export function readingUpdate(
   )
     return null;
   return {
+    ...(patch.unit !== undefined ? { unit: patch.unit } : current.unit ? { unit: current.unit } : {}),
     chapter: patch.chapter ?? current.chapter,
     page: patch.page ?? current.page,
     hostOnly: patch.hostOnly ?? current.hostOnly,

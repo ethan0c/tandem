@@ -95,6 +95,7 @@ export function isLibraryEntry(value: unknown): value is LibraryEntry {
         Number.isInteger(e.readingPosition.page) &&
         e.readingPosition.page >= 0 &&
         e.readingPosition.page < 500)) &&
+    (!e.watchPosition || (typeof e.watchPosition.unit === "string" && e.watchPosition.unit.length < 80 && Number.isFinite(e.watchPosition.seconds) && e.watchPosition.seconds >= 0 && e.watchPosition.seconds < 1_000_000)) &&
     typeof e.updatedAt === "number" &&
     Number.isFinite(e.updatedAt) &&
     typeof e.favorite === "boolean" &&

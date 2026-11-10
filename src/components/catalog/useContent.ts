@@ -9,6 +9,7 @@ export function useContent(kind: MediaKind, id: string, language = "en", offset 
   const [pending, setPending] = useState(true);
   const [retry, setRetry] = useState(0);
   useEffect(() => {
+    if (!id) return;
     const controller = new AbortController();
     const load = async () => {
       setPending(true); setError("");

@@ -3,6 +3,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import next from "next";
 import { Server } from "socket.io";
 import { initialReading, readingUpdate, validStory } from "./src/lib/reading";
+import { approvedVideo, directAnime } from "./src/lib/content-types";
 import {
   CHAT_HISTORY,
   CHAT_MAX_LENGTH,
@@ -320,6 +321,8 @@ app.prepare().then(() => {
       const room = rooms.get(roomId);
       if (!room) return;
       // Only the sender can be the sharer of their own screen.
+      if (source?.kind === "remote" && !approvedVideo(source.mediaId, source.url)) return;
+      if (source?.kind === "remote") source = { ...source, name: directAnime[source.mediaId].title };
       room.source = source?.kind === "screen" ? { ...source, sharerId: clientId } : source;
       room.playback = freshPlayback();
       io.to(roomId).emit("source:changed", { source: room.source, playback: room.playback, from: clientId });

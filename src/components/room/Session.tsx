@@ -15,6 +15,7 @@ import { Player } from "./Player";
 import { ScreenStage } from "./ScreenStage";
 import { SourceDialog } from "./SourceDialog";
 import { TopBar } from "./TopBar";
+import { directAnime } from "@/lib/content-types";
 
 /** The chat panel's width on wide screens (Tailwind's w-80, in ChatPanel). */
 const CHAT_WIDTH = 320;
@@ -44,6 +45,13 @@ export function Session({ roomId, name, localStream }: Props) {
   const room = useRoom(roomId, name, { onMessage: bump, onReaction: (r) => floating.add(r.id, r.emoji, nameRef.current(r.from)) });
   const storyQuery = useClientValue(() => location.search, "");
   const { changeStory } = room;
+  const { changeSource } = room;
+  useEffect(() => {
+    if (room.status !== "joined" || room.selfId !== room.hostId || room.source) return;
+    const id = new URLSearchParams(storyQuery).get("media");
+    const direct = id ? directAnime[id] : null;
+    if (id && direct) changeSource({ kind: "remote", mediaId: id, name: direct.title, url: direct.streams[0].url });
+  }, [storyQuery, room.status, room.selfId, room.hostId, room.source, changeSource]);
   useEffect(() => {
     if (room.status !== "joined" || room.selfId !== room.hostId || room.story) return;
     const params = new URLSearchParams(storyQuery);

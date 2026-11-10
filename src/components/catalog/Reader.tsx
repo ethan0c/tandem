@@ -26,6 +26,7 @@ import { ChatPanel } from "@/components/room/ChatPanel";
 import { TakenOver } from "@/components/TakenOver";
 import type { CatalogTitle } from "@/lib/catalog-types";
 import { useLibrary } from "./LibraryProvider";
+import { useContent } from "./useContent";
 
 export function Reader({ roomId }: { roomId: string }) {
   const [session, setSession] = useState<{
@@ -140,6 +141,8 @@ function ReadingSession({
   const [error, setError] = useState("");
   const [chat, setChat] = useState(false);
   const [media, setMedia] = useState<CatalogTitle | null>(null);
+  const [loadingPages, setLoadingPages] = useState(false);
+  const chapters = useContent("manga", room.story?.id || "");
   const input = useRef<HTMLInputElement>(null);
   const canvas = useRef<HTMLDivElement>(null);
   const sentPosition = useRef("");
@@ -155,13 +158,31 @@ function ReadingSession({
       room.status === "joined" &&
       !room.story &&
       params.get("media")
-    )
+    ) {
       changeStory({
         id: params.get("media")!,
         kind: "manga",
         title: params.get("title") || "Our manga",
       });
-  }, [query, isHost, room.status, room.story, changeStory]);
+      const unit = params.get("unit");
+      if (unit && /^[a-f0-9-]{36}$/i.test(unit)) changeReading({ unit, chapter: Number(params.get("chapter")) || 1, page: 0 });
+    }
+  }, [query, isHost, room.status, room.story, changeStory, changeReading]);
+  useEffect(() => {
+    if (!room.story?.id || !room.reading.unit) return;
+    const controller = new AbortController();
+    const load = async () => {
+      setLoadingPages(true); setError("");
+      try {
+        const response = await fetch(`/api/content?${new URLSearchParams({ kind: "manga", id: room.story!.id, unit: room.reading.unit! })}`, { signal: controller.signal });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "The chapter couldn’t be loaded.");
+        if (!controller.signal.aborted) setPages(data.pages.map((url: string, i: number) => ({ url, name: `Page ${i + 1}` })));
+      } catch (e) { if (!controller.signal.aborted) { setPages([]); setError(e instanceof Error ? e.message : "The chapter couldn’t be loaded."); } }
+      finally { if (!controller.signal.aborted) setLoadingPages(false); }
+    };
+    void load(); return () => controller.abort();
+  }, [room.story?.id, room.reading.unit]);
   useEffect(() => {
     if (!room.story) return;
     const controller = new AbortController();
@@ -177,7 +198,7 @@ function ReadingSession({
   }, [room.story]);
   useEffect(
     () => () => {
-      pages.forEach((p) => URL.revokeObjectURL(p.url));
+      pages.forEach((p) => { if (p.url.startsWith("blob:")) URL.revokeObjectURL(p.url); });
     },
     [pages],
   );
@@ -188,7 +209,7 @@ function ReadingSession({
         ?.scrollIntoView({ block: "start" });
   }, [page, mode, pages]);
   useEffect(() => {
-    if (!ready || !media || !pages.length) return;
+    if (!ready || !media || !pages.length || loadingPages) return;
     const key = `${media.id}:${room.reading.chapter}:${page}`;
     if (sentPosition.current === key) return;
     sentPosition.current = key;
@@ -196,7 +217,7 @@ function ReadingSession({
       status: "current",
       readingPosition: { chapter: room.reading.chapter, page },
     });
-  }, [ready, media, pages.length, page, room.reading.chapter, save]);
+  }, [ready, media, pages.length, page, room.reading.chapter, save, loadingPages]);
   function go(next: number) {
     if (!canNavigate || next < 0 || next >= pages.length) return;
     if (follow) changeReading({ page: next });
@@ -240,7 +261,7 @@ function ReadingSession({
             {room.members.map((m) => m.name).join(" & ") || "Connecting…"}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             size="sm"
             variant="ghost"
@@ -294,7 +315,8 @@ function ReadingSession({
           </Button>
         </div>
       </div>
-      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+      <div className="reader-toolbar mt-6 border-y border-white/10 py-4">
+        {!!chapters.data?.units.length && <label><span className="sr-only">Shared chapter</span><select className="field max-w-full" value={room.reading.unit || ""} disabled={!canNavigate || !follow || room.status !== "joined"} onChange={e => { const unit = chapters.data!.units.find(u => u.id === e.target.value); if (unit) changeReading({ unit: unit.id, chapter: Math.max(1, unit.number), page: 0 }); }}><option value="">Choose a chapter</option>{room.reading.unit && !chapters.data.units.some(u => u.id === room.reading.unit) && <option value={room.reading.unit}>Chapter {room.reading.chapter}</option>}{chapters.data.units.map(unit => <option value={unit.id} key={unit.id}>{unit.label}{unit.group ? ` · ${unit.group}` : ""}</option>)}</select></label>}
         <label className="flex items-center gap-2 text-xs text-zinc-400">
           Chapter
           <input
@@ -304,7 +326,7 @@ function ReadingSession({
             max="1000000"
             step="0.1"
             value={room.reading.chapter}
-            disabled={!canNavigate || !follow || room.status !== "joined"}
+            disabled={!!room.reading.unit || !canNavigate || !follow || room.status !== "joined"}
             onChange={(e) =>
               changeReading({ chapter: Number(e.target.value), page: 0 })
             }
@@ -388,6 +410,7 @@ function ReadingSession({
             return;
           }
           setError("");
+          if (room.reading.unit) changeReading({ unit: "", page: 0 });
           setPages(
             files.map((f) => ({ url: URL.createObjectURL(f), name: f.name })),
           );
@@ -406,7 +429,7 @@ function ReadingSession({
             : "Chapter and page changes are shared. Everyone opens their own images in the same order."
           : "You’re on your own page. Switch back to sync to catch up."}
       </p>
-      {pages.length ? (
+      {loadingPages ? <p className="py-16 text-center text-sm text-zinc-400" role="status">Loading shared chapter…</p> : pages.length ? (
         <>
           <div className="reader-page" data-mode={mode} ref={canvas}>
             {mode === "page" ? (
@@ -414,6 +437,7 @@ function ReadingSession({
                 <img
                   src={pages[page].url}
                   alt={`Page ${page + 1}: ${pages[page].name}`}
+                  referrerPolicy="no-referrer"
                 />
               ) : (
                 <div className="empty-state">

@@ -111,6 +111,11 @@ export function Player({
     setCurrentTime(0);
     setBlocked(false);
 
+    if (source?.kind === "remote") {
+      v.src = source.url;
+      v.load();
+      return;
+    }
     if (source?.kind !== "file" || !localFile) {
       v.removeAttribute("src");
       v.load();

@@ -24,6 +24,8 @@ interface Resource {
     title?: string;
     url?: string;
     number?: number;
+    externalSite?: string;
+    externalId?: string;
   };
   relationships?: { categories?: { data?: { id: string }[] } };
 }
@@ -191,4 +193,8 @@ export async function getProviders(id: string) {
   } catch {
     return [];
   }
+}
+export async function getExternalCatalogId(kind: MediaKind, id: string, site: string) {
+  try { const data = await request(`${kind}/${id}/mappings`); return (data.data as Resource[]).find(item => item.attributes.externalSite === site)?.attributes.externalId || null; }
+  catch { return null; }
 }

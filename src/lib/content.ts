@@ -1,10 +1,10 @@
 import "server-only";
-import { getCatalogTitle } from "./catalog";
+import { getCatalogTitle, getExternalCatalogId } from "./catalog";
 import { normalizeName } from "./library";
 import type { CatalogTitle, MediaKind } from "./catalog-types";
 import { directAnime, safePageBase, type ContentCatalog, type ContentPlayback, type ContentUnit } from "./content-types";
 
-interface DexManga { id: string; attributes: { title: Record<string, string>; altTitles: Record<string, string>[]; year: number; contentRating: string }; }
+interface DexManga { id: string; attributes: { title: Record<string, string>; altTitles: Record<string, string>[]; year: number; contentRating: string; links?: Record<string, string> }; }
 interface DexChapter { id: string; attributes: { chapter: string | null; title: string | null; translatedLanguage: string; externalUrl: string | null; pages: number; isUnavailable?: boolean; readableAt: string }; relationships: { id: string; type: string; attributes?: { name?: string } }[]; }
 const cache = new Map<string, { until: number; data: unknown }>();
 const inflight = new Map<string, Promise<unknown>>();
@@ -34,7 +34,10 @@ async function dex<T>(path: string, ttl = 5 * 60_000): Promise<T> {
 }
 async function matchManga(media: CatalogTitle): Promise<string | null> {
   const p = new URLSearchParams({ title: media.title, limit: "20", "contentRating[]": "safe" });
+  p.append("contentRating[]", "suggestive");
   const result = await dex<{ data: DexManga[] }>(`manga?${p}`);
+  const mal = await getExternalCatalogId("manga", media.id, "myanimelist/manga");
+  if (mal) { const exact = result.data.filter(item => item.attributes.links?.mal === mal); if (exact.length === 1) return exact[0].id; }
   const names = new Set([media.title, media.originalTitle, ...media.aliases].map(normalizeName));
   const matches = result.data.filter(item => Object.values(item.attributes.title).concat(...item.attributes.altTitles.map(Object.values)).some(title => names.has(normalizeName(title))));
   if (matches.length === 1) return matches[0].id;

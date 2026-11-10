@@ -142,7 +142,8 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
             <p className="mt-2 text-sm text-zinc-500">{media.originalTitle}</p>
           )}
           <div className="mt-5 flex flex-wrap gap-3">
-            <Button onClick={startTogether}>
+            <ButtonLink href="#episodes">{kind === "anime" ? "Watch" : "Read"}</ButtonLink>
+            <Button variant="ghost" onClick={startTogether}>
               <Users className="size-4" />
               {kind === "anime" ? "Watch together" : "Read together"}
             </Button>
