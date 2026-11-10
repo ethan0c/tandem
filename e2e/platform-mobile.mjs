@@ -93,7 +93,7 @@ async function geometry(page, label) {
     [],
     `${label}: icons must remain inside buttons`,
   );
-  const nav = page.locator(".platform-nav");
+  const nav = page.locator(".platform-nav:visible");
   if (await nav.count()) {
     const bounds = await nav.locator("a").evaluateAll((links) =>
       links.map((a) => {
@@ -170,7 +170,7 @@ try {
     page.on("pageerror", (error) => errors.push(`${width}: ${error.message}`));
     for (const path of paths) {
       await page.goto(base + path);
-      await page.locator("h1").waitFor();
+      await page.locator("h1:visible").waitFor();
       await page.evaluate(() => document.fonts.ready);
       await page.waitForTimeout(450);
       await geometry(page, `${width} ${path}`);

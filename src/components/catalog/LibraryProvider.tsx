@@ -201,23 +201,23 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     let unsubscribeAuth: (() => void) | undefined;
     const unsubscribeClient = onSupabaseReady((client) => {
       const subscription = client.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
-      const next = session?.user || null;
-      if (next?.id === userRef.current?.id) {
-        if (_event === "INITIAL_SESSION") { persist(read(storageKey.current)); setReady(true); }
-        return;
-      }
-      ++syncGeneration.current;
-      userRef.current = next;
-      storageKey.current = next ? `${KEY}:${next.id}` : KEY;
-      outbox.current = readOutbox(storageKey.current);
-      setUser(next);
-      persist(read(storageKey.current));
-      setReady(true);
-      if (next) {
-        setNotice("Syncing your library…");
-        queueMicrotask(() => void sync());
-      } else setNotice("");
+        if (!mounted) return;
+        const next = session?.user || null;
+        if (next?.id === userRef.current?.id) {
+          if (_event === "INITIAL_SESSION") { persist(read(storageKey.current)); setReady(true); }
+          return;
+        }
+        ++syncGeneration.current;
+        userRef.current = next;
+        storageKey.current = next ? `${KEY}:${next.id}` : KEY;
+        outbox.current = readOutbox(storageKey.current);
+        setUser(next);
+        persist(read(storageKey.current));
+        setReady(true);
+        if (next) {
+          setNotice("Syncing your library…");
+          queueMicrotask(() => void sync());
+        } else setNotice("");
       });
       unsubscribeAuth = () => subscription.data.subscription.unsubscribe();
     });
