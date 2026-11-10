@@ -274,7 +274,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       entry.progress = Math.max(
         0,
         Math.min(
-          media.total || 1_000_000,
+          1_000_000,
           Number.isFinite(entry.progress) ? entry.progress : 0,
         ),
       );

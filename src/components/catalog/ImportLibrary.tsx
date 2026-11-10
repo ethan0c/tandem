@@ -11,6 +11,7 @@ import {
 import { matchTitle, parseBackup, parseLibraryText } from "@/lib/library";
 import { Button, ButtonLink } from "@/components/Button";
 import { useLibrary } from "./LibraryProvider";
+import { fetchPublicCatalog } from "@/lib/public-catalog-client";
 interface ReviewRow {
   name: string;
   progress: number;
@@ -18,6 +19,7 @@ interface ReviewRow {
   selected: boolean;
   candidates: CatalogTitle[];
   original?: LibraryEntry;
+  progressNote?: string;
 }
 export function ImportLibrary() {
   const [text, setText] = useState("");
@@ -25,6 +27,7 @@ export function ImportLibrary() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [reviewed, setReviewed] = useState(0);
   const { entries, importEntries } = useLibrary();
   const input = useRef<HTMLInputElement>(null);
   const generation = useRef(0);
@@ -52,37 +55,30 @@ export function ImportLibrary() {
         throw new Error(
           "No titles found. Paste one manga title per line, with an optional chapter number.",
         );
-      const next: ReviewRow[] = [];
-      for (const row of parsed) {
-        let media =
-          matchTitle(
-            row.title,
-            (seed as CatalogTitle[]).filter((t) => t.kind === "manga"),
-          ) || null;
-        let candidates: CatalogTitle[] = media ? [media] : [];
-        if (!media) {
+      const manga = (seed as CatalogTitle[]).filter((title) => title.kind === "manga");
+      const next: ReviewRow[] = parsed.map((row) => {
+        const media = matchTitle(row.title, manga) || null;
+        return { name: row.title, progress: row.progress, progressNote: row.progressNote, media, selected: !!media && !row.progressNote, candidates: media ? [media] : [] };
+      });
+      setRows(next);
+      setReviewed(next.filter((row) => row.media).length);
+      let cursor = 0;
+      // Keep the pasted order and show all recognized titles immediately. Limit lookup traffic.
+      await Promise.all(Array.from({ length: Math.min(3, next.length) }, async () => {
+        while (cursor < next.length && run === generation.current) {
+          const index = cursor++;
+          if (next[index].media) continue;
           try {
-            const response = await fetch(
-              `/api/catalog?kind=manga&q=${encodeURIComponent(row.title)}`,
-            );
-            if (response.ok) {
-              candidates = (await response.json()).items;
-              media = matchTitle(row.title, candidates) || null;
-            }
-          } catch {
-            /* Leave unmatched rows for manual review. */
-          }
+            const data = await fetchPublicCatalog<{ items: CatalogTitle[] }>(`/api/catalog?kind=manga&q=${encodeURIComponent(next[index].name)}`);
+            if (run !== generation.current) return;
+            const media = matchTitle(next[index].name, data.items) || null;
+            next[index] = { ...next[index], media, selected: !!media && !next[index].progressNote, candidates: (media ? [media, ...data.items.filter((item) => item.id !== media.id)] : data.items).slice(0, 10) };
+          } catch { /* Keep unavailable or ambiguous matches available for manual review. */ }
+          if (run !== generation.current) return;
+          setRows([...next]);
+          setReviewed((count) => count + 1);
         }
-        if (run !== generation.current) return;
-        next.push({
-          name: row.title,
-          progress: row.progress,
-          media,
-          selected: !!media,
-          candidates,
-        });
-        setRows([...next]);
-      }
+      }));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn’t read this library.");
     } finally {
@@ -93,14 +89,12 @@ export function ImportLibrary() {
     setBusy(true);
     setError("");
     try {
-      const response = await fetch(
+      const data = await fetchPublicCatalog<{ items: CatalogTitle[] }>(
         `/api/catalog?kind=manga&q=${encodeURIComponent(name)}`,
       );
-      if (!response.ok) throw new Error("Search unavailable. Try again.");
-      const data = await response.json();
       setRows((prev) =>
         prev!.map((row, i) =>
-          i === index ? { ...row, candidates: data.items } : row,
+          i === index ? { ...row, candidates: data.items.slice(0, 10) } : row,
         ),
       );
     } catch (e) {
@@ -117,7 +111,7 @@ export function ImportLibrary() {
       const existing =
         incoming.get(key) || entries.find((e) => mediaKey(e.media) === key);
       const progress = Math.min(
-        row.media.total || 1_000_000,
+        1_000_000,
         Math.max(existing?.progress || 0, row.progress),
       );
       incoming.set(key, {
@@ -176,8 +170,9 @@ export function ImportLibrary() {
             maxLength={100_000}
           />
           <p className="mt-3 text-xs leading-6 text-muted">
-            One title per line. Chapter numbers are optional. Up to 100 unique
-            titles per paste. You can also restore a Tandem JSON export.
+            Paste the whole Weeb Central subscriptions page, or one title per line.
+            We use Last Read, not Latest. Up to 100 unique titles per paste.
+            You can also restore a Tandem JSON export.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Button onClick={review} disabled={busy || !text.trim()}>
@@ -209,8 +204,8 @@ export function ImportLibrary() {
           <div className="mb-4 flex items-center justify-between gap-4">
             <h2 className="text-sm">
               {busy
-                ? `Finding matches… ${rows.length} reviewed`
-                : `${rows.filter((r) => r.selected && r.media).length} selected · ${rows.filter((r) => !r.media).length} need a match`}
+                ? `Finding matches… ${reviewed} of ${rows.length} checked`
+                : `${rows.length} titles · ${rows.filter((r) => r.selected && r.media).length} selected · ${rows.filter((r) => !r.media).length} need a match`}
             </h2>
             <Button
               size="sm"
@@ -230,7 +225,7 @@ export function ImportLibrary() {
                 key={index}
                 className="rounded-2xl border border-white/10 bg-white/[0.025] p-4"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-start gap-3">
                   <input
                     type="checkbox"
                     aria-label={`Import ${row.name}`}
@@ -248,7 +243,7 @@ export function ImportLibrary() {
                     className="size-4 accent-violet-500"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm">{row.name}</p>
+                    <p className="break-words text-sm">{row.name}</p>
                     <p
                       className={`mt-1 text-xs ${row.media ? "text-brand-300" : "text-amber-200"}`}
                     >
@@ -263,11 +258,12 @@ export function ImportLibrary() {
                         : ""}
                     </p>
                   </div>
-                  <label className="text-xs text-muted">
+                  <label className="flex w-full items-center justify-between text-xs text-muted sm:w-auto">
                     Chapter
                     <input
                       className="field ml-2 w-20 text-xs"
                       type="number"
+                      aria-label={`Chapter progress for ${row.name}`}
                       min="0"
                       max="1000000"
                       step="0.1"
@@ -278,7 +274,7 @@ export function ImportLibrary() {
                             i === index
                               ? {
                                   ...r,
-                                  progress: Math.max(0, Number(e.target.value)),
+                                  progress: Number.isFinite(e.target.valueAsNumber) ? Math.max(0, Math.min(1_000_000, e.target.valueAsNumber)) : 0,
                                 }
                               : r,
                           ),
@@ -287,6 +283,7 @@ export function ImportLibrary() {
                     />
                   </label>
                 </div>
+                {row.progressNote && <p className="mt-3 text-xs leading-6 text-amber-200">{row.progressNote}</p>}
                 <details className="mt-3 text-xs text-muted">
                   <summary className="cursor-pointer">
                     {row.media ? "Change match" : "Find a match"}
@@ -348,7 +345,9 @@ export function ImportLibrary() {
           </div>
           <p className="my-4 text-xs leading-6 text-muted">
             Only checked, matched titles will be imported. Existing progress is
-            kept if it’s further ahead. No chapters are downloaded.
+            kept if it’s further ahead, even when a catalog count is behind.
+            Release status does not mark a title as finished in your library.
+            No chapters are downloaded.
           </p>
           <Button
             onClick={finish}
