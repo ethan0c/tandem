@@ -15,6 +15,7 @@ export interface ContentCatalog {
   total: number;
   hasMore: boolean;
   notice?: string;
+  externalUrl?: string;
 }
 export interface ContentPlayback {
   source: string;

@@ -76,6 +76,11 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
               {content.data.notice}
             </p>
           )}
+          {content.data?.externalUrl && (
+            <ButtonLink href={content.data.externalUrl} variant="ghost" size="sm" className="mt-4">
+              Open {content.data.source} search <ArrowRight className="size-3.5" />
+            </ButtonLink>
+          )}
           {!!content.data?.units.length && (
             <label className="spoiler-toggle mb-4">
               <input type="checkbox" checked={showTitles} onChange={(event) => setRevealedFor(event.target.checked ? `${kind}:${id}` : "")} />

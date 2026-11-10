@@ -123,6 +123,7 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
             {catalog.data?.notice ||
               "Choose another source or return to the series."}
           </p>
+          {catalog.data?.externalUrl && <ButtonLink href={catalog.data.externalUrl} variant="ghost">Open {catalog.data.source} search</ButtonLink>}
           <ButtonLink href={titleHref({ kind, id })} variant="ghost">
             Back to series
           </ButtonLink>
@@ -133,7 +134,7 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
           <div className="viewer-content" aria-busy={changingUnit}>
             {changingUnit && <div className="viewer-loading-note" role="status">Opening {kind === "anime" ? "episode" : "chapter"}…</div>}
             <div inert={changingUnit} className={changingUnit ? "viewer-content-pending" : undefined}>
-              {media && kind === "anime" && playback.streams && <AnimePlayer key={`${playback.unit.id}:${retry}`} media={media} playback={playback} transitioning={changingUnit} onFailure={setFailure} />}
+              {media && kind === "anime" && (playback.streams || playback.embedUrl) && <AnimePlayer key={`${playback.unit.id}:${retry}`} media={media} playback={playback} transitioning={changingUnit} onFailure={setFailure} />}
               {media && kind === "manga" && playback.pages && <MangaReader key={`${playback.unit.id}:${retry}`} media={media} playback={playback} transitioning={changingUnit} settings={readingSettings} onSettings={setReadingSettings} onFailure={setFailure} />}
             </div>
           </div>

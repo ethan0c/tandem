@@ -26,7 +26,7 @@ async function sourceRequest<T>(url: string, html = false, ttl = 120_000, header
     cache: "no-store",
   });
   if (!response.ok) {
-    if (response.status === 403) throw new Error("The content source blocked Tandem's server (HTTP 403). Try again later or open the source site directly.");
+    if (response.status === 403) throw new Error("The content source blocked Tandem's server (HTTP 403). The source site may still work in your browser.");
     throw new Error(`The content source returned HTTP ${response.status}.`);
   }
   const value = html ? await response.text() : await response.json();

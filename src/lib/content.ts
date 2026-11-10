@@ -165,7 +165,8 @@ export async function getContentCatalog(
         if (connected) return connected;
       } catch (error) {
         return { media, source: "ReAnime", units: [], total: 0, hasMore: false,
-          notice: error instanceof Error ? error.message : "ReAnime is temporarily unavailable." };
+          notice: error instanceof Error ? error.message : "ReAnime is temporarily unavailable.",
+          externalUrl: "https://reanime.to/search" };
       }
     }
     return {
