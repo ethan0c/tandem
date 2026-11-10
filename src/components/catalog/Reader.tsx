@@ -246,7 +246,7 @@ function ReadingSession({
         ?.readingPosition
     : undefined;
   return (
-    <div className="relative">
+    <div className="reading-session relative">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="eyebrow">

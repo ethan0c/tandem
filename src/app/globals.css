@@ -551,6 +551,7 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
 .viewer-video { background: #000; border-radius: 12px; overflow: hidden; }
 .viewer-video video { display: block; width: 100%; max-height: 75svh; aspect-ratio: 16/9; object-fit: contain; }
 .reader-page { width: 100%; max-width: 850px; margin-inline: auto; }
+.reading-session { overflow-x: clip; min-width: 0; }
 .reader-page img { display: block; max-width: 100%; height: auto; margin-inline: auto; }
 .reader-page[data-mode="page"] img { max-height: 75svh; width: auto; object-fit: contain; }
 .reader-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
