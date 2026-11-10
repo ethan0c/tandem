@@ -194,7 +194,19 @@ export async function getProviders(id: string) {
     return [];
   }
 }
-export async function getExternalCatalogId(kind: MediaKind, id: string, site: string) {
-  try { const data = await request(`${kind}/${id}/mappings`); return (data.data as Resource[]).find(item => item.attributes.externalSite === site)?.attributes.externalId || null; }
-  catch { return null; }
+export async function getExternalCatalogId(
+  kind: MediaKind,
+  id: string,
+  site: string,
+) {
+  try {
+    const data = await request(`${kind}/${id}/mappings`);
+    return (
+      (data.data as Resource[]).find(
+        (item) => item.attributes.externalSite === site,
+      )?.attributes.externalId || null
+    );
+  } catch {
+    return null;
+  }
 }

@@ -4,11 +4,7 @@ import Image from "next/image";
 import { Bookmark, Check, Star } from "lucide-react";
 import { mediaKey, titleHref, type CatalogTitle } from "@/lib/catalog-types";
 import { useLibrary } from "./LibraryProvider";
-export function MediaCard({
-  media,
-}: {
-  media: CatalogTitle;
-}) {
+export function MediaCard({ media }: { media: CatalogTitle }) {
   const { entries, save, remove, ready } = useLibrary();
   const entry = entries.find((e) => mediaKey(e.media) === mediaKey(media));
   return (

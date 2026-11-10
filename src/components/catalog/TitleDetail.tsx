@@ -142,7 +142,9 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
             <p className="mt-2 text-sm text-zinc-500">{media.originalTitle}</p>
           )}
           <div className="mt-5 flex flex-wrap gap-3">
-            <ButtonLink href="#episodes">{kind === "anime" ? "Watch" : "Read"}</ButtonLink>
+            <ButtonLink href="#episodes">
+              {kind === "anime" ? "Watch" : "Read"}
+            </ButtonLink>
             <Button variant="ghost" onClick={startTogether}>
               <Users className="size-4" />
               {kind === "anime" ? "Watch together" : "Read together"}
@@ -175,7 +177,9 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
       </section>
       <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_320px]">
         <div>
-          <p className="mb-5 text-sm leading-7 text-zinc-400">{media.genres.slice(0, 8).join(" · ")}</p>
+          <p className="mb-5 text-sm leading-7 text-zinc-400">
+            {media.genres.slice(0, 8).join(" · ")}
+          </p>
           <h2 className="text-lg font-medium">The story</h2>
           <p className="mt-3 whitespace-pre-line text-sm leading-7 text-zinc-400">
             {media.synopsis}

@@ -68,7 +68,14 @@ export function Browse({ kind }: { kind: MediaKind }) {
   }
   return (
     <>
-      <div className="page-heading"><h1>{kind === "anime" ? "Anime" : "Manga"}</h1><p>{kind === "anime" ? "Find your next watch." : "Manga, manhwa, and manhua. Pick up a new story."}</p></div>
+      <div className="page-heading">
+        <h1>{kind === "anime" ? "Anime" : "Manga"}</h1>
+        <p>
+          {kind === "anime"
+            ? "Find your next watch."
+            : "Manga, manhwa, and manhua. Pick up a new story."}
+        </p>
+      </div>
       <div className="catalog-filters mt-7">
         <label className="catalog-search relative">
           <Search className="pointer-events-none absolute left-3 top-3 size-4 text-zinc-500" />
@@ -137,7 +144,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
             value={sort}
             onChange={(e) => change(setSort, e.target.value)}
           >
-            <option value="popular">Most popular</option>
+            <option value="popular">Popular</option>
             <option value="rating">Top rated</option>
             <option value="newest">Newest</option>
           </select>
@@ -204,7 +211,23 @@ export function Browse({ kind }: { kind: MediaKind }) {
           </Button>
         </div>
       )}
-      {kind === "anime" && <p className="mt-10 border-t border-white/10 pt-6 text-sm text-zinc-400"><Link href="/play/anime/4650" className="hover:text-white">Watch Namakura Gatana (1917) in Tandem →</Link></p>}
+      {kind === "anime" && (
+        <p className="mt-10 border-t border-white/10 pt-6 text-sm text-zinc-400">
+          <Link href="/play/anime/4650" className="hover:text-white">
+            Watch Namakura Gatana (1917) in Tandem →
+          </Link>
+        </p>
+      )}
+      {kind === "manga" && (
+        <p className="mt-10 border-t border-white/10 pt-6 text-sm text-zinc-400">
+          <Link
+            href="/play/manga/24249?unit=ubunchu-12"
+            className="hover:text-white"
+          >
+            Read Ubunchu! in Tandem →
+          </Link>
+        </p>
+      )}
     </>
   );
 }

@@ -897,5 +897,26 @@
     "rating": 5.6,
     "slug": "namakura-katana",
     "trailer": null
+  },
+  {
+    "id": "24249",
+    "kind": "manga",
+    "title": "Ubunchu!",
+    "originalTitle": "Ubunchu!",
+    "aliases": [
+      "Ubunchu!",
+      "うぶんちゅ!"
+    ],
+    "synopsis": "Based on the Linux operating system variant Ubuntu, this \"slapstick school comedy,\" three high school students — the fervent UNIX user and club president Akane Kisaragi, the hardcore gal-game otaku vice-president Masato Midou, and the doujinshi-drawing Mac fan Risa Shiina — are learning how to use Ubuntu in their systems adminstration club.\n\n(Source: ANN)",
+    "poster": "https://media.kitsu.app/manga/poster_images/24249/medium.jpg",
+    "cover": "",
+    "genres": [],
+    "year": 2008,
+    "status": "finished",
+    "format": "manga",
+    "total": 18,
+    "rating": 7,
+    "slug": "ubunchu",
+    "trailer": null
   }
 ]

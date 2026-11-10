@@ -578,7 +578,7 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .discovery-hero { min-height: 300px; }
   .catalog-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .platform .field { font-size: 16px; }
-  .reader-toolbar > label { flex: 1; }
+  .reader-toolbar > label { flex: 1 1 180px; }
   .reader-toolbar select { width: 100%; }
   .library-row { padding: 14px; }
   .chapter-row { gap: 12px; }

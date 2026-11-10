@@ -13,4 +13,16 @@ async function ResolvedPage({
   return <TitleDetail key={`${kind}:${id}`} kind={kind} id={id} />;
 }
 
-export default function Page(props: { params: Promise<{ kind: string; id: string }> }) { return <Suspense fallback={<p className="py-16 text-sm text-zinc-400">Opening your story…</p>}><ResolvedPage {...props} /></Suspense>; }
+export default function Page(props: {
+  params: Promise<{ kind: string; id: string }>;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <p className="py-16 text-sm text-zinc-400">Opening your story…</p>
+      }
+    >
+      <ResolvedPage {...props} />
+    </Suspense>
+  );
+}

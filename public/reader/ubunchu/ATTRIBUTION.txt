@@ -1,0 +1,18 @@
+Ubunchu! Chapter 12
+
+First printed in Ubuntu Magazine Japan; published by ASCII Media Works Inc.
+Created by Hiroshi Seo (aerialline.com).
+English translation: Tarek Saier (sirtetris.com).
+Cleaning and typesetting: PublicDesert (github.com/publicdesert).
+
+Original manga: CC BY-NC-SA 2.1 JP
+https://creativecommons.org/licenses/by-nc-sa/2.1/jp/deed.en
+
+English translation: CC BY-NC-SA 4.0
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+Full English translation license: LICENSE.txt in this directory.
+
+Source: https://github.com/publicdesert/ubunchu_english/tree/main/Chapter_12
+The published English CBZ was extracted and resized to 1500px-wide WebP images
+for responsive reading. No dialogue or artwork was added or removed.
+This copy is provided for non-commercial use under the licenses above.

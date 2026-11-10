@@ -165,7 +165,12 @@ function ReadingSession({
         title: params.get("title") || "Our manga",
       });
       const unit = params.get("unit");
-      if (unit && /^[a-f0-9-]{36}$/i.test(unit)) changeReading({ unit, chapter: Number(params.get("chapter")) || 1, page: 0 });
+      if (unit && /^[a-z0-9][a-z0-9_-]{0,79}$/i.test(unit))
+        changeReading({
+          unit,
+          chapter: Number(params.get("chapter")) || 1,
+          page: 0,
+        });
     }
   }, [query, isHost, room.status, room.story, changeStory, changeReading]);
   const storyId = room.story?.id;
@@ -173,16 +178,36 @@ function ReadingSession({
     if (!storyId || !room.reading.unit) return;
     const controller = new AbortController();
     const load = async () => {
-      setLoadingPages(true); setError("");
+      setLoadingPages(true);
+      setError("");
       try {
-        const response = await fetch(`/api/content?${new URLSearchParams({ kind: "manga", id: storyId, unit: room.reading.unit! })}`, { signal: controller.signal });
+        const response = await fetch(
+          `/api/content?${new URLSearchParams({ kind: "manga", id: storyId, unit: room.reading.unit! })}`,
+          { signal: controller.signal },
+        );
         const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "The chapter couldn’t be loaded.");
-        if (!controller.signal.aborted) setPages(data.pages.map((url: string, i: number) => ({ url, name: `Page ${i + 1}` })));
-      } catch (e) { if (!controller.signal.aborted) { setPages([]); setError(e instanceof Error ? e.message : "The chapter couldn’t be loaded."); } }
-      finally { if (!controller.signal.aborted) setLoadingPages(false); }
+        if (!response.ok)
+          throw new Error(data.error || "The chapter couldn’t be loaded.");
+        if (!controller.signal.aborted)
+          setPages(
+            data.pages.map((url: string, i: number) => ({
+              url,
+              name: `Page ${i + 1}`,
+            })),
+          );
+      } catch (e) {
+        if (!controller.signal.aborted) {
+          setPages([]);
+          setError(
+            e instanceof Error ? e.message : "The chapter couldn’t be loaded.",
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoadingPages(false);
+      }
     };
-    void load(); return () => controller.abort();
+    void load();
+    return () => controller.abort();
   }, [storyId, room.reading.unit]);
   useEffect(() => {
     if (!room.story) return;
@@ -199,7 +224,9 @@ function ReadingSession({
   }, [room.story]);
   useEffect(
     () => () => {
-      pages.forEach((p) => { if (p.url.startsWith("blob:")) URL.revokeObjectURL(p.url); });
+      pages.forEach((p) => {
+        if (p.url.startsWith("blob:")) URL.revokeObjectURL(p.url);
+      });
     },
     [pages],
   );
@@ -218,7 +245,15 @@ function ReadingSession({
       status: "current",
       readingPosition: { chapter: room.reading.chapter, page },
     });
-  }, [ready, media, pages.length, page, room.reading.chapter, save, loadingPages]);
+  }, [
+    ready,
+    media,
+    pages.length,
+    page,
+    room.reading.chapter,
+    save,
+    loadingPages,
+  ]);
   function go(next: number) {
     if (!canNavigate || next < 0 || next >= pages.length) return;
     if (follow) changeReading({ page: next });
@@ -317,7 +352,43 @@ function ReadingSession({
         </div>
       </div>
       <div className="reader-toolbar mt-6 border-y border-white/10 py-4">
-        {!!chapters.data?.units.length && <label><span className="sr-only">Shared chapter</span><select className="field max-w-full" value={room.reading.unit || ""} disabled={!canNavigate || !follow || room.status !== "joined"} onChange={e => { const unit = chapters.data!.units.find(u => u.id === e.target.value); if (unit) changeReading({ unit: unit.id, chapter: Math.max(1, unit.number), page: 0 }); }}><option value="">Choose a chapter</option>{room.reading.unit && !chapters.data.units.some(u => u.id === room.reading.unit) && <option value={room.reading.unit}>Chapter {room.reading.chapter}</option>}{chapters.data.units.map(unit => <option value={unit.id} key={unit.id}>{unit.label}{unit.group ? ` · ${unit.group}` : ""}</option>)}</select></label>}
+        {!!chapters.data?.units.length && (
+          <label>
+            <span className="sr-only">Shared chapter</span>
+            <select
+              className="field max-w-full"
+              value={room.reading.unit || ""}
+              disabled={!canNavigate || !follow || room.status !== "joined"}
+              onChange={(e) => {
+                const unit = chapters.data!.units.find(
+                  (u) => u.id === e.target.value,
+                );
+                if (unit)
+                  changeReading({
+                    unit: unit.id,
+                    chapter: Math.max(1, unit.number),
+                    page: 0,
+                  });
+              }}
+            >
+              <option value="">Choose a chapter</option>
+              {room.reading.unit &&
+                !chapters.data.units.some(
+                  (u) => u.id === room.reading.unit,
+                ) && (
+                  <option value={room.reading.unit}>
+                    Chapter {room.reading.chapter}
+                  </option>
+                )}
+              {chapters.data.units.map((unit) => (
+                <option value={unit.id} key={unit.id}>
+                  {unit.label}
+                  {unit.group ? ` · ${unit.group}` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label className="flex items-center gap-2 text-xs text-zinc-400">
           Chapter
           <input
@@ -327,7 +398,12 @@ function ReadingSession({
             max="1000000"
             step="0.1"
             value={room.reading.chapter}
-            disabled={!!room.reading.unit || !canNavigate || !follow || room.status !== "joined"}
+            disabled={
+              !!room.reading.unit ||
+              !canNavigate ||
+              !follow ||
+              room.status !== "joined"
+            }
             onChange={(e) =>
               changeReading({ chapter: Number(e.target.value), page: 0 })
             }
@@ -430,7 +506,11 @@ function ReadingSession({
             : "Chapter and page changes are shared. Everyone opens their own images in the same order."
           : "You’re on your own page. Switch back to sync to catch up."}
       </p>
-      {loadingPages ? <p className="py-16 text-center text-sm text-zinc-400" role="status">Loading shared chapter…</p> : pages.length ? (
+      {loadingPages ? (
+        <p className="py-16 text-center text-sm text-zinc-400" role="status">
+          Loading shared chapter…
+        </p>
+      ) : pages.length ? (
         <>
           <div className="reader-page" data-mode={mode} ref={canvas}>
             {mode === "page" ? (
