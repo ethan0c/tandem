@@ -1,4 +1,4 @@
-import { chromium } from "playwright";
+import { chromium, webkit } from "playwright";
 import assert from "node:assert/strict";
 import { readFileSync, mkdirSync } from "node:fs";
 const base = process.env.BASE_URL || "http://localhost:3000";
@@ -8,10 +8,11 @@ const seed = JSON.parse(
 const output =
   process.env.SCREENSHOT_DIR || "/private/tmp/tandem-mobile-checks";
 mkdirSync(output, { recursive: true });
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const engine = process.env.TEST_ENGINE || "chromium";
+const browser = engine === "webkit" ? await webkit.launch({ headless: true }) : await chromium.launch({ channel: "chrome", headless: true });
 const errors = [];
 let checked = 0;
-const sizes = [320, 360, 375, 390, 414, 430, 768, 1024, 1440];
+const sizes = (process.env.TEST_WIDTHS || "320,360,375,390,414,430,768,1024,1440").split(",").map(Number);
 const paths = [
   "/",
   "/discover",
@@ -184,11 +185,12 @@ try {
       .getByRole("button", { name: "Import selected titles" })
       .waitFor();
     await geometry(page, `${width} import review`);
-    await page.goto(base + "/read/mobile-check-" + width);
+    await page.goto(base + "/read/mobile-" + Date.now().toString(36) + "-" + width);
     await page
       .getByRole("textbox", { name: "Your name" })
       .fill("Mobile tester");
     await page.getByRole("button", { name: "Join reading room" }).click();
+    await page.waitForFunction(() => document.querySelector(".reading-session .eyebrow")?.textContent.includes("1 here"));
     await page
       .getByRole("button", { name: "Choose images", exact: true })
       .waitFor();
@@ -202,10 +204,7 @@ try {
     await geometry(page, `${width} reader controls`);
     const next = page.getByRole("button", { name: "Next page", exact: true });
     await next.click();
-    assert.equal(
-      await page.getByRole("spinbutton", { name: "Page number" }).inputValue(),
-      "2",
-    );
+    await page.waitForFunction(() => document.querySelector('input[aria-label="Page number"]')?.value === "2", { timeout: 5000 });
     await geometry(page, `${width} reader next page`);
     if (width === 320 || width === 390)
       await page.screenshot({
