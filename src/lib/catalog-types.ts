@@ -17,7 +17,12 @@ export interface CatalogTitle {
   slug: string;
   trailer: string | null;
 }
-export type LibraryStatus = "current" | "planned" | "completed" | "paused" | "dropped";
+export type LibraryStatus =
+  | "current"
+  | "planned"
+  | "completed"
+  | "paused"
+  | "dropped";
 export interface LibraryEntry {
   media: CatalogTitle;
   status: LibraryStatus;
@@ -27,8 +32,16 @@ export interface LibraryEntry {
   updatedAt: number;
   readingPosition?: { chapter: number; page: number };
 }
-export function mediaKey(media: Pick<CatalogTitle, "kind" | "id">) { return `${media.kind}:${media.id}`; }
-export function titleHref(media: Pick<CatalogTitle, "kind" | "id">) { return `/title/${media.kind}/${media.id}`; }
+export function mediaKey(media: Pick<CatalogTitle, "kind" | "id">) {
+  return `${media.kind}:${media.id}`;
+}
+export function titleHref(media: Pick<CatalogTitle, "kind" | "id">) {
+  return `/title/${media.kind}/${media.id}`;
+}
 export const libraryStatuses: Record<LibraryStatus, string> = {
-  current: "In progress", planned: "For later", completed: "Completed", paused: "Paused", dropped: "Dropped",
+  current: "In progress",
+  planned: "For later",
+  completed: "Completed",
+  paused: "Paused",
+  dropped: "Dropped",
 };

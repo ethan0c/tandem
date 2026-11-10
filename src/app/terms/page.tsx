@@ -85,7 +85,7 @@ export default function Terms() {
       </header>
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-16">
         <h1 className="font-display text-4xl font-medium tracking-[-0.03em]">Terms</h1>
-        <p className="mt-3 font-sans text-xs text-zinc-500">Last updated 14 October 2026</p>
+        <p className="mt-3 font-sans text-xs text-zinc-500">Last updated 10 November 2026</p>
         {sections.map((s) => (
           <section key={s.title} className="mt-10">
             <h2 className="font-display text-xl font-medium">{s.title}</h2>

@@ -1,5 +1,9 @@
 # Tandem
 
+The anime and manga platform starts at `/discover`, with catalog browsing, personal libraries, imports,
+Supabase accounts, and shared reading rooms. See [platform implementation](docs/platform-implementation.md)
+for setup, checks, content-source limits, and the remaining roadmap.
+
 Watch anime together, face to face. Tandem is a watch-party app for two: synced video playback and a peer-to-peer
 video call in one tab, with your partner's camera floating over the show.
 

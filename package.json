@@ -14,7 +14,8 @@
     "test": "tsx --test tests/*.test.ts",
     "discord:register": "tsx scripts/discord/register.mjs",
     "turn:check": "tsx scripts/turn/check.mjs",
-    "e2e:extension": "node e2e/extension-live.mjs"
+    "e2e:extension": "node e2e/extension-live.mjs",
+    "e2e:reading": "node e2e/reading-sync.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",
