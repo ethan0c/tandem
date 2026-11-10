@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FolderOpen, MonitorUp, X } from "lucide-react";
+import { FolderOpen, MonitorPlay, MonitorUp, X } from "lucide-react";
+import { AnimePicker } from "./AnimePicker";
+import type { RoomStory } from "@/lib/reading";
 
 interface Props {
+  onStory?: (story: RoomStory) => void;
   open: boolean;
   onClose: () => void;
   onFile: (file: File) => void;
@@ -12,8 +15,8 @@ interface Props {
   screenError: string | null;
 }
 
-export function SourceDialog({ open, onClose, onFile, onScreen, screenError }: Props) {
-  const [tab, setTab] = useState<"screen" | "file">("screen");
+export function SourceDialog({ open, onClose, onFile, onScreen, screenError, onStory }: Props) {
+  const [tab, setTab] = useState<"screen" | "file" | "anime">("screen");
   const [sharing, setSharing] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -42,6 +45,7 @@ export function SourceDialog({ open, onClose, onFile, onScreen, screenError }: P
           </button>
         </div>
         <div className="flex gap-1 p-2">
+          {onStory && <TabButton active={tab === "anime"} onClick={() => setTab("anime")} icon={<MonitorPlay className="size-4" />}>Anime</TabButton>}
           <TabButton active={tab === "screen"} onClick={() => setTab("screen")} icon={<MonitorUp className="size-4" />}>
             Share tab
           </TabButton>
@@ -50,7 +54,7 @@ export function SourceDialog({ open, onClose, onFile, onScreen, screenError }: P
           </TabButton>
         </div>
         <div className="px-5 pb-5 pt-2">
-          {tab === "screen" ? (
+          {tab === "anime" && onStory ? <AnimePicker onPick={story => { onStory(story); setTab("screen"); }} /> : tab === "screen" ? (
             <div className="space-y-3">
               <p className="text-sm text-zinc-400">
                 Let everyone watch what is playing in your browser. Choose the tab with your show and turn on{" "}

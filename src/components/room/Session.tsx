@@ -42,6 +42,13 @@ export function Session({ roomId, name, localStream }: Props) {
   // Reactions arrive with a member id; this turns it into "You" or their name (members as of now).
   const nameRef = useRef<(id: string) => string>(() => "");
   const room = useRoom(roomId, name, { onMessage: bump, onReaction: (r) => floating.add(r.id, r.emoji, nameRef.current(r.from)) });
+  const storyQuery = useClientValue(() => location.search, "");
+  const { changeStory } = room;
+  useEffect(() => {
+    if (room.status !== "joined" || room.selfId !== room.hostId || room.story) return;
+    const params = new URLSearchParams(storyQuery);
+    if (params.get("media") && params.get("title")) changeStory({ id: params.get("media")!, title: params.get("title")!, kind: "anime" });
+  }, [storyQuery, room.status, room.selfId, room.hostId, room.story, changeStory]);
   useEffect(() => {
     nameRef.current = (id) => (id === room.selfId ? "You" : (room.members.find((m) => m.id === id)?.name ?? "Guest"));
   });
@@ -168,6 +175,7 @@ export function Session({ roomId, name, localStream }: Props) {
           chat={{ open: chatOpen, unread, onToggle: toggleChat }}
         />
 
+        {room.story && !room.source && <div className="absolute inset-x-4 top-20 z-20 text-center"><p className="text-xs text-brand-300">Tonight’s pick · {room.story.title}</p><a href={`https://www.crunchyroll.com/search?q=${encodeURIComponent(room.story.title)}`} target="_blank" rel="noreferrer" className="mt-2 inline-block text-[11px] text-zinc-400 hover:text-white">Find on Crunchyroll ↗</a></div>}
         {room.source?.kind === "screen" ? (
           <ScreenStage
             isSharer={screen.isSharer}
@@ -232,6 +240,7 @@ export function Session({ roomId, name, localStream }: Props) {
       />
 
       <SourceDialog
+        onStory={room.selfId === room.hostId ? room.changeStory : undefined}
         open={sourceOpen}
         onClose={() => setSourceOpen(false)}
         onFile={(file) => {

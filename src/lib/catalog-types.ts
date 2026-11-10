@@ -25,6 +25,7 @@ export interface LibraryEntry {
   favorite: boolean;
   subscribed: boolean;
   updatedAt: number;
+  readingPosition?: { chapter: number; page: number };
 }
 export function mediaKey(media: Pick<CatalogTitle, "kind" | "id">) { return `${media.kind}:${media.id}`; }
 export function titleHref(media: Pick<CatalogTitle, "kind" | "id">) { return `/title/${media.kind}/${media.id}`; }
