@@ -235,7 +235,7 @@ function ReadingSession({
     if (mode === "scroll" && pages[page])
       canvas.current
         ?.querySelector(`[data-page="${page}"]`)
-        ?.scrollIntoView({ block: "start" });
+        ?.scrollIntoView({ block: "start", behavior: "instant" });
   }, [page, mode, pages]);
   useEffect(() => {
     if (!ready || !media || !pages.length || loadingPages) return;

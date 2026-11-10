@@ -19,7 +19,9 @@
     "e2e:mobile": "node e2e/platform-mobile.mjs",
     "e2e:content": "node e2e/content.mjs",
     "e2e:viewer": "node e2e/viewer-controls.mjs",
-    "e2e:loading": "node e2e/loading.mjs"
+    "e2e:loading": "node e2e/loading.mjs",
+    "e2e:reader-performance": "node e2e/reader-performance.mjs",
+    "e2e:contrast": "node e2e/contrast.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

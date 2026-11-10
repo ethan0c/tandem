@@ -38,6 +38,8 @@ async function audit(path) {
       const range = document.createRange(); range.selectNodeContents(node);
       for (const box of range.getClientRects()) {
         if (box.width < 3 || box.height < 3 || box.top < 0 || box.bottom > innerHeight || box.left < 0 || box.right > innerWidth) continue;
+        const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+        if (hit && !el.contains(hit)) continue;
         result.push({ text: text.slice(0,100), className: String(el.className), color: rgba(style.color), opacity, size: parseFloat(style.fontSize), weight: parseFloat(style.fontWeight), x: box.x, y: box.y, w: box.width, h: box.height });
       }
     }
@@ -45,6 +47,7 @@ async function audit(path) {
       if (el.value || el.closest('[inert]')) continue;
       const box = el.getBoundingClientRect(), style = getComputedStyle(el,'::placeholder');
       if (box.top < 0 || box.bottom > innerHeight || !box.height) continue;
+      if (!el.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2))) continue;
       result.push({ text: `Placeholder: ${el.placeholder}`, className: el.className, color: rgba(style.color), opacity: Number(style.opacity), size: parseFloat(style.fontSize) || parseFloat(getComputedStyle(el).fontSize), weight: 400, x: box.x + 14, y: box.y + 8, w: Math.max(8,box.width-60), h: box.height-16 });
     }
     return result;
@@ -55,18 +58,19 @@ async function audit(path) {
   await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
   const { data, info } = await sharp(screenshot).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   for (const item of candidates) {
-    let ratio = Infinity;
+    let ratio = Infinity, worstBg, worstPoint;
     for (const f of [.1,.5,.9]) {
       const x = Math.min(info.width-1,Math.max(0,Math.round(item.x+item.w*f))), y = Math.min(info.height-1,Math.max(0,Math.round(item.y+item.h/2)));
       const offset = (y*info.width+x)*info.channels, bg = [...data.subarray(offset,offset+3)];
       const alpha = item.color[3]/255*item.opacity;
       const fg = bg.map((v,i)=>item.color[i]*alpha+v*(1-alpha));
       const l1=luminance(fg), l2=luminance(bg);
-      ratio=Math.min(ratio,(Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05));
+      const sample=(Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05);
+      if(sample<ratio){ratio=sample;worstBg=bg;worstPoint=[x,y]}
     }
     const threshold = item.size >= 24 || (item.size >= 18.66 && item.weight >= 700) ? 3 : 4.5;
-    const row = { path, text:item.text, className:item.className, ratio:Math.round(ratio*100)/100, required:threshold };
-    all.push(row); if (ratio < threshold) failures.push(row);
+    const row = { path, text:item.text, className:item.className, ratio:Math.round(ratio*100)/100, required:threshold, background:worstBg, point:worstPoint, foreground:item.color, opacity:item.opacity };
+    all.push(row); if (ratio < threshold) { failures.push(row); writeFileSync(`/private/tmp/tandem-contrast-bg-${path.split("?")[0].replaceAll("/","_")}.png`,screenshot); }
   }
 }
 try {

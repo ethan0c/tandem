@@ -53,7 +53,7 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
   function go(next: number) {
     if (!Number.isInteger(next) || next < 0 || next >= pages.length) return;
     setPosition(next);
-    if (settings.mode === "scroll") canvas.current?.querySelector(`[data-page="${next}"]`)?.scrollIntoView({ block: "start" });
+    if (settings.mode === "scroll") canvas.current?.querySelector(`[data-page="${next}"]`)?.scrollIntoView({ block: "start", behavior: "instant" });
   }
   useEffect(() => {
     const loader = createPagePreloader();
@@ -76,15 +76,16 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
 
   useEffect(() => {
     if (settings.mode !== "scroll" || !canvas.current) return;
-    canvas.current.querySelector(`[data-page="${currentPage.current}"]`)?.scrollIntoView({ block: "start" });
+    canvas.current.querySelector(`[data-page="${currentPage.current}"]`)?.scrollIntoView({ block: "start", behavior: "instant" });
     const near = new Set<number>();
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
     const pageLoader = new IntersectionObserver((observed) => {
       for (const item of observed) {
         const index = Number(item.target.getAttribute("data-page"));
         if (item.isIntersecting) near.add(index); else near.delete(index);
       }
       setNearPages(new Set(near));
-    }, { rootMargin: "100% 0px", threshold: 0 });
+    }, { rootMargin: saveData ? "0px" : "100% 0px", threshold: 0 });
     // A narrow viewport band follows the page being read, rather than the last loaded image.
     const visible = new Set<number>();
     const observer = new IntersectionObserver((observed) => {
@@ -131,7 +132,7 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
         const next = currentPage.current + ((event.key === "ArrowRight") === (settings.direction === "ltr") ? 1 : -1);
         if (next < 0 || next >= pages.length) return;
         setPosition(next);
-        if (settings.mode === "scroll") canvas.current?.querySelector(`[data-page="${next}"]`)?.scrollIntoView({ block: "start" });
+        if (settings.mode === "scroll") canvas.current?.querySelector(`[data-page="${next}"]`)?.scrollIntoView({ block: "start", behavior: "instant" });
       }
     };
     window.addEventListener("keydown", key);
