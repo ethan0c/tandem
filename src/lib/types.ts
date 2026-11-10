@@ -1,4 +1,5 @@
 /** Shared contracts between the Socket.IO server and the browser client. */
+import type { ReadingState, RoomStory } from "./reading";
 
 export type Source =
   | { kind: "file"; name: string }
@@ -50,6 +51,8 @@ export const CHAT_MAX_LENGTH = 500;
 export const CHAT_HISTORY = 100;
 
 export interface RoomState {
+  reading?: ReadingState;
+  story?: RoomStory;
   id: string;
   hostId: string | null;
   members: Member[];
@@ -82,6 +85,8 @@ export type ScreenSignal =
   | { type: "candidate"; candidate: RTCIceCandidateInit };
 
 export interface ServerToClientEvents {
+  "reading:state": (state: ReadingState) => void;
+  "story:state": (story: RoomStory) => void;
   "member:joined": (member: Member) => void;
   "member:left": (payload: { id: string; hostId: string | null }) => void;
   "member:replaced": (payload: { id: string; member: Member; hostId: string | null }) => void;
@@ -103,6 +108,8 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
+  "reading:update": (patch: Partial<ReadingState>) => void;
+  "story:update": (story: RoomStory) => void;
   "room:join": (
     payload: { roomId: string; name: string; clientId: string; tabId?: string; formerTabId?: string },
     ack: (res: JoinAck) => void,

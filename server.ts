@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
+import { initialReading, readingUpdate, validStory } from "./src/lib/reading";
 import {
   CHAT_HISTORY,
   CHAT_MAX_LENGTH,
@@ -43,6 +44,7 @@ const tabOfMember = new Map<string, string>();
 const pendingLeave = new Map<string, { roomId: string; timer: NodeJS.Timeout }>();
 
 interface SocketData {
+  readingTimes?: number[];
   roomId?: string;
   clientId?: string;
   /** Send times of this socket's recent chat messages, for the flood check. */
@@ -280,6 +282,28 @@ app.prepare().then(() => {
     });
 
     socket.on("time:ping", (ack) => ack(Date.now()));
+
+    socket.on("reading:update", (patch) => {
+      const { roomId, clientId } = socket.data;
+      const room = roomId ? rooms.get(roomId) : undefined;
+      if (!room || !clientId || socketOf.get(clientId) !== socket.id) return;
+      const now = Date.now();
+      const recent = (socket.data.readingTimes ?? []).filter(t => now - t < 1000);
+      if (recent.length >= 20) return;
+      socket.data.readingTimes = [...recent, now];
+      const next = readingUpdate(room.reading ?? initialReading, patch, room.hostId === clientId);
+      if (!next) return;
+      room.reading = next;
+      io.to(roomId!).emit("reading:state", next);
+    });
+    socket.on("story:update", (value) => {
+      const { roomId, clientId } = socket.data;
+      const room = roomId ? rooms.get(roomId) : undefined;
+      const story = validStory(value);
+      if (!room || !clientId || !story || room.hostId !== clientId || socketOf.get(clientId) !== socket.id) return;
+      room.story = story;
+      io.to(roomId!).emit("story:state", story);
+    });
 
     socket.on("sync:update", ({ playing, time, reason }) => {
       const { roomId, clientId } = socket.data;

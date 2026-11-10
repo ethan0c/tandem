@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { playChime } from "@/lib/chime";
 import { activateSession, finishSession, rememberRoom } from "@/lib/last-room";
 import { clientId, formerTabId, tabId, getSocket, sendGoodbye, type AppSocket } from "@/lib/socket";
+import { initialReading, type ReadingState, type RoomStory } from "@/lib/reading";
 import {
   CHAT_HISTORY,
   type ChatMessage,
@@ -34,6 +35,8 @@ interface Options {
 }
 
 export function useRoom(roomId: string, name: string | null, options?: Options) {
+  const [reading, setReading] = useState<ReadingState>(initialReading);
+  const [story, setStory] = useState<RoomStory | null>(null);
   const [status, setStatus] = useState<RoomStatus>("connecting");
   const [selfId, setSelfId] = useState<string | null>(null);
   const [hostId, setHostId] = useState<string | null>(null);
@@ -152,6 +155,8 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
         heldSource.current = null;
         setSelfId(ack.selfId);
         setHostId(ack.state.hostId);
+        setReading(ack.state.reading ?? initialReading);
+        setStory(ack.state.story ?? null);
         setMembers(ack.state.members);
         // The room's recent chat: everything we missed while away, or the history for a late joiner.
         setMessages(ack.state.chat ?? []);
@@ -230,6 +235,8 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
     };
 
     socket.on("member:joined", onJoined);
+    socket.on("reading:state", setReading);
+    socket.on("story:state", setStory);
     socket.on("member:left", onLeft);
     socket.on("member:replaced", onReplaced);
     socket.on("sync:state", onSync);
@@ -259,6 +266,8 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
       window.removeEventListener("offline", onOffline);
       window.removeEventListener("online", onOnline);
       socket.off("member:joined", onJoined);
+      socket.off("reading:state", setReading);
+      socket.off("story:state", setStory);
       socket.off("member:left", onLeft);
       socket.off("member:replaced", onReplaced);
       socket.off("sync:state", onSync);
@@ -304,9 +313,12 @@ export function useRoom(roomId: string, name: string | null, options?: Options) 
   }, []);
 
   /** Take the room back from the other tab. */
+  const changeReading = useCallback((patch: Partial<ReadingState>) => { if (joinedRef.current) socketRef.current?.emit("reading:update", patch); }, []);
+  const changeStory = useCallback((next: RoomStory) => { if (joinedRef.current) socketRef.current?.emit("story:update", next); }, []);
   const useHere = useCallback(() => reclaimRef.current(), []);
 
   return {
+    reading, story, changeReading, changeStory,
     status,
     takenOver,
     useHere,
