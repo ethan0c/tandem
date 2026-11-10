@@ -1,9 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, CalendarHeart, Clapperboard, Heart, History, Smartphone, Video } from "lucide-react";
+import { CalendarHeart, Clapperboard, Heart, History, Smartphone, Video } from "lucide-react";
 import { PlatformHeader } from "@/components/catalog/PlatformShell";
 import { LibraryProvider } from "@/components/catalog/LibraryProvider";
-import { Logo } from "@/components/Logo";
 import { ButtonLink } from "@/components/Button";
 import { Footer } from "@/components/landing/Footer";
 import { StartRoom } from "@/components/landing/StartRoom";
@@ -12,7 +11,7 @@ import { RotatingHeadline } from "@/components/landing/RotatingHeadline";
 import { RejoinRoom } from "@/components/landing/RejoinRoom";
 import { Preview } from "@/components/landing/Preview";
 import { IntroLoader } from "@/components/landing/IntroLoader";
-import { DISCORD_ADD_URL, EXTENSION_URL, GITHUB, SITE_URL } from "@/lib/links";
+import { DISCORD_ADD_URL, EXTENSION_URL, SITE_URL } from "@/lib/links";
 
 const madeForTwo = [
   {

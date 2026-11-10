@@ -37,7 +37,7 @@ export function StartRoom({ tone = "light" }: { tone?: "light" | "dark" | "brand
     <div className="flex w-full max-w-xl flex-col items-stretch gap-3 sm:flex-row">
       <Button size="lg" onClick={create} disabled={creating} className="sm:min-w-48">
         {creating ? "Creating…" : "Create a room"}
-        <ChevronRight className="-mr-1 size-5" strokeWidth={2.5} />
+        <ChevronRight className="size-5 shrink-0" strokeWidth={2.5} />
       </Button>
       <form onSubmit={join} className="flex flex-1 flex-col gap-1">
         <div

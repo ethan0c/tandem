@@ -104,6 +104,7 @@ input[type="range"].tandem-range:hover::-webkit-slider-thumb {
   --btn-lift: 3px;
   position: relative;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
@@ -191,7 +192,7 @@ html { scroll-behavior: smooth; }
 }
 .room-link-field { transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease; }
 .room-link-field:focus-within { box-shadow: 0 0 0 4px rgb(255 255 255 / 0.08); }
-.btn3d svg { transition: transform 180ms ease; }
+.btn3d svg { display: block; flex-shrink: 0; transition: transform 180ms ease; }
 .form-error { animation: fade-up 180ms ease-out both; }
 .landing nav:not(.hero-nav) a { position: relative; }
 .landing nav:not(.hero-nav) a::after {
@@ -534,6 +535,7 @@ textarea.field { height: auto; padding-block: 12px; }
 .field::placeholder { color: #71717a; }
 .field:focus { border-color: var(--color-brand-500); box-shadow: 0 0 0 3px rgb(139 92 246 / 0.12); }
 .field option { background: #1a171f; color: #e4e4e7; }
+select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: 16px 16px; background-position: right 12px center; }
 .catalog-filters { display: grid; grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(130px, 1fr)) 84px minmax(140px, 1fr); gap: 12px; }
 .catalog-filters :is(input, select) { width: 100%; }
 .empty-state { display: flex; min-height: 300px; flex-direction: column; align-items: center; justify-content: center; gap: 18px; border: 1px dashed rgb(255 255 255 / 0.12); border-radius: 16px; padding: 32px 20px; text-align: center; }
@@ -553,6 +555,9 @@ textarea.field { height: auto; padding-block: 12px; }
 .reader-page[data-mode="page"] img { max-height: 75svh; width: auto; object-fit: contain; }
 .reader-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .reader-pagination { position: sticky; bottom: 12px; z-index: 20; margin: 24px auto 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; width: min(100%, 360px); padding: 12px; background: rgb(23 19 29 / 0.97); border: 1px solid rgb(255 255 255 / 0.15); border-radius: 12px; }
+.reader-pagination > .btn3d { flex: 0 0 44px; width: 44px; height: 44px; padding: 0; }
+.reader-pagination > label { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 13px; }
+.reader-pagination .field { width: 56px; flex-shrink: 0; margin-inline: 0; padding-inline: 7px; }
 @media (max-width: 1023px) {
   .media-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px; }
   .platform-header-frame { grid-template-columns: auto 1fr; gap: 8px 20px; }

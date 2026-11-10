@@ -168,13 +168,14 @@ function ReadingSession({
       if (unit && /^[a-f0-9-]{36}$/i.test(unit)) changeReading({ unit, chapter: Number(params.get("chapter")) || 1, page: 0 });
     }
   }, [query, isHost, room.status, room.story, changeStory, changeReading]);
+  const storyId = room.story?.id;
   useEffect(() => {
-    if (!room.story?.id || !room.reading.unit) return;
+    if (!storyId || !room.reading.unit) return;
     const controller = new AbortController();
     const load = async () => {
       setLoadingPages(true); setError("");
       try {
-        const response = await fetch(`/api/content?${new URLSearchParams({ kind: "manga", id: room.story!.id, unit: room.reading.unit! })}`, { signal: controller.signal });
+        const response = await fetch(`/api/content?${new URLSearchParams({ kind: "manga", id: storyId, unit: room.reading.unit! })}`, { signal: controller.signal });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "The chapter couldn’t be loaded.");
         if (!controller.signal.aborted) setPages(data.pages.map((url: string, i: number) => ({ url, name: `Page ${i + 1}` })));
@@ -182,7 +183,7 @@ function ReadingSession({
       finally { if (!controller.signal.aborted) setLoadingPages(false); }
     };
     void load(); return () => controller.abort();
-  }, [room.story?.id, room.reading.unit]);
+  }, [storyId, room.reading.unit]);
   useEffect(() => {
     if (!room.story) return;
     const controller = new AbortController();
@@ -463,10 +464,10 @@ function ReadingSession({
               ))
             )}
           </div>
-          <div className="sticky bottom-4 z-20 mx-auto mt-5 flex max-w-sm items-center justify-between gap-3 rounded-2xl border border-white/15 bg-[#17131d]/95 p-3 shadow-2xl backdrop-blur">
+          <div className="reader-pagination">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               aria-label="Previous page"
               disabled={page <= 0 || !canNavigate}
               onClick={() => go(page - 1)}
@@ -489,7 +490,7 @@ function ReadingSession({
             </label>
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               aria-label="Next page"
               disabled={page >= pages.length - 1 || !canNavigate}
               onClick={() => go(page + 1)}
