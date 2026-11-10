@@ -11,32 +11,38 @@ const page = await context.newPage();
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 let attempts = 0;
+let releaseFirst;
+const firstTitleGate = new Promise(resolve => { releaseFirst = resolve; });
 try {
-  await page.route('**/api/catalog?**', async route => {
+  await context.route('**/api/catalog?**', async route => {
     const url = new URL(route.request().url());
     const id = url.searchParams.get('id');
     if (id) {
-      await new Promise(resolve => setTimeout(resolve, 700));
+      if (id === '99999') await firstTitleGate;
+      else await new Promise(resolve => setTimeout(resolve, 700));
       if (id === '99998' && attempts++ === 0) return route.fulfill({ status: 503, json: { error: 'Temporary provider outage' } });
       return route.fulfill({ json: { title: { ...seed.find(m => m.kind === 'manga'), id, title: `Loaded title ${id}` }, providers: [] } });
     }
     await new Promise(resolve => setTimeout(resolve, 700));
     return route.fulfill({ json: { items: [], hasMore: false, source: 'kitsu' } });
   });
-  await page.route('**/api/content?**', route => route.fulfill({ json: { units: [], source: '', total: 0, hasMore: false } }));
+  await context.route('**/api/content?**', route => route.fulfill({ json: { units: [], source: '', total: 0, hasMore: false } }));
   await page.goto(`${base}/title/manga/99999`);
   const loading = page.getByRole('status', { name: 'Loading title' });
   await loading.waitFor();
-  assert.equal(await loading.locator('.loading-shape').first().evaluate(e => getComputedStyle(e).animationName), 'none');
+  await page.waitForFunction(() => { const shape = document.querySelector('[aria-label="Loading title"] .loading-shape'); return shape && getComputedStyle(shape).animationName === 'none'; });
+  releaseFirst();
   assert.ok(await page.locator('.platform-header').count());
   await page.getByRole('heading', { name: 'Loaded title 99999', exact: true }).waitFor();
   assert.equal(await loading.count(), 0);
+  await page.waitForLoadState('networkidle');
   await page.goto(`${base}/title/manga/99998`);
   await page.getByRole('status', { name: 'Loading title' }).waitFor();
   await page.getByRole('heading', { name: 'Title unavailable', exact: true }).waitFor();
   await page.getByRole('button', { name: 'Try again', exact: true }).click();
   await page.getByRole('status', { name: 'Loading title' }).waitFor();
   await page.getByRole('heading', { name: 'Loaded title 99998', exact: true }).waitFor();
+  await page.waitForLoadState('networkidle');
   await page.goto(`${base}/manga`);
   await page.getByRole('heading', { name: 'No stories found', exact: true }).waitFor();
   await page.getByRole('textbox', { name: 'Search titles', exact: true }).fill('new search');

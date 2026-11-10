@@ -62,7 +62,9 @@ export function Browse({ kind }: { kind: MediaKind }) {
       controller.abort();
     };
   }, [kind, q, genre, sort, status, year, page]);
-  function change(set: (value: string) => void, value: string) {
+  function change(set: (value: string) => void, value: string, current: string) {
+    if (value === current) return;
+    setBusy(true);
     set(value);
     setPage(1);
   }
@@ -82,7 +84,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
           <span className="sr-only">Search titles</span>
           <input
             value={q}
-            onChange={(e) => change(setQ, e.target.value)}
+            onChange={(e) => change(setQ, e.target.value, q)}
             placeholder="Search titles…"
             className="field w-full pl-10"
           />
@@ -92,7 +94,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
           <select
             className="field"
             value={genre}
-            onChange={(e) => change(setGenre, e.target.value)}
+            onChange={(e) => change(setGenre, e.target.value, genre)}
           >
             <option value="">All genres</option>
             {[
@@ -118,7 +120,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
           <select
             className="field"
             value={status}
-            onChange={(e) => change(setStatus, e.target.value)}
+            onChange={(e) => change(setStatus, e.target.value, status)}
           >
             <option value="">Any status</option>
             <option value="current">Ongoing</option>
@@ -134,7 +136,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
             placeholder="Year"
             maxLength={4}
             value={year}
-            onChange={(e) => change(setYear, e.target.value.replace(/\D/g, ""))}
+            onChange={(e) => change(setYear, e.target.value.replace(/\D/g, ""), year)}
           />
         </label>
         <label className="filter-sort">
@@ -142,7 +144,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
           <select
             className="field"
             value={sort}
-            onChange={(e) => change(setSort, e.target.value)}
+            onChange={(e) => change(setSort, e.target.value, sort)}
           >
             <option value="popular">Popular</option>
             <option value="rating">Top rated</option>
@@ -193,6 +195,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
           <Button
             variant="ghost"
             onClick={() => {
+              if (q || genre || status || year || page !== 1) setBusy(true);
               setQ("");
               setGenre("");
               setStatus("");
@@ -209,7 +212,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
           <Button
             variant="ghost"
             disabled={busy}
-            onClick={() => setPage((p) => p + 1)}
+            onClick={() => { setBusy(true); setPage((p) => p + 1); }}
           >
             {busy ? "Loading…" : "Explore more"}
           </Button>

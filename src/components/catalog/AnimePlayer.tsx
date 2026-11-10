@@ -26,7 +26,7 @@ export function AnimePlayer({ media, playback, onFailure, transitioning = false 
   const lastSave = useRef(0);
   const initialSeconds = useRef(entry?.watchPosition?.unit === playback.unit.id ? entry.watchPosition.seconds : 0);
   const switching = useRef(false);
-  const transfer = useRef<{ seconds: number; playing: boolean; volume: number; muted: boolean } | null>(null);
+  const transfer = useRef<{ seconds: number; playing: boolean; volume: number; muted: boolean; rate: number } | null>(null);
   const canPiP = useClientValue(() => !!document.pictureInPictureEnabled, false);
   const streams = playback.streams || [];
   useEffect(() => { if (transitioning) video.current?.pause(); }, [transitioning]);
@@ -39,7 +39,7 @@ export function AnimePlayer({ media, playback, onFailure, transitioning = false 
   function changeStream(index: number) {
     if (index === streamIndex || !streams[index]) return;
     const element = video.current;
-    if (element) transfer.current = { seconds: element.currentTime, playing: !element.paused, volume: element.volume, muted: element.muted };
+    if (element) transfer.current = { seconds: element.currentTime, playing: !element.paused, volume: element.volume, muted: element.muted, rate: element.playbackRate };
     switching.current = true;
     setStreamIndex(index);
   }
@@ -95,7 +95,9 @@ export function AnimePlayer({ media, playback, onFailure, transitioning = false 
             const previous = transfer.current;
             const seconds = previous?.seconds ?? initialSeconds.current;
             if (Number.isFinite(element.duration) && seconds < element.duration - 3) element.currentTime = seconds;
-            element.playbackRate = speed;
+            const rate = previous?.rate ?? speed;
+            element.playbackRate = rate;
+            setSpeed(rate);
             if (previous) { element.volume = previous.volume; element.muted = previous.muted; }
             transfer.current = null;
             switching.current = false;
@@ -103,7 +105,7 @@ export function AnimePlayer({ media, playback, onFailure, transitioning = false 
           }}
           onTimeUpdate={(event) => { if (Date.now() - lastSave.current > 5000) savePosition(event.currentTarget); }}
           onPause={(event) => savePosition(event.currentTarget)}
-          onRateChange={(event) => setSpeed(event.currentTarget.playbackRate)}
+          onRateChange={(event) => { if (!switching.current) setSpeed(event.currentTarget.playbackRate); }}
           onEnded={() => save(media, {
             progress: Math.max(entry?.progress || 0, playback.unit.number),
             status: media.total === playback.unit.number ? "completed" : "current",

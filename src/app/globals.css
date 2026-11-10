@@ -194,8 +194,8 @@ html { scroll-behavior: smooth; }
 .room-link-field:focus-within { box-shadow: 0 0 0 4px rgb(255 255 255 / 0.08); }
 .btn3d svg { display: block; flex-shrink: 0; transition: transform 180ms ease; }
 .form-error { animation: fade-up 180ms ease-out both; }
-.landing nav:not(.hero-nav) a { position: relative; }
-.landing nav:not(.hero-nav) a::after {
+.landing nav:not(.hero-nav):not(.platform-nav) a { position: relative; }
+.landing nav:not(.hero-nav):not(.platform-nav) a::after {
   content: "";
   position: absolute;
   left: 0;
@@ -207,7 +207,7 @@ html { scroll-behavior: smooth; }
   transform-origin: left;
   transition: transform 200ms ease;
 }
-.landing nav:not(.hero-nav) a:focus-visible::after { transform: scaleX(1); }
+.landing nav:not(.hero-nav):not(.platform-nav) a:focus-visible::after { transform: scaleX(1); }
 details.faq { transition: background-color 200ms ease; }
 details.faq > summary { transition: color 200ms ease; }
 details.faq > summary:focus-visible { outline: 2px solid rgb(255 255 255 / 0.5); outline-offset: 3px; border-radius: 4px; }
@@ -226,7 +226,7 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   .btn3d:active { transform: translateY(var(--btn-lift)); box-shadow: 0 0 0 var(--btn-shadow); }
   .btn3d-icon:hover svg { transform: translateX(2px); }
   .room-preview:hover > div { border-color: rgb(255 255 255 / 0.2); }
-  .landing nav:not(.hero-nav) a:hover::after { transform: scaleX(1); }
+  .landing nav:not(.hero-nav):not(.platform-nav) a:hover::after { transform: scaleX(1); }
   details.faq > summary:hover { color: #d4d4d8; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -499,9 +499,15 @@ html:has(#intro) .hero-preview > figure { animation-delay: 2.3s; }
 .platform-header-frame { display: grid; grid-template-columns: auto 1fr auto; gap: 28px; padding-block: 16px; }
 .platform-brand { justify-self: start; }
 .platform-nav { display: flex; align-items: center; justify-content: center; gap: 24px; min-width: 0; }
-.platform-nav-link { position: relative; padding-block: 10px; font-size: 14px; color: #a1a1aa; white-space: nowrap; }
-.platform-nav-link:hover, .platform-nav-link[aria-current="page"] { color: #fff; }
-.platform-nav-link[aria-current="page"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: 3px; height: 2px; background: var(--color-brand-400); }
+.platform-nav-link { position: relative; padding-block: 10px; font-size: 14px; color: #a1a1aa; white-space: nowrap; transition: color 150ms ease; }
+.platform-nav-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: 3px; height: 2px; background: #fff; transform: scaleX(0); transform-origin: left; transition: transform 200ms ease; }
+.platform-nav-link:focus-visible, .platform-nav-link[aria-current] { color: #fff; }
+.platform-nav-link:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: 4px; }
+.platform-nav-link:focus-visible::after, .platform-nav-link[aria-current]::after { transform: scaleX(1); }
+@media (hover: hover) {
+  .platform-nav-link:hover { color: #fff; }
+  .platform-nav-link:hover::after { transform: scaleX(1); }
+}
 .platform-header-actions { display: flex; align-items: center; gap: 20px; }
 .platform-account { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 13px; color: #a1a1aa; min-height: 40px; }
 .platform-account:hover { color: #fff; }
@@ -583,7 +589,7 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
 .viewer-loading-note { position: absolute; z-index: 30; top: 20px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); padding: 12px 18px; border: 1px solid rgb(255 255 255 / 0.12); border-radius: 10px; background: #201b29; color: #e4e4e7; font-size: 13px; }
 .video-loading-note { pointer-events: none; position: absolute; inset: 0; display: grid; place-items: center; color: #a1a1aa; font-size: 13px; }
 .viewer-load-error { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border: 1px solid rgb(244 63 94 / 0.25); border-radius: 12px; font-size: 13px; color: #fda4af; }
-.reader-image-frame { position: relative; display: flex; align-items: center; justify-content: center; max-height: 75svh; }
+.reader-image-frame { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; max-height: 75svh; margin-inline: auto; }
 .reader-page[data-fit="width"] .reader-image-frame { max-height: none; }
 .reader-image-loading { position: absolute; inset: 0; display: grid; place-items: center; color: #a1a1aa; font-size: 13px; }
 .reader-image-pending { opacity: 0; }

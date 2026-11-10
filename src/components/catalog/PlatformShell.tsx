@@ -51,7 +51,13 @@ function Navigation({ pathname }: { pathname: string }) {
         <Link
           key={href}
           href={href}
-          aria-current={pathname === href ? "page" : undefined}
+          aria-current={
+            pathname === href ? "page" :
+            (href !== "/" && pathname.startsWith(`${href}/`)) ||
+            ((href === "/anime" || href === "/manga") &&
+              (pathname.startsWith(`/title${href}/`) || pathname.startsWith(`/play${href}/`)))
+              ? "location" : undefined
+          }
           className="platform-nav-link"
         >
           {label}
