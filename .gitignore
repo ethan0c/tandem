@@ -19,6 +19,7 @@
 
 # production
 /build
+/Anivexa-API/
 
 # misc
 .DS_Store
