@@ -1,7 +1,7 @@
 import "server-only";
 import { getCatalogTitle, getExternalCatalogId } from "./catalog";
 import { normalizeName } from "./library";
-import { reanimeCatalog, reanimePlayback, weebCatalog, weebPlayback } from "./content-providers";
+import { anivexaCatalog, anivexaConfigured, anivexaPlayback, reanimeCatalog, reanimePlayback, weebCatalog, weebPlayback } from "./content-providers";
 import type { CatalogTitle, MediaKind } from "./catalog-types";
 import {
   directAnime,
@@ -161,12 +161,14 @@ export async function getContentCatalog(
     const direct = directAnime[id];
     if (!direct) {
       try {
-        const connected = await reanimeCatalog(media, offset);
+        const connected = anivexaConfigured
+          ? await anivexaCatalog(media, offset)
+          : await reanimeCatalog(media, offset);
         if (connected) return connected;
       } catch (error) {
-        return { media, source: "ReAnime", units: [], total: 0, hasMore: false,
-          notice: error instanceof Error ? error.message : "ReAnime is temporarily unavailable.",
-          externalUrl: "https://reanime.to/search" };
+        return { media, source: anivexaConfigured ? "MKissa" : "ReAnime", units: [], total: 0, hasMore: false,
+          notice: error instanceof Error ? error.message : "The anime source is temporarily unavailable.",
+          externalUrl: anivexaConfigured ? "https://mkissa.to/" : "https://reanime.to/search" };
       }
     }
     return {
@@ -245,9 +247,9 @@ export async function getContentPlayback(
   if (kind === "anime") {
     const direct = directAnime[id];
     if (direct && unitId === "film") return { ...direct, unit: filmUnit };
-    if (!/^ra-\d{1,4}$/.test(unitId)) return null;
+    if (!/^(?:ra-\d{1,4}|av-mkissa-(?:sub|dub)-\d{1,4})$/.test(unitId)) return null;
     const media = await getCatalogTitle(kind, id);
-    return media ? reanimePlayback(media, unitId) : null;
+    return media ? unitId.startsWith("av-") ? anivexaPlayback(media, unitId) : reanimePlayback(media, unitId) : null;
   }
   if (kind === "manga" && /^wc-[0-9A-HJKMNP-TV-Z]{26}$/i.test(unitId)) {
     const media = await getCatalogTitle(kind, id);

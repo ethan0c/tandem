@@ -2,6 +2,7 @@ import "server-only";
 import { getExternalCatalogId } from "./catalog";
 import type { CatalogTitle } from "./catalog-types";
 import type { ContentCatalog, ContentPlayback, ContentUnit } from "./content-types";
+import { parseAnivexaEpisodes, parseAnivexaPlayback } from "./anivexa-parsers";
 import {
   parseReAnimeEpisodes,
   parseReAnimeSearch,
@@ -15,6 +16,7 @@ import {
 const REANIME = (process.env.REANIME_ORIGIN || "https://reanime.to").replace(/\/$/, "");
 const WEEBCENTRAL = (process.env.WEEBCENTRAL_ORIGIN || "https://weebcentral.com").replace(/\/$/, "");
 const REANIME_BRIDGE = process.env.REANIME_API_URL?.replace(/\/$/, "");
+const ANIVEXA = process.env.ANIVEXA_API_URL?.replace(/\/$/, "");
 const cache = new Map<string, { expires: number; value: unknown }>();
 
 async function sourceRequest<T>(url: string, html = false, ttl = 120_000, headers: Record<string, string> = {}): Promise<T> {
@@ -35,6 +37,40 @@ async function sourceRequest<T>(url: string, html = false, ttl = 120_000, header
     cache.set(url, { expires: Date.now() + ttl, value });
   }
   return value as T;
+}
+
+export const anivexaConfigured = Boolean(ANIVEXA);
+
+async function anivexaEpisodes(media: CatalogTitle): Promise<{ anilist: string; units: ContentUnit[] }> {
+  if (!ANIVEXA) throw new Error("Anivexa is not configured.");
+  const anilist = await getExternalCatalogId("anime", media.id, "anilist/anime");
+  if (!anilist || !/^\d{1,10}$/.test(anilist)) throw new Error("This title has no AniList mapping for MKissa.");
+  const response = await sourceRequest<unknown>(`${ANIVEXA}/episodes/mkissa/${anilist}?map=false`);
+  return { anilist, units: parseAnivexaEpisodes(response) };
+}
+
+export async function anivexaCatalog(media: CatalogTitle, offset: number): Promise<ContentCatalog> {
+  const { units } = await anivexaEpisodes(media);
+  return {
+    media, source: "MKissa", units: units.slice(offset, offset + 100), total: units.length,
+    hasMore: offset + 100 < units.length,
+    ...(!units.length ? { notice: "MKissa has no episodes for this title." } : {}),
+  };
+}
+
+export async function anivexaPlayback(media: CatalogTitle, unitId: string): Promise<ContentPlayback | null> {
+  const match = /^av-mkissa-(sub|dub)-(\d{1,4})$/.exec(unitId);
+  if (!match) return null;
+  const { anilist, units } = await anivexaEpisodes(media);
+  const unit = units.find((item) => item.id === unitId);
+  if (!unit) return null;
+  const response = await sourceRequest<unknown>(`${ANIVEXA}/watch/mkissa/${anilist}/${match[1]}/mkissa-${match[2]}`, false, 0);
+  const playback = parseAnivexaPlayback(response);
+  if (!playback.streams.length) throw new Error("MKissa returned no playable video for this episode.");
+  return {
+    source: "MKissa", credit: "Episode supplied by MKissa via Anivexa.",
+    sourceUrl: "https://mkissa.to/", unit, streams: playback.streams,
+  };
 }
 
 async function reanimeMatch(media: CatalogTitle) {
