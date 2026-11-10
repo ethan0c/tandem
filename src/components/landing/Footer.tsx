@@ -8,6 +8,9 @@ const columns = [
   {
     title: "Tandem",
     links: [
+      { label: "Discover anime & manga", href: "/discover" },
+      { label: "Your library", href: "/library" },
+      { label: "Watch & read together", href: "/rooms" },
       { label: "Start a room", href: "/#start" },
       { label: "Plan a watch night", href: "/plan" },
       { label: "Guides", href: "/guides" },

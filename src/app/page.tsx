@@ -153,10 +153,10 @@ export default function Home() {
               <Logo size={24} />
             </Link>
             <nav aria-label="Main navigation" className="hero-nav flex items-center gap-1 text-sm text-zinc-400">
-              <a href="#two" className="hidden md:block">Made for two</a>
+              <Link href="/discover">Discover</Link>
+              <Link href="/library" className="hidden sm:block">Library</Link>
               <Link href="/plan" className="hidden md:block">Plan a night</Link>
-              <a href="#sources" className="hidden md:block">Works with</a>
-              <a href="#faq" className="hidden md:block">Questions</a>
+              <Link href="/rooms" className="hidden md:block">Rooms</Link>
               <a href={GITHUB} target="_blank" rel="noreferrer" className="hidden sm:flex items-center gap-1">
                 GitHub <ArrowUpRight className="size-3.5" />
               </a>
@@ -176,6 +176,7 @@ export default function Home() {
               <StartRoom tone="dark" />
             </div>
             <RejoinRoom />
+            <Link href="/discover" className="mt-5 text-xs text-zinc-400 transition hover:text-brand-300">Find your next anime or manga <span aria-hidden="true">→</span></Link>
           </div>
           <div className="hero-preview w-full">
             <Preview />

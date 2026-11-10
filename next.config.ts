@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "media.kitsu.app" },
+      { protocol: "https", hostname: "media.kitsu.io" },
     ],
   },
   /* config options here */
