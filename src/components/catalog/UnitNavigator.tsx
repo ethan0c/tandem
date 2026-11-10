@@ -5,20 +5,21 @@ import type { MediaKind } from "@/lib/catalog-types";
 import type { ContentCatalog, ContentUnit } from "@/lib/content-types";
 import { adjacentUnits, unitLabel } from "@/lib/spoilers";
 
-export function UnitNavigator({ kind, catalog, current, onSelect, offset, onOffset }: {
+export function UnitNavigator({ kind, catalog, current, onSelect, offset, onOffset, disabled = false }: {
   kind: MediaKind;
   catalog: ContentCatalog;
   current: ContentUnit;
   onSelect: (unit: ContentUnit) => void;
   offset: number;
   onOffset: (offset: number) => void;
+  disabled?: boolean;
 }) {
   const { previous, next } = adjacentUnits(catalog.units, current);
   const noun = kind === "anime" ? "episode" : "chapter";
   const choices = catalog.units.some((unit) => unit.id === current.id)
     ? catalog.units : [current, ...catalog.units];
   return (
-    <nav className="unit-navigation mt-6" aria-label={`${kind === "anime" ? "Episode" : "Chapter"} navigation`}>
+    <nav className="unit-navigation mt-6" inert={disabled} aria-busy={disabled} aria-label={`${kind === "anime" ? "Episode" : "Chapter"} navigation`}>
       <div className="unit-navigation-row">
         <Button variant="ghost" size="icon" aria-label={`Previous ${noun}`} disabled={!previous} onClick={() => previous && onSelect(previous)}>
           <ChevronLeft className="size-4" />

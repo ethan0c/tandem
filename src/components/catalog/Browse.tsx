@@ -174,12 +174,16 @@ export function Browse({ kind }: { kind: MediaKind }) {
       )}
       {result.items.length ? (
         <div
-          className={`media-grid ${busy ? "opacity-60" : ""}`}
+          className={`media-grid transition-opacity motion-reduce:transition-none ${busy ? "opacity-60" : ""}`}
           aria-busy={busy}
         >
           {result.items.map((media) => (
             <MediaCard key={media.id} media={media} />
           ))}
+        </div>
+      ) : busy ? (
+        <div className="media-grid" aria-busy="true" role="status" aria-label="Loading search results">
+          {Array.from({ length: 12 }, (_, index) => <div className="loading-shape aspect-[0.7] rounded-xl" aria-hidden="true" key={index} />)}
         </div>
       ) : (
         <div className="empty-state">

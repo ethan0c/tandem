@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ContentViewer } from "@/components/catalog/ContentViewer";
+import { ViewerSkeleton } from "@/components/catalog/LoadingStates";
 export const metadata = {
   title: "Watch and read",
   robots: { index: false, follow: false },
@@ -21,9 +22,7 @@ export default function Page(props: {
 }) {
   return (
     <Suspense
-      fallback={
-        <p className="py-16 text-sm text-zinc-400">Opening your story…</p>
-      }
+      fallback={<ViewerSkeleton />}
     >
       <ResolvedPage {...props} />
     </Suspense>

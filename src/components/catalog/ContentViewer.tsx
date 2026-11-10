@@ -13,6 +13,7 @@ import { AnimePlayer } from "./AnimePlayer";
 import { MangaReader, type ReadingSettings } from "./MangaReader";
 import { UnitNavigator } from "./UnitNavigator";
 import { unitLabel } from "@/lib/spoilers";
+import { ViewerSkeleton } from "./LoadingStates";
 
 export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
   const router = useRouter();
@@ -36,7 +37,6 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
     const load = async () => {
       setLoading(true);
       setFailure("");
-      setPlayback(null);
       try {
         const response = await fetch(
           `/api/content?${new URLSearchParams({ kind, id, unit: unitId })}`,
@@ -75,6 +75,8 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
     router.push(
       `/${kind === "manga" ? "read" : "room"}/${newRoomId()}?${togetherParams}`,
     );
+  const changingUnit = !failure && !!playback && (loading || playback.unit.id !== unitId);
+  if ((!ready || (!catalog.data && catalog.pending) || loading) && !playback) return <ViewerSkeleton kind={kind} />;
   return (
     <>
       <Link
@@ -93,17 +95,13 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
           </p>
         </div>
         {playback && (
-          <Button onClick={startTogether} variant="ghost">
+          <Button onClick={startTogether} disabled={changingUnit} variant="ghost">
             <Users className="size-4" />
             {kind === "anime" ? "Watch together" : "Read together"}
           </Button>
         )}
       </div>
-      {!ready || (!catalog.data && catalog.pending) || loading ? (
-        <p className="py-16 text-center text-sm text-zinc-400" role="status">
-          Loading {kind === "anime" ? "video" : "chapter"}…
-        </p>
-      ) : failure || catalog.error ? (
+      {(failure || catalog.error) && !playback ? (
         <div className="empty-state mt-7">
           <h2>Couldn’t open this source</h2>
           <p>{failure || catalog.error}</p>
@@ -130,9 +128,16 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
         </div>
       ) : (
         <>
-          {media && kind === "anime" && playback.streams && <AnimePlayer key={playback.unit.id} media={media} playback={playback} onFailure={setFailure} />}
-          {media && kind === "manga" && playback.pages && <MangaReader key={playback.unit.id} media={media} playback={playback} settings={readingSettings} onSettings={setReadingSettings} onFailure={setFailure} />}
-          {catalog.data && <UnitNavigator kind={kind} catalog={catalog.data} current={playback.unit} onSelect={selectUnit} offset={offset} onOffset={setOffset} />}
+          {(failure || catalog.error) && <div className="viewer-load-error mt-5" role="alert"><p>{failure || catalog.error}</p><Button variant="ghost" size="sm" onClick={() => { setRetry((n) => n + 1); catalog.retry(); }}>Try again</Button></div>}
+          <div className="viewer-content" aria-busy={changingUnit}>
+            {changingUnit && <div className="viewer-loading-note" role="status">Opening {kind === "anime" ? "episode" : "chapter"}…</div>}
+            <div inert={changingUnit} className={changingUnit ? "viewer-content-pending" : undefined}>
+              {media && kind === "anime" && playback.streams && <AnimePlayer key={`${playback.unit.id}:${retry}`} media={media} playback={playback} transitioning={changingUnit} onFailure={setFailure} />}
+              {media && kind === "manga" && playback.pages && <MangaReader key={`${playback.unit.id}:${retry}`} media={media} playback={playback} transitioning={changingUnit} settings={readingSettings} onSettings={setReadingSettings} onFailure={setFailure} />}
+            </div>
+          </div>
+          {catalog.data && <UnitNavigator kind={kind} catalog={catalog.data} current={playback.unit} onSelect={selectUnit} offset={offset} onOffset={setOffset} disabled={changingUnit || catalog.pending} />}
+          {catalog.pending && <p className="mt-3 text-xs text-zinc-400" role="status">Loading {kind === "anime" ? "episode" : "chapter"} choices…</p>}
           <p className="mt-4 text-xs leading-6 text-zinc-400">Unfinished {kind === "anime" ? "episode" : "chapter"} titles are hidden to avoid spoilers. Nothing advances automatically.</p>
           <p className="mt-7 text-xs leading-6 text-zinc-400">
             {playback.credit}{" "}

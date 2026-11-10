@@ -576,6 +576,23 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
 .manga-reader:fullscreen { overflow-y: auto; background: #100e14; padding: 20px; }
 .spoiler-toggle { display: flex; align-items: center; gap: 12px; min-height: 44px; color: #a1a1aa; font-size: 12px; line-height: 1.8; cursor: pointer; }
 .spoiler-toggle input { flex-shrink: 0; width: 18px; height: 18px; accent-color: var(--color-brand-500); }
+.loading-shape { border-radius: 6px; background: rgb(255 255 255 / 0.06); animation: loading-breathe 1.8s ease-in-out infinite; }
+@keyframes loading-breathe { 50% { background-color: rgb(255 255 255 / 0.1); } }
+.viewer-content { position: relative; }
+.viewer-content-pending { opacity: 0.4; transition: opacity 150ms ease; }
+.viewer-loading-note { position: absolute; z-index: 30; top: 20px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); padding: 12px 18px; border: 1px solid rgb(255 255 255 / 0.12); border-radius: 10px; background: #201b29; color: #e4e4e7; font-size: 13px; }
+.video-loading-note { pointer-events: none; position: absolute; inset: 0; display: grid; place-items: center; color: #a1a1aa; font-size: 13px; }
+.viewer-load-error { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border: 1px solid rgb(244 63 94 / 0.25); border-radius: 12px; font-size: 13px; color: #fda4af; }
+.reader-image-frame { position: relative; display: flex; align-items: center; justify-content: center; height: 75svh; }
+.reader-page[data-fit="width"] .reader-image-frame { height: auto; }
+.reader-image-loading { position: absolute; inset: 0; display: grid; place-items: center; color: #a1a1aa; font-size: 13px; }
+.reader-image-pending { opacity: 0; }
+.reader-image-ready { opacity: 1; transition: opacity 150ms ease; }
+.catalog-result-note { min-height: 34px; }
+@media (prefers-reduced-motion: reduce) {
+  .loading-shape { animation: none; }
+  .viewer-content-pending, .reader-image-ready { transition: none; }
+}
 @media (max-width: 1023px) {
   .media-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px; }
   .platform-header-frame { grid-template-columns: auto 1fr; gap: 8px 20px; }

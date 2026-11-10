@@ -25,6 +25,7 @@ import { newRoomId } from "@/lib/room-id";
 import { Button, ButtonLink } from "@/components/Button";
 import { useLibrary } from "./LibraryProvider";
 import { ContentChapters } from "./ContentChapters";
+import { TitleSkeleton } from "./LoadingStates";
 
 export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
   const [fetchedMedia, setMedia] = useState<CatalogTitle | null>(
@@ -37,6 +38,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
   );
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
   const [trailer, setTrailer] = useState(false);
   const { entries, save, ready } = useLibrary();
   const router = useRouter();
@@ -64,12 +66,14 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
         if (!controller.signal.aborted) setBusy(false);
       });
     return () => controller.abort();
-  }, [kind, id]);
+  }, [kind, id, retry]);
+  if (!media && busy) return <TitleSkeleton />;
   if (!media)
     return (
       <div className="empty-state">
-        <h1>{busy ? "Finding your story…" : "Title unavailable"}</h1>
+        <h1>Title unavailable</h1>
         <p>{error}</p>
+        <Button variant="ghost" onClick={() => { setBusy(true); setError(""); setRetry((value) => value + 1); }}>Try again</Button>
         <ButtonLink href={`/${kind}`} variant="ghost">
           Back to {kind}
         </ButtonLink>

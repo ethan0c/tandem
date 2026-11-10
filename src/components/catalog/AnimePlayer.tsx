@@ -10,10 +10,11 @@ import { useLibrary } from "./LibraryProvider";
 
 type InlineVideo = HTMLVideoElement & { webkitEnterFullscreen?: () => void };
 
-export function AnimePlayer({ media, playback, onFailure }: {
+export function AnimePlayer({ media, playback, onFailure, transitioning = false }: {
   media: CatalogTitle;
   playback: ContentPlayback;
   onFailure: (message: string) => void;
+  transitioning?: boolean;
 }) {
   const video = useRef<HTMLVideoElement>(null);
   const { entries, save } = useLibrary();
@@ -21,12 +22,14 @@ export function AnimePlayer({ media, playback, onFailure }: {
   const [streamIndex, setStreamIndex] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [message, setMessage] = useState("");
+  const [buffering, setBuffering] = useState(true);
   const lastSave = useRef(0);
   const initialSeconds = useRef(entry?.watchPosition?.unit === playback.unit.id ? entry.watchPosition.seconds : 0);
   const switching = useRef(false);
   const transfer = useRef<{ seconds: number; playing: boolean; volume: number; muted: boolean } | null>(null);
   const canPiP = useClientValue(() => !!document.pictureInPictureEnabled, false);
   const streams = playback.streams || [];
+  useEffect(() => { if (transitioning) video.current?.pause(); }, [transitioning]);
 
   function savePosition(element: HTMLVideoElement) {
     if (switching.current || element.ended || element.readyState < 1) return;
@@ -62,6 +65,7 @@ export function AnimePlayer({ media, playback, onFailure }: {
   useEffect(() => {
     const element = video.current;
     const key = (event: KeyboardEvent) => {
+      if (transitioning) return;
       if (event.altKey || event.ctrlKey || event.metaKey || (event.target as HTMLElement).closest("input,select,textarea,button,video,[contenteditable]")) return;
       if (!element || !element.getBoundingClientRect().height) return;
       const key = event.key.toLowerCase();
@@ -76,11 +80,16 @@ export function AnimePlayer({ media, playback, onFailure }: {
     };
     window.addEventListener("keydown", key);
     return () => { window.removeEventListener("keydown", key); element?.pause(); };
-  }, []);
+  }, [transitioning]);
   return (
     <section className="mt-7" aria-label="Anime player">
-      <div className="viewer-video">
+      <div className="viewer-video relative" aria-busy={buffering}>
+        {buffering && <div className="video-loading-note" role="status">Loading video…</div>}
         <video ref={video} controls playsInline preload="metadata" aria-label={`${media.title} — ${unitLabel("anime", playback.unit)}`} src={streams[streamIndex]?.url}
+          onLoadStart={() => setBuffering(true)}
+          onWaiting={() => setBuffering(true)}
+          onCanPlay={() => setBuffering(false)}
+          onPlaying={() => setBuffering(false)}
           onLoadedMetadata={(event) => {
             const element = event.currentTarget;
             const previous = transfer.current;
@@ -101,6 +110,7 @@ export function AnimePlayer({ media, playback, onFailure }: {
             watchPosition: { unit: playback.unit.id, seconds: 0 },
           })}
           onError={() => {
+            setBuffering(false);
             if (streamIndex + 1 < streams.length) changeStream(streamIndex + 1);
             else onFailure("The video source couldn’t be played. Try again or return to the series.");
           }}

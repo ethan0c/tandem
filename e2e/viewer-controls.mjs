@@ -40,6 +40,7 @@ try {
       const url = new URL(route.request().url());
       if (url.searchParams.get("kind") !== "manga") return route.continue();
       const unit = units.find(u => u.id === url.searchParams.get("unit"));
+      if (unit?.number === 13) await new Promise(resolve => setTimeout(resolve, 900));
       await route.fulfill({ json: unit ? { ...playback, unit } : { ...catalog, units, total: 2 } });
     });
     await context.route("**/api/catalog?**", route => {
@@ -73,8 +74,13 @@ try {
     await page.waitForFunction(() => document.querySelector('input[aria-label="Page number"]')?.value === '5', null, { timeout: 5000 }).catch(async error => { console.log(await page.evaluate(() => ({ scroll: scrollY, page: document.querySelector('input[aria-label="Page number"]')?.value, positions: [...document.querySelectorAll('[data-page]')].map(e => ({ page: e.dataset.page, top: e.getBoundingClientRect().top, height: e.getBoundingClientRect().height, loaded: e.querySelector('img').naturalWidth })) }))); await page.screenshot({ path: '/private/tmp/tandem-scroll-debug.png' }); throw error; });
     await page.getByRole("combobox", { name: "Reading mode" }).selectOption("page");
     await page.getByRole("combobox", { name: "Page sizing" }).selectOption("height");
+    const frameHeight = (await page.locator('.reader-page:visible').boundingBox()).height;
     await page.getByRole("button", { name: "Next chapter", exact: true }).click();
+    await page.getByText("Opening chapter…", { exact: true }).waitFor();
+    assert.equal(await page.locator('.reader-page img:visible').count(), 1, 'previous chapter remains mounted while loading');
+    assert.equal((await page.locator('.reader-page:visible').boundingBox()).height, frameHeight, 'pending chapter keeps layout height');
     await page.waitForURL(/unit=ubunchu-13/);
+    await page.waitForFunction(() => [...document.querySelectorAll('.unit-navigation select')].some(e => e.value === 'ubunchu-13'));
     await page.locator('.reader-page img:visible').waitFor();
     assert.equal(await page.getByRole("combobox", { name: "Reading direction" }).inputValue(), "rtl");
     assert.equal(await page.getByRole("spinbutton", { name: "Page number" }).inputValue(), "1");

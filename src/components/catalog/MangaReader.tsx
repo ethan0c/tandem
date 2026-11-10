@@ -15,22 +15,26 @@ export interface ReadingSettings {
   direction: "ltr" | "rtl";
   fit: "height" | "width";
 }
+const EMPTY_PAGES: string[] = [];
 
-export function MangaReader({ media, playback, settings, onSettings, onFailure }: {
+export function MangaReader({ media, playback, settings, onSettings, onFailure, transitioning = false }: {
   media: CatalogTitle;
   playback: ContentPlayback;
   settings: ReadingSettings;
   onSettings: (settings: ReadingSettings) => void;
   onFailure: (message: string) => void;
+  transitioning?: boolean;
 }) {
   const { entries, save } = useLibrary();
   const entry = entries.find((item) => item.media.kind === "manga" && item.media.id === media.id);
-  const pages = playback.pages || [];
+  const pages = playback.pages || EMPTY_PAGES;
   const [position, setPosition] = useState(() => {
     const saved = entry?.readingPosition;
     return saved?.chapter === playback.unit.number && saved.page < pages.length ? saved.page : 0;
   });
   const [message, setMessage] = useState("");
+  const [loadedPage, setLoadedPage] = useState("");
+  const [pageRatio, setPageRatio] = useState(0.7);
   const canvas = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLElement>(null);
   const currentPage = useRef(position);
@@ -44,6 +48,14 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure }
     setPosition(next);
     if (settings.mode === "scroll") canvas.current?.querySelector(`[data-page="${next}"]`)?.scrollIntoView({ block: "start" });
   }
+  useEffect(() => {
+    for (const next of [position - 1, position + 1, position + 2]) {
+      if (!pages[next]) continue;
+      const image = new Image();
+      image.referrerPolicy = "no-referrer";
+      image.src = pages[next];
+    }
+  }, [pages, position]);
   useEffect(() => {
     currentPage.current = position;
     if (playback.unit.number >= 1) save(media, { status: "current", readingPosition: { chapter: playback.unit.number, page: position } });
@@ -68,6 +80,7 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure }
 
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
+      if (transitioning) return;
       if (event.altKey || event.ctrlKey || event.metaKey || (event.target as HTMLElement).closest("input,select,textarea,button,[contenteditable]")) return;
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
         event.preventDefault();
@@ -79,7 +92,7 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure }
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [pages.length, settings.direction, settings.mode]);
+  }, [pages.length, settings.direction, settings.mode, transitioning]);
 
   async function fullscreen() {
     try {
@@ -112,7 +125,10 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure }
           const dy = event.changedTouches[0].clientY - start.y;
           if (Math.abs(dx) > 70 && Math.abs(dy) < 50) go(position + ((dx < 0) === (settings.direction === "ltr") ? 1 : -1));
         }}>
-        {settings.mode === "page" ? <img src={pages[position]} alt={`Page ${position + 1} of ${label}`} referrerPolicy="no-referrer" onError={() => onFailure("This page couldn’t be loaded. Retry to refresh the page source.")} /> : pages.map((url, index) => (
+        {settings.mode === "page" ? <div className="reader-image-frame" style={settings.fit === "width" ? { aspectRatio: pageRatio } : undefined} aria-busy={loadedPage !== pages[position]}>
+          {loadedPage !== pages[position] && <div className="reader-image-loading loading-shape" role="status"><span>Loading page {position + 1}…</span></div>}
+          <img src={pages[position]} alt={`Page ${position + 1} of ${label}`} referrerPolicy="no-referrer" className={loadedPage === pages[position] ? "reader-image-ready" : "reader-image-pending"} onLoad={(event) => { setPageRatio(event.currentTarget.naturalWidth / event.currentTarget.naturalHeight); setLoadedPage(pages[position]); }} onError={() => onFailure("This page couldn’t be loaded. Retry to refresh the page source.")} />
+        </div> : pages.map((url, index) => (
           <div key={url} data-page={index}><img src={url} alt={`Page ${index + 1} of ${label}`} loading={index > 1 ? "lazy" : "eager"} referrerPolicy="no-referrer" onError={() => onFailure("This page couldn’t be loaded. Retry to refresh the page source.")} /></div>
         ))}
       </div>
