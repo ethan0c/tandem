@@ -72,10 +72,7 @@ const sections = [
       "Tandem does not sell or rent your information. Your information is used to run your rooms, calls, account, and library, including the connection and catalog services described above.",
     ],
   },
-  {
-    title: "Get in touch",
-    body: ["For questions about your privacy, visit our project on GitHub at github.com/ethan0c."],
-  },
+
 ];
 
 export default function Privacy() {

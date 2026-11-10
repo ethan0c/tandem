@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import { EXTENSION_URL, GITHUB } from "@/lib/links";
-
-const OCELABS = "https://ocelabs.xyz";
+import { EXTENSION_URL } from "@/lib/links";
 
 const columns = [
   {
@@ -25,14 +23,6 @@ const columns = [
     links: [
       { label: "Chrome · Edge · Brave", href: EXTENSION_URL, external: true },
       { label: "Supported sites", href: "/#sources" },
-      { label: "Project on GitHub", href: GITHUB, external: true },
-    ],
-  },
-  {
-    title: "People",
-    links: [
-      { label: "ethan0c", href: GITHUB, external: true },
-      { label: "ocelabs.xyz", href: OCELABS, external: true },
     ],
   },
 ];
@@ -41,7 +31,7 @@ export function Footer() {
   return (
     <footer className="text-white">
       <div className="mx-auto site-width site-gutter pb-10 pt-16">
-        <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
+        <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr]">
           <div>
             <Logo size={30} light />
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-zinc-400">
@@ -71,16 +61,6 @@ export function Footer() {
         </div>
         <div className="mt-14 flex flex-col gap-2 border-t border-white/10 pt-6 font-sans text-[11px] text-muted sm:flex-row sm:items-center sm:justify-between">
           <span>© 2026 tandem</span>
-          <span>
-            built by{" "}
-            <a href={GITHUB} target="_blank" rel="noreferrer" className="text-zinc-300 hover:text-white">
-              ethan0c
-            </a>{" "}
-            /{" "}
-            <a href={OCELABS} target="_blank" rel="noreferrer" className="text-zinc-300 hover:text-white">
-              ocelabs.xyz
-            </a>
-          </span>
         </div>
       </div>
     </footer>

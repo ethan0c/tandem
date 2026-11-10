@@ -18,7 +18,7 @@ Copy each field into the Developer Dashboard (Store listing tab and Privacy tab)
 | Global promo video | *(optional, leave empty)* |
 | Official URL | None, unless you verify ilovemygf.site in Google Search Console |
 | Homepage URL | https://www.ilovemygf.site/ |
-| Support URL | https://github.com/ethan0c |
+| Support URL | https://www.ilovemygf.site |
 | Mature content | Off |
 
 ## Privacy tab

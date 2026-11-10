@@ -1,5 +1,3 @@
-export const GITHUB = "https://github.com/ethan0c";
-
 /** The extension's Chrome Web Store listing (Edge and Brave install from it too). NEXT_PUBLIC_EXTENSION_URL overrides it. */
 export const EXTENSION_URL =
   process.env.NEXT_PUBLIC_EXTENSION_URL || "https://chromewebstore.google.com/detail/cbllpgpbalhffmpnalmmehkcgcjajjck";

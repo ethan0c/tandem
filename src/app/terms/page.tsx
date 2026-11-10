@@ -67,10 +67,7 @@ const sections = [
       "You can stop using Tandem at any time by leaving your room, removing the extension or removing the Discord app. We may block access for anyone who breaks these terms.",
     ],
   },
-  {
-    title: "Get in touch",
-    body: ["Questions about these terms: visit our project on GitHub at github.com/ethan0c."],
-  },
+
 ];
 
 export default function Terms() {

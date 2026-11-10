@@ -89,9 +89,9 @@ export function Library() {
         <div className="flex-1">
           <p className="text-xs">
             {entries.length} saved titles{" "}
-            <span className="mx-2 text-zinc-700">/</span>
+            <span className="mx-2 text-muted">/</span>
             {entries.filter((e) => e.status === "current").length} in progress{" "}
-            <span className="mx-2 text-zinc-700">/</span>
+            <span className="mx-2 text-muted">/</span>
             {entries.filter((e) => e.status === "completed").length} completed
           </p>
           <p className="mt-1.5 text-xs text-muted">

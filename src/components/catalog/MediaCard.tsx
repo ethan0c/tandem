@@ -82,7 +82,7 @@ export function MediaCard({ media, eager = false }: { media: CatalogTitle; eager
       </Link>
       <p className="mt-1 text-xs leading-relaxed text-zinc-400">
         {media.year || "TBA"}
-        <span className="mx-1.5 text-zinc-700">·</span>
+        <span className="mx-1.5 text-muted">·</span>
         {media.total
           ? `${media.total} ${media.kind === "anime" ? "episodes" : "chapters"}`
           : media.status === "current"
