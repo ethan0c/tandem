@@ -9,6 +9,7 @@ import { unitLabel } from "@/lib/spoilers";
 import { useLibrary } from "./LibraryProvider";
 
 type InlineVideo = HTMLVideoElement & { webkitEnterFullscreen?: () => void };
+const EMPTY_STREAMS: NonNullable<ContentPlayback["streams"]> = [];
 
 export function AnimePlayer({ media, playback, onFailure, transitioning = false }: {
   media: CatalogTitle;
@@ -28,8 +29,31 @@ export function AnimePlayer({ media, playback, onFailure, transitioning = false 
   const switching = useRef(false);
   const transfer = useRef<{ seconds: number; playing: boolean; volume: number; muted: boolean; rate: number } | null>(null);
   const canPiP = useClientValue(() => !!document.pictureInPictureEnabled, false);
-  const streams = playback.streams || [];
+  const streams = playback.streams || EMPTY_STREAMS;
   useEffect(() => { if (transitioning) video.current?.pause(); }, [transitioning]);
+  useEffect(() => {
+    const element = video.current;
+    const source = streams[streamIndex];
+    if (!element || !source || source.type !== "application/vnd.apple.mpegurl") return;
+    let disposed = false;
+    let destroy: (() => void) | undefined;
+    if (element.canPlayType(source.type)) {
+      element.src = source.url;
+    } else {
+      void import("hls.js").then(({ default: Hls }) => {
+        if (disposed) return;
+        if (!Hls.isSupported()) { onFailure("This browser cannot play the source's HLS video."); return; }
+        const hls = new Hls();
+        hls.loadSource(source.url);
+        hls.attachMedia(element);
+        hls.on(Hls.Events.ERROR, (_, data) => {
+          if (data.fatal) onFailure("The source video could not be loaded. Try another episode or source.");
+        });
+        destroy = () => hls.destroy();
+      }).catch(() => onFailure("The HLS player could not be loaded."));
+    }
+    return () => { disposed = true; destroy?.(); element.removeAttribute("src"); element.load(); };
+  }, [streams, streamIndex, onFailure]);
 
   function savePosition(element: HTMLVideoElement) {
     if (switching.current || element.ended || element.readyState < 1) return;
@@ -81,11 +105,19 @@ export function AnimePlayer({ media, playback, onFailure, transitioning = false 
     window.addEventListener("keydown", key);
     return () => { window.removeEventListener("keydown", key); element?.pause(); };
   }, [transitioning]);
+  if (playback.embedUrl && !streams.length) return (
+    <section className="mt-7" aria-label="Anime player">
+      <div className="viewer-video relative">
+        <iframe title={`${media.title} — ${unitLabel("anime", playback.unit)}`} src={playback.embedUrl} className="h-full w-full" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
+      </div>
+      <p className="mt-3 text-xs leading-6 text-zinc-400">Playback controls are supplied by ReAnime. Watch position cannot be saved from an embedded player.</p>
+    </section>
+  );
   return (
     <section className="mt-7" aria-label="Anime player">
       <div className="viewer-video relative" aria-busy={buffering}>
         {buffering && <div className="video-loading-note" role="status">Loading video…</div>}
-        <video ref={video} controls playsInline preload="metadata" aria-label={`${media.title} — ${unitLabel("anime", playback.unit)}`} src={streams[streamIndex]?.url}
+        <video ref={video} controls playsInline preload="metadata" aria-label={`${media.title} — ${unitLabel("anime", playback.unit)}`} src={streams[streamIndex]?.type === "application/vnd.apple.mpegurl" ? undefined : streams[streamIndex]?.url}
           onLoadStart={() => setBuffering(true)}
           onWaiting={() => setBuffering(true)}
           onCanPlay={() => setBuffering(false)}

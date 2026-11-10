@@ -1,6 +1,7 @@
 import "server-only";
 import { getCatalogTitle, getExternalCatalogId } from "./catalog";
 import { normalizeName } from "./library";
+import { reanimeCatalog, reanimePlayback, weebCatalog, weebPlayback } from "./content-providers";
 import type { CatalogTitle, MediaKind } from "./catalog-types";
 import {
   directAnime,
@@ -158,6 +159,15 @@ export async function getContentCatalog(
     };
   if (kind === "anime") {
     const direct = directAnime[id];
+    if (!direct) {
+      try {
+        const connected = await reanimeCatalog(media, offset);
+        if (connected) return connected;
+      } catch (error) {
+        return { media, source: "ReAnime", units: [], total: 0, hasMore: false,
+          notice: error instanceof Error ? error.message : "ReAnime is temporarily unavailable." };
+      }
+    }
     return {
       media,
       source: direct?.source || "",
@@ -171,6 +181,12 @@ export async function getContentCatalog(
           }
         : {}),
     };
+  }
+  try {
+    const connected = await weebCatalog(media, offset, language);
+    if (connected) return connected;
+  } catch {
+    // Keep the existing MangaDex source available when WeebCentral blocks a request.
   }
   const mangaId = await matchManga(media);
   if (!mangaId)
@@ -227,7 +243,14 @@ export async function getContentPlayback(
     return directManga[id];
   if (kind === "anime") {
     const direct = directAnime[id];
-    return direct && unitId === "film" ? { ...direct, unit: filmUnit } : null;
+    if (direct && unitId === "film") return { ...direct, unit: filmUnit };
+    if (!/^ra-\d{1,4}$/.test(unitId)) return null;
+    const media = await getCatalogTitle(kind, id);
+    return media ? reanimePlayback(media, unitId) : null;
+  }
+  if (kind === "manga" && /^wc-[0-9A-HJKMNP-TV-Z]{26}$/i.test(unitId)) {
+    const media = await getCatalogTitle(kind, id);
+    return media ? weebPlayback(media, unitId) : null;
   }
   if (!/^[a-f0-9-]{36}$/i.test(unitId)) return null;
   const media = await getCatalogTitle(kind, id);

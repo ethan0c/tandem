@@ -22,6 +22,7 @@ export interface ContentPlayback {
   sourceUrl: string;
   unit: ContentUnit;
   streams?: { url: string; type: string; label: string }[];
+  embedUrl?: string;
   pages?: string[];
 }
 
