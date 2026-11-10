@@ -3,6 +3,7 @@
 import { IconButton as ControlButton } from "@/components/Button";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import {
   Film,
   FolderOpen,
@@ -244,7 +245,6 @@ export function Player({
       <video
         ref={videoRef}
         playsInline
-        poster={preview?.poster}
         aria-label={preview ? "Haikyu episode preview" : undefined}
         preload="auto"
         className="absolute inset-0 h-full w-full object-contain object-center"
@@ -273,6 +273,7 @@ export function Player({
           if (hasMedia) setError("This file could not be played. Try an MP4 or WebM.");
         }}
       />
+      {preview && <Image src={preview.poster} alt="" fill preload sizes="(max-width: 767px) 92vw, (max-height: 800px) 640px, 1080px" className="pointer-events-none object-contain" />}
 
       {/* Empty state */}
       {!source && !preview && (

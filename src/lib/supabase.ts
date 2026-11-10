@@ -10,7 +10,7 @@ const listeners = new Set<(client: SupabaseClient) => void>();
 /** Guests do not download the account/database SDK. Existing sessions initialize immediately. */
 export function needsAccountClient() {
   if (!isSupabaseConfigured) return false;
-  if (location.pathname.startsWith("/account") || /(?:access_token|refresh_token|type=recovery)=/.test(location.hash)) return true;
+  if (location.pathname.startsWith("/account") || /access_token=|refresh_token=|type=recovery/.test(location.hash)) return true;
   try {
     return !!localStorage.getItem(`sb-${new URL(url!).hostname.split(".")[0]}-auth-token`);
   } catch { return true; }
