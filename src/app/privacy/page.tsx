@@ -58,9 +58,18 @@ const sections = [
     ],
   },
   {
+    title: "Your account and library",
+    body: [
+      "Accounts are optional. A guest library is saved in your browser. When you sign in, your account library, favorites, subscriptions, and progress are stored with Supabase so they can sync across your devices. Your account library is private. Your browser keeps your sign-in session so you can return without signing in again.",
+      "Catalog searches are sent through Tandem to Kitsu. Artwork loads from Kitsu’s image service. Opening a provider or playing a trailer connects you to that provider and its privacy practices.",
+      "Pasted library lists are matched against catalog titles. Only title searches are sent to Kitsu; your full pasted list is not uploaded as a file. Selected matches are saved to your library after you review them. You can export your library or remove saved titles from the Library page.",
+      "Reading rooms share chapter and page numbers, the selected title, chat, and the names of participants. Page images you choose stay on your device and are not uploaded. Room data expires with the room. Reading position can be saved to your library.",
+    ],
+  },
+  {
     title: "How your information is used",
     body: [
-      "Tandem does not sell or rent your information. Your information is used only to run your room and call, including the connection services described above.",
+      "Tandem does not sell or rent your information. Your information is used to run your rooms, calls, account, and library, including the connection and catalog services described above.",
     ],
   },
   {
@@ -81,7 +90,7 @@ export default function Privacy() {
       </header>
       <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-16">
         <h1 className="font-display text-4xl font-medium tracking-[-0.03em]">Privacy</h1>
-        <p className="mt-3 font-sans text-xs text-zinc-500">Last updated 13 October 2026</p>
+        <p className="mt-3 font-sans text-xs text-zinc-500">Last updated 10 November 2026</p>
         {sections.map((s) => (
           <section key={s.title} className="mt-10">
             <h2 className="font-display text-xl font-medium">{s.title}</h2>

@@ -12,7 +12,7 @@ export function cleanAnalyticsUrl(raw: string): string | null {
     return null;
   }
   if (url.pathname.startsWith("/overlay")) return null;
-  const path = url.pathname.replace(/^\/(room|join|call)\/[^/]+/, "/$1/[id]");
+  const path = url.pathname.replace(/^\/(room|join|call|read)\/[^/]+/, "/$1/[id]");
   // Campaign tags say which listing or link sent someone; they are not personal, so they stay.
   const campaign = new URLSearchParams([...url.searchParams].filter(([key]) => key.startsWith("utm_")));
   return `${url.origin}${path}${campaign.size ? `?${campaign}` : ""}`;

@@ -14,6 +14,8 @@ interface LibraryContext {
 }
 const Context = createContext<LibraryContext | null>(null);
 function read(key: string) { try { const parsed = JSON.parse(localStorage.getItem(key) || "[]"); return Array.isArray(parsed) ? parsed.filter(isLibraryEntry) : []; } catch { return []; } }
+interface PendingWrite { entry: LibraryEntry; deleted: boolean; }
+function readOutbox(key: string): PendingWrite[] { try { const parsed = JSON.parse(localStorage.getItem(`${key}:outbox`) || "[]"); return Array.isArray(parsed) ? parsed.filter((r: PendingWrite) => isLibraryEntry(r?.entry) && typeof r.deleted === "boolean") : []; } catch { return []; } }
 
 export function LibraryProvider({ children }: { children: ReactNode }) {
   const [entries, setEntries] = useState<LibraryEntry[]>([]);
@@ -24,6 +26,30 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   const storageKey = useRef(KEY);
   const userRef = useRef<User | null>(null);
   const syncGeneration = useRef(0);
+  const outbox = useRef<PendingWrite[]>([]);
+  const uploading = useRef<Promise<boolean> | null>(null);
+
+  const storeOutbox = useCallback(() => {
+    try { localStorage.setItem(`${storageKey.current}:outbox`, JSON.stringify(outbox.current)); } catch { setNotice("Browser storage is unavailable. Export your library to keep a copy."); }
+  }, []);
+  const flush = useCallback(async (): Promise<boolean> => {
+    if (uploading.current) { await uploading.current; if (!outbox.current.length) return true; }
+    const client = supabase; const activeUser = userRef.current;
+    if (!client || !activeUser) return false;
+    const run = (async () => {
+      while (outbox.current.length && userRef.current?.id === activeUser.id) {
+        const writes = [...outbox.current];
+        const { error } = await client.from("library_entries").upsert(writes.map(({ entry, deleted }) => ({ user_id: activeUser.id, media_key: mediaKey(entry.media), entry, deleted, updated_at: new Date(entry.updatedAt).toISOString() })), { onConflict: "user_id,media_key" });
+        if (userRef.current?.id !== activeUser.id) return false;
+        if (error) { setNotice("Saved in this browser. Cloud sync failed; try Sync again."); return false; }
+        outbox.current = outbox.current.filter(row => !writes.some(w => mediaKey(w.entry.media) === mediaKey(row.entry.media) && w.entry.updatedAt === row.entry.updatedAt));
+        storeOutbox();
+      }
+      setNotice("Saved to your library."); return true;
+    })();
+    uploading.current = run;
+    try { return await run; } finally { if (uploading.current === run) uploading.current = null; }
+  }, [storeOutbox]);
 
   const persist = useCallback((next: LibraryEntry[]) => {
     current.current = next;
@@ -34,6 +60,8 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     const activeUser = userRef.current;
     if (!supabase || !activeUser) return;
     const generation = ++syncGeneration.current;
+    const uploaded = await flush();
+    if (generation !== syncGeneration.current || userRef.current?.id !== activeUser.id) return;
     const { data, error } = await supabase.from("library_entries").select("entry, deleted, updated_at").eq("user_id", activeUser.id);
     if (generation !== syncGeneration.current) return;
     if (error) { setNotice("Saved in this browser. Cloud sync is unavailable; check Supabase setup."); return; }
@@ -44,14 +72,15 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       if (row.deleted) tombstones.set(mediaKey(row.entry.media), Date.parse(row.updated_at));
       else valid.push(row.entry);
     }
+    for (const row of outbox.current) { if (row.deleted) tombstones.set(mediaKey(row.entry.media), row.entry.updatedAt); }
     const merged = mergeEntries(current.current, valid).filter(e => (tombstones.get(mediaKey(e.media)) || 0) < e.updatedAt);
     persist(merged);
-    setNotice("Library synced across your devices.");
-  }, [persist]);
+    if (uploaded) setNotice("Library synced across your devices.");
+  }, [persist, flush]);
 
   useEffect(() => {
     persist(read(KEY)); setReady(true);
-    const onStorage = (event: StorageEvent) => { if (event.key === storageKey.current) persist(read(storageKey.current)); };
+    const onStorage = (event: StorageEvent) => { if (event.key === storageKey.current) { persist(read(storageKey.current)); outbox.current = readOutbox(storageKey.current); } };
     window.addEventListener("storage", onStorage);
     const subscription = supabase?.auth.onAuthStateChange((_event, session) => {
       const next = session?.user || null;
@@ -59,20 +88,23 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       ++syncGeneration.current;
       userRef.current = next;
       storageKey.current = next ? `${KEY}:${next.id}` : KEY;
+      outbox.current = readOutbox(storageKey.current);
       setUser(next); persist(read(storageKey.current));
       if (next) { setNotice("Syncing your library…"); queueMicrotask(() => void sync()); }
       else setNotice("");
     });
     const onFocus = () => { void sync(); };
     window.addEventListener("focus", onFocus);
-    return () => { subscription?.data.subscription.unsubscribe(); window.removeEventListener("storage", onStorage); window.removeEventListener("focus", onFocus); };
+    window.addEventListener("online", onFocus);
+    return () => { subscription?.data.subscription.unsubscribe(); window.removeEventListener("storage", onStorage); window.removeEventListener("focus", onFocus); window.removeEventListener("online", onFocus); };
   }, [persist, sync]);
 
   const upload = useCallback((rows: LibraryEntry[], deleted = false) => {
     if (!supabase || !userRef.current || !rows.length) return;
-    const id = userRef.current.id;
-    void supabase.from("library_entries").upsert(rows.map(entry => ({ user_id: id, media_key: mediaKey(entry.media), entry, deleted, updated_at: new Date(entry.updatedAt).toISOString() })), { onConflict: "user_id,media_key" }).then(({ error }) => setNotice(error ? "Saved in this browser. Cloud sync failed; try Sync again." : "Saved to your library."));
-  }, []);
+    const merged = new Map(outbox.current.map(row => [mediaKey(row.entry.media), row]));
+    for (const entry of rows) merged.set(mediaKey(entry.media), { entry, deleted });
+    outbox.current = [...merged.values()]; storeOutbox(); void flush();
+  }, [storeOutbox, flush]);
   const save = useCallback((media: CatalogTitle, changes: Partial<Omit<LibraryEntry, "media" | "updatedAt">> = {}) => {
     const existing = current.current.find(e => mediaKey(e.media) === mediaKey(media));
     const entry: LibraryEntry = { status: "planned", progress: 0, favorite: false, subscribed: false, ...existing, ...changes, media, updatedAt: Date.now() };
