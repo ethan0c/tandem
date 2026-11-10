@@ -19,6 +19,7 @@ export const catalogFormats = {
     { value: "music", label: "Music" },
   ],
 } as const;
+const singularLabels: Readonly<Record<string, string>> = { novel: "Novel", oneshot: "One-shot", oel: "English original", movie: "Movie", special: "Special" };
 
 export function isCatalogFormat(kind: MediaKind, format: string) {
   return !format || catalogFormats[kind].some((option) => option.value.toLowerCase() === format.toLowerCase());
@@ -31,6 +32,5 @@ export function matchesCatalogFormat(media: Pick<CatalogTitle, "format">, format
 }
 export function catalogFormatLabel(media: Pick<CatalogTitle, "kind" | "format">) {
   const format = catalogFormats[media.kind].find((option) => matchesCatalogFormat(media, option.value));
-  const singular: Record<string, string> = { novel: "Novel", oneshot: "One-shot", oel: "English original", movie: "Movie", special: "Special" };
-  return format ? singular[format.value] || format.label : typeof media.format === "string" && media.format ? media.format : "Unknown format";
+  return format ? singularLabels[format.value] || format.label : typeof media.format === "string" && media.format ? media.format : "Unknown format";
 }

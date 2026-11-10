@@ -194,6 +194,7 @@ export function Library() {
           </select>
         </label>
       </div>
+      {ready && <p className="mb-5 text-xs text-muted" role="status">{filtered.length} of {entries.length} titles shown</p>}
       {!ready ? (
         <p className="py-20 text-center text-sm text-muted">
           Opening your library…
@@ -242,7 +243,7 @@ export function Library() {
                 >
                   {e.media.title}
                 </Link>
-                <p className="mt-1 text-xs capitalize text-muted">
+                <p className="mt-1 text-xs text-muted">
                   {catalogFormatLabel(e.media)} · {e.media.year || "TBA"}
                 </p>
                 <p className="mt-2 text-xs text-brand-300">
