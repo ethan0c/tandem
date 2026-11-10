@@ -492,7 +492,7 @@ html:has(#intro) .hero-preview > figure { animation-delay: 2.3s; }
 @keyframes intro-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes intro-out { to { opacity: 0; visibility: hidden; } }
 
-/* The catalog carries the same quiet theater, violet palette, and raised actions as the landing page. */
+/* Catalog surfaces reuse the landing page's theater, violet palette, and raised actions. */
 .platform {
   background: radial-gradient(75% 38rem at 50% -12rem, rgb(124 58 237 / 0.14), transparent 85%), linear-gradient(#0e0c12, #111015 45%, #0c0b10);
 }
