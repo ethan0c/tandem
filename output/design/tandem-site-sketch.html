@@ -1,0 +1,156 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+#tandem-plan { --tp-bg:#0c0b10; --tp-surface:#17151c; --tp-text:#fafafa; --tp-secondary:#a1a1aa; --tp-line:#ffffff17; --tp-purple:#7c3aed; --tp-purple-light:#a78bfa; color:var(--tp-text); background:var(--tp-bg); font:400 14px/1.65 'Plus Jakarta Sans',system-ui,sans-serif; border-radius:16px; overflow:hidden; }
+#tandem-plan * { box-sizing:border-box; }
+#tandem-plan button,#tandem-plan input,#tandem-plan select,#tandem-plan textarea { font:inherit; }
+#tandem-plan .tp-head { display:flex; flex-wrap:wrap; align-items:center; gap:22px; padding:22px 30px; border-bottom:1px solid var(--tp-line); }
+#tandem-plan .tp-logo { display:flex; align-items:center; gap:10px; margin-right:auto; color:var(--tp-text); font-size:24px; letter-spacing:-1.2px; background:none; border:0; padding:0; }
+#tandem-plan .tp-mark { position:relative; display:block; width:29px; height:29px; }
+#tandem-plan .tp-mark:before,#tandem-plan .tp-mark:after { content:''; position:absolute; width:17px; height:17px; border:2px solid var(--tp-purple-light); border-radius:5px; }
+#tandem-plan .tp-mark:before { left:1px; top:1px; } #tandem-plan .tp-mark:after { left:9px; top:9px; }
+#tandem-plan .tp-nav { display:flex; gap:22px; align-items:center; }
+#tandem-plan .tp-link { border:0; padding:5px 0; background:none; color:var(--tp-secondary); white-space:nowrap; }
+#tandem-plan .tp-link:hover,#tandem-plan .tp-link[aria-current=page] { color:var(--tp-text); }
+#tandem-plan .tp-link[aria-current=page] { box-shadow:0 2px var(--tp-purple-light); }
+#tandem-plan .tp-action { background:var(--tp-purple); color:var(--tp-text); border:2px solid transparent; border-radius:12px; padding:10px 16px; box-shadow:0 4px #4c1d95; display:inline-flex; align-items:center; justify-content:center; gap:8px; white-space:nowrap; }
+#tandem-plan .tp-action:active { transform:translateY(3px); box-shadow:0 1px #4c1d95; }
+#tandem-plan .tp-secondary { background:#ffffff0d; color:var(--tp-text); border:1px solid #ffffff29; box-shadow:0 3px #050506; }
+#tandem-plan .tp-main { padding:34px; min-height:610px; }
+#tandem-plan h1,#tandem-plan h2,#tandem-plan h3,#tandem-plan p { margin:0; }
+#tandem-plan h1 { font-size:34px; font-weight:500; letter-spacing:-1.2px; line-height:1.2; }
+#tandem-plan h2 { font-size:20px; font-weight:500; letter-spacing:-.5px; }
+#tandem-plan h3 { font-size:15px; font-weight:500; }
+#tandem-plan .tp-muted { color:var(--tp-secondary); }
+#tandem-plan .tp-small { font-size:12px; }
+#tandem-plan .tp-gap { margin-top:20px; }
+#tandem-plan .tp-actions { display:flex; flex-wrap:wrap; align-items:center; gap:16px; margin-top:25px; }
+#tandem-plan .tp-home { text-align:center; padding:16px 0 0; background:radial-gradient(ellipse at center top,#7c3aed12,transparent 70%); }
+#tandem-plan .tp-home h1 { font-size:42px; }
+#tandem-plan .tp-home>.tp-muted { margin:14px auto 0; max-width:430px; }
+#tandem-plan .tp-home>.tp-actions { justify-content:center; }
+#tandem-plan .tp-stage { position:relative; background:#111016; border:1px solid var(--tp-line); border-radius:13px; min-height:235px; margin-top:32px; display:flex; align-items:center; justify-content:center; color:var(--tp-secondary); }
+#tandem-plan .tp-home .tp-stage { max-width:640px; margin-inline:auto; min-height:250px; }
+#tandem-plan .tp-camera { position:absolute; right:17px; bottom:17px; width:120px; height:76px; border:1px solid #ffffff30; border-radius:10px; background:#24212b; display:grid; place-items:center; font-size:12px; }
+#tandem-plan .tp-home-links { display:flex; flex-wrap:wrap; justify-content:center; gap:28px; padding-top:23px; }
+#tandem-plan .tp-section-title { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin:29px 0 16px; }
+#tandem-plan .tp-tools { display:flex; flex-wrap:wrap; gap:10px; margin:23px 0; }
+#tandem-plan input,#tandem-plan select,#tandem-plan textarea { color:var(--tp-text); border:1px solid #ffffff20; border-radius:9px; background:#ffffff05; padding:9px 12px; min-width:0; }
+#tandem-plan select option { color:var(--tp-text); background:var(--tp-surface); }
+#tandem-plan .tp-search { flex:1; min-width:170px; }
+#tandem-plan .tp-feature { display:grid; grid-template-columns:1.2fr 1fr; min-height:220px; gap:20px; margin-top:24px; padding:25px; background:#16131c; border-radius:13px; }
+#tandem-plan .tp-feature-copy { align-self:center; }
+#tandem-plan .tp-feature-copy p { margin-top:12px; max-width:380px; }
+#tandem-plan .tp-feature-art { display:grid; place-items:center; min-height:160px; border:1px dashed #ffffff24; border-radius:8px; color:#ffffff6b; }
+#tandem-plan .tp-covers { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:18px; }
+#tandem-plan .tp-cover-button { min-width:0; padding:0; background:none; color:var(--tp-text); border:0; text-align:left; }
+#tandem-plan .tp-cover-art { display:grid; place-items:center; aspect-ratio:0.7; background:linear-gradient(140deg,#24212c,#16141b); border-radius:10px; color:#ffffff52; font-size:12px; }
+#tandem-plan .tp-cover-name { display:block; margin-top:9px; font-size:13px; }
+#tandem-plan .tp-cover-meta { display:block; margin-top:3px; font-size:12px; color:var(--tp-secondary); }
+#tandem-plan .tp-split-head { display:flex; justify-content:space-between; flex-wrap:wrap; align-items:center; gap:14px; }
+#tandem-plan .tp-tabs { display:flex; gap:20px; }
+#tandem-plan .tp-library-row { display:flex; flex-wrap:wrap; gap:16px; align-items:center; padding:20px 0; border-bottom:1px solid var(--tp-line); }
+#tandem-plan .tp-library-row .tp-cover-art { width:52px; flex-shrink:0; }
+#tandem-plan .tp-library-copy { flex:1; min-width:150px; }
+#tandem-plan .tp-library-copy p { margin-top:4px; }
+#tandem-plan .tp-detail { display:grid; grid-template-columns:150px 1fr; gap:28px; margin-top:28px; }
+#tandem-plan .tp-detail .tp-cover-art { font-size:12px; }
+#tandem-plan .tp-detail h1 { margin-top:10px; }
+#tandem-plan .tp-detail p { margin-top:14px; }
+#tandem-plan .tp-episode { display:flex; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--tp-line); }
+#tandem-plan .tp-room-controls { display:flex; justify-content:center; flex-wrap:wrap; gap:16px; margin-top:20px; }
+#tandem-plan .tp-reading-paper { background:#e7e5e9; min-height:270px; width:230px; color:#64606a; display:grid; place-items:center; margin:20px auto 0; }
+#tandem-plan .tp-import { max-width:540px; margin:20px auto; }
+#tandem-plan .tp-import textarea { width:100%; min-height:140px; margin-top:18px; resize:vertical; }
+#tandem-plan .tp-footer { padding:18px 34px; border-top:1px solid var(--tp-line); display:flex; flex-wrap:wrap; gap:18px; color:var(--tp-secondary); font-size:12px; }
+#tandem-plan .tp-toast { color:var(--tp-purple-light); min-height:24px; margin-top:15px; }
+#tandem-plan .tp-route-title { margin-top:8px; }
+@media(max-width:700px){ #tandem-plan .tp-head {padding:18px;gap:15px} #tandem-plan .tp-nav {order:3;width:100%;justify-content:space-between;gap:12px} #tandem-plan .tp-head>.tp-link {display:none} #tandem-plan .tp-main {padding:24px 18px;min-height:640px} #tandem-plan .tp-covers {grid-template-columns:repeat(3,minmax(0,1fr));gap:14px} #tandem-plan .tp-feature {grid-template-columns:1fr;padding:18px} #tandem-plan .tp-feature-art {min-height:110px} #tandem-plan .tp-detail {grid-template-columns:90px 1fr;gap:16px} #tandem-plan .tp-detail .tp-actions {grid-column:1/-1} #tandem-plan h1 {font-size:28px} #tandem-plan .tp-home h1 {font-size:34px} #tandem-plan .tp-footer {padding:18px} }
+@media(max-width:420px){ #tandem-plan .tp-covers {grid-template-columns:repeat(2,minmax(0,1fr))} #tandem-plan .tp-detail {grid-template-columns:1fr} #tandem-plan .tp-detail>.tp-cover-art {width:100px} #tandem-plan .tp-head>.tp-action {padding:9px 12px;font-size:12px} }
+@media(pointer:coarse){ #tandem-plan button {min-height:44px} #tandem-plan input,#tandem-plan textarea,#tandem-plan select {font-size:16px} }
+</style>
+<div id="tandem-plan" aria-label="Tandem site structure sketch">
+  <header class="tp-head">
+    <button type="button" class="tp-logo cursor-interaction" data-route="home" aria-label="Tandem home"><span class="tp-mark" aria-hidden="true"></span>tandem</button>
+    <nav class="tp-nav" aria-label="Main navigation">
+      <button type="button" class="tp-link cursor-interaction" data-route="home" aria-current="page">Home</button>
+      <button type="button" class="tp-link cursor-interaction" data-route="anime">Anime</button>
+      <button type="button" class="tp-link cursor-interaction" data-route="manga">Manga</button>
+      <button type="button" class="tp-link cursor-interaction" data-route="library">Library</button>
+    </nav>
+    <button type="button" class="tp-link cursor-interaction" data-route="account">Account</button>
+    <button type="button" class="tp-action cursor-interaction" data-route="room">Create a room</button>
+  </header>
+  <main class="tp-main" id="tp-screen">
+    <section class="tp-home"><h1>Watch together.</h1><p class="tp-muted">Your show in sync. Your favorite person on call.</p><div class="tp-actions"><button class="tp-action cursor-interaction" data-route="room" type="button">Create a room</button><button class="tp-link cursor-interaction" data-route="plan" type="button">Plan a night →</button></div><div class="tp-stage">Shared video preview<div class="tp-camera">Your person</div></div><div class="tp-home-links"><button class="tp-link cursor-interaction" data-route="anime" type="button">Find an anime →</button><button class="tp-link cursor-interaction" data-route="manga" type="button">Find a manga →</button></div></section>
+  </main>
+  <footer class="tp-footer"><span>Shows in sync. Time together.</span><span>Privacy</span><span>Terms</span></footer>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('tandem-plan');
+  const screen = root.querySelector('#tp-screen');
+  const config = { animeLayout:'Featured and posters', libraryLayout:'List', returning:false };
+  const anime = [{title:'Demon Slayer',meta:'2023 · Anime'},{title:'One Piece',meta:'1999 · Anime'},{title:'Solo Leveling',meta:'2024 · Anime'},{title:'Black Clover',meta:'2017 · Anime'},{title:'Jujutsu Kaisen',meta:'2020 · Anime'}];
+  const manga = [{title:'One Piece',meta:'Eiichiro Oda'},{title:'Sakamoto Days',meta:'Yuto Suzuki'},{title:'Blue Box',meta:'Kouji Miura'},{title:'Witch Watch',meta:'Kenta Shinohara'},{title:'Kagurabachi',meta:'Takeru Hokazono'},{title:'Spy × Family',meta:'Tatsuya Endo'},{title:'Dandadan',meta:'Yukinobu Tatsu'}];
+  const initial = window.openai?.widgetState?.modelContent || {};
+  let route = ['home','anime','manga','library','title','room','watch','reader','import','account','plan'].includes(initial.screen) ? initial.screen : 'home';
+  let kind = initial.kind === 'manga' ? 'manga' : 'anime';
+  let selected = initial.title || 'Demon Slayer';
+  let libraryKind = 'anime'; let search = ''; let chapter = 1; let page = 1; let importReviewed = false; let toast = '';
+  Object.assign(config, window.openai?.widgetState?.privateContent?.config || {});
+  const esc = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const action = (label,to,secondary=false) => `<button type="button" class="tp-action ${secondary?'tp-secondary':''} cursor-interaction" data-route="${to}">${label}</button>`;
+  const link = (label,to) => `<button type="button" class="tp-link cursor-interaction" data-route="${to}">${label}</button>`;
+  const persist = () => window.openai?.setWidgetState?.({modelContent:{screen:route,kind,title:selected},privateContent:{config}}).catch(()=>{});
+  function covers(items,type) { return `<div class="tp-covers">${items.map(item=>`<button type="button" class="tp-cover-button cursor-interaction" data-title="${esc(item.title)}" data-kind="${type}"><span class="tp-cover-art">Cover artwork</span><span class="tp-cover-name">${esc(item.title)}</span><span class="tp-cover-meta">${esc(item.meta)}</span></button>`).join('')}</div>`; }
+  function home() { return `<section class="tp-home"><h1>Watch together.</h1><p class="tp-muted">Your show in sync. Your favorite person on call.</p><div class="tp-actions">${action('Create a room','room')}${link('Plan a night →','plan')}</div><div class="tp-stage">Shared video preview<div class="tp-camera">Your person</div></div><div class="tp-home-links">${link('Find an anime →','anime')}${link('Find a manga →','manga')}</div></section>${config.returning?'<div class="tp-section-title"><h2>Continue</h2>'+link('Your library →','library')+'</div>'+covers(anime.slice(0,3),'anime'):''}`; }
+  function catalog(type) {
+    const list = type==='anime'?anime:manga;
+    const title = type==='anime'?'Anime':'Manga';
+    const featured = type==='anime'&&config.animeLayout==='Featured and posters';
+    return `<h1>${title}</h1><div class="tp-tools"><input class="tp-search" aria-label="Search ${type}" id="tp-search" placeholder="Search titles${type==='manga'?' or authors':''}…" value="${esc(search)}"><select aria-label="Genre"><option>All genres</option><option>Action</option><option>Romance</option></select><select aria-label="Sort"><option>Popular</option><option>Recently updated</option></select></div>${featured&&!search?`<section class="tp-feature"><div class="tp-feature-copy"><h2>Demon Slayer</h2><p class="tp-muted tp-small">Tanjiro searches for a way to save his sister.</p><div class="tp-actions"><button class="tp-action cursor-interaction" data-title="Demon Slayer" data-kind="anime" type="button">View series</button></div></div><div class="tp-feature-art">Series backdrop</div></section>`:''}<div class="tp-section-title"><h2>${search?'Search results':type==='anime'?'Popular anime':'Recently updated'}</h2></div><div id="tp-results">${covers(list.filter(i=>i.title.toLowerCase().includes(search.toLowerCase())),type)}</div>`;
+  }
+  function library() {
+    const list=libraryKind==='anime'?anime.slice(0,3):manga.slice(0,3);
+    return `<div class="tp-split-head"><h1>Library</h1>${action('Import a list','import',true)}</div><div class="tp-tools"><div class="tp-tabs"><button class="tp-link cursor-interaction" aria-current="${libraryKind==='anime'?'page':'false'}" data-library="anime" type="button">Anime</button><button class="tp-link cursor-interaction" aria-current="${libraryKind==='manga'?'page':'false'}" data-library="manga" type="button">Manga</button></div><select aria-label="Library status"><option>In progress</option><option>For later</option><option>Completed</option></select></div>${config.libraryLayout==='Posters'?covers(list,libraryKind):list.map((item,index)=>`<div class="tp-library-row"><span class="tp-cover-art" aria-hidden="true"></span><div class="tp-library-copy"><h3>${item.title}</h3><p class="tp-muted tp-small">${libraryKind==='anime'?'Episode':'Chapter'} ${[4,12,8][index]}</p></div><button type="button" class="tp-action tp-secondary cursor-interaction" data-title="${item.title}" data-kind="${libraryKind}">Continue</button></div>`).join('')}`;
+  }
+  function detail() {
+    const reading=kind==='manga';
+    return `${link((reading?'Manga':'Anime')+' / All titles',kind)}<section class="tp-detail"><div class="tp-cover-art">Cover artwork</div><div><p class="tp-muted tp-small">${reading?'Manga · Ongoing':'Anime · 2023 · 24 episodes'}</p><h1>${esc(selected)}</h1><p class="tp-muted">Synopsis, genres, and availability.</p><div class="tp-actions">${action(reading?'Read':'Watch',reading?'reader':'watch')}${action(reading?'Read together':'Watch together',reading?'reader':'room',true)}<button class="tp-link cursor-interaction" data-save type="button">Save to library</button></div><p class="tp-muted tp-small">${reading?'Choose a chapter below.':'Choose an episode below.'}</p></div></section><div class="tp-section-title"><h2>${reading?'Chapters':'Episodes'}</h2><select aria-label="${reading?'Volume':'Season'}"><option>${reading?'All chapters':'Season 1'}</option></select></div>${[1,2,3,4].map(n=>`<div class="tp-episode"><span>${reading?'Chapter':'Episode'} ${n}</span>${link(reading?'Read →':'Watch →',reading?'reader':'watch')}</div>`).join('')}<p class="tp-toast" aria-live="polite">${esc(toast)}</p>`;
+  }
+  function room() { return `<div class="tp-split-head"><div><h2>${esc(selected)}</h2><p class="tp-muted tp-small">Your room · You and your person</p></div><button type="button" class="tp-action tp-secondary cursor-interaction" data-invite>Copy invite</button></div><div class="tp-stage" style="min-height:360px">Shared video<div class="tp-camera">Video call</div></div><div class="tp-room-controls"><button class="tp-action tp-secondary cursor-interaction" type="button" data-choose>Choose video</button><button class="tp-link cursor-interaction" type="button" data-mic>Mute mic</button><button class="tp-link cursor-interaction" type="button" data-chat>Chat</button>${link('Leave','home')}</div><p class="tp-toast" aria-live="polite">${esc(toast)}</p>`; }
+  function reader() { return `<div class="tp-split-head"><div><h2>${esc(selected)}</h2><p class="tp-muted tp-small">Reading together · Chapter ${chapter}</p></div><button type="button" class="tp-action tp-secondary cursor-interaction" data-invite>Copy invite</button></div><div class="tp-reading-paper">Manga page</div><div class="tp-room-controls"><button class="tp-link cursor-interaction" data-page="-1" type="button">← Previous</button><span>Page ${page}</span><button class="tp-link cursor-interaction" data-page="1" type="button">Next →</button></div><div class="tp-room-controls"><button class="tp-link cursor-interaction" data-mic type="button">Mute mic</button><button class="tp-link cursor-interaction" data-follow type="button">Read independently</button>${link('Leave','library')}</div><p class="tp-toast" aria-live="polite">${esc(toast)}</p>`; }
+  function importer() { return `<section class="tp-import">${link('← Library','library')}<h1 class="tp-route-title">Import your manga</h1>${importReviewed?`<div class="tp-gap"><div class="tp-library-row"><span>One Piece</span><span class="tp-muted">Chapter 100</span><button class="tp-link cursor-interaction" type="button" data-correct>Change match</button></div><div class="tp-library-row"><span>Blue Box</span><span class="tp-muted">Chapter 12</span><button class="tp-link cursor-interaction" type="button" data-correct>Change match</button></div></div><div class="tp-actions">${action('Save selected titles','library')}</div>`:`<p class="tp-muted tp-gap">Paste your list, then review the matches.</p><textarea aria-label="Manga list" placeholder="One Piece — Chapter 100&#10;Blue Box — Chapter 12"></textarea><div class="tp-actions"><button type="button" class="tp-action cursor-interaction" data-review>Review matches</button></div>`}<p class="tp-toast" aria-live="polite">${esc(toast)}</p></section>`; }
+  function render() {
+    root.querySelectorAll('.tp-nav [data-route]').forEach(b=>b.setAttribute('aria-current',b.dataset.route===route?'page':'false'));
+    if(route==='home') screen.innerHTML=home();
+    else if(route==='anime'||route==='manga') screen.innerHTML=catalog(route);
+    else if(route==='library') screen.innerHTML=library();
+    else if(route==='title') screen.innerHTML=detail();
+    else if(route==='room'||route==='watch') screen.innerHTML=room();
+    else if(route==='reader') screen.innerHTML=reader();
+    else if(route==='import') screen.innerHTML=importer();
+    else if(route==='account') screen.innerHTML=`<section class="tp-import"><h1>Your account</h1><p class="tp-muted tp-gap">A private library, saved across your devices.</p><div class="tp-tools"><input aria-label="Email" placeholder="Email" type="email"><input aria-label="Password" placeholder="Password" type="password"></div>${action('Sign in','library')}</section>`;
+    else screen.innerHTML=`<section class="tp-import"><h1>Plan a watch night</h1><p class="tp-muted tp-gap">The existing Tandem planning flow.</p><div class="tp-tools"><input aria-label="Date" type="date"><input aria-label="Time" type="time"></div>${action('Create invite','room')}</section>`;
+  }
+  root.addEventListener('click',event=>{
+    const b=event.target.closest('button'); if(!b)return;
+    if(b.dataset.route){route=b.dataset.route; if(route==='anime'||route==='manga'){kind=route;search='';} toast='';render();persist();}
+    else if(b.dataset.title){selected=b.dataset.title;kind=b.dataset.kind;route='title';toast='';render();persist();}
+    else if(b.dataset.library){libraryKind=b.dataset.library;render();}
+    else if(b.hasAttribute('data-save')){b.textContent='Saved to library';}
+    else if(b.hasAttribute('data-invite')){b.textContent='Invite copied';}
+    else if(b.hasAttribute('data-mic')){b.textContent=b.textContent==='Mute mic'?'Unmute mic':'Mute mic';}
+    else if(b.hasAttribute('data-follow')){b.textContent=b.textContent==='Read independently'?'Read in sync':'Read independently';}
+    else if(b.dataset.page){page=Math.max(1,page+Number(b.dataset.page));render();}
+    else if(b.hasAttribute('data-review')){importReviewed=true;render();}
+    else if(b.hasAttribute('data-choose')){route='anime';kind='anime';search='';render();}
+    else if(b.hasAttribute('data-chat')){toast='Room chat opens beside the video.';render();}
+    else if(b.hasAttribute('data-correct')){toast='Search for a different title before confirming the import.';render();}
+  });
+  root.addEventListener('input',event=>{if(event.target.id!=='tp-search')return;search=event.target.value;const list=route==='anime'?anime:manga;root.querySelector('#tp-results').innerHTML=covers(list.filter(i=>i.title.toLowerCase().includes(search.toLowerCase())),route);});
+  window.addEventListener('openai:set_globals',event=>{const next=event.detail?.globals?.widgetState;if(!next)return;if(next.privateContent?.config)Object.assign(config,next.privateContent.config);if(next.modelContent?.screen)route=next.modelContent.screen;render();});
+  render();
+  if(globalThis.Tweak){const tweak=new Tweak({container:root,onChange:()=>{render();persist();}});tweak.addSelect(config,'animeLayout',{label:'Anime layout',options:['Featured and posters','Poster grid']});tweak.addSelect(config,'libraryLayout',{label:'Library layout',options:['List','Posters']});tweak.addToggle(config,'returning',{label:'Show a returning visitor’s Home'});}
+})();
+</script>

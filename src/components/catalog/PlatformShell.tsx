@@ -1,54 +1,44 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  BookOpen,
-  Compass,
-  Library,
-  MonitorPlay,
-  Users,
-  UserRound,
-} from "lucide-react";
+import { UserRound } from "lucide-react";
 import { Suspense, type ReactNode } from "react";
 import { HeaderFrame } from "@/components/HeaderFrame";
 import { Logo } from "@/components/Logo";
 import { useLibrary } from "./LibraryProvider";
+import { ButtonLink } from "@/components/Button";
 
 const links = [
-  { href: "/discover", label: "Discover", icon: Compass },
-  { href: "/anime", label: "Anime", icon: MonitorPlay },
-  { href: "/manga", label: "Manga", icon: BookOpen },
-  { href: "/library", label: "Library", icon: Library },
-  { href: "/rooms", label: "Rooms", icon: Users },
+  { href: "/", label: "Home" },
+  { href: "/anime", label: "Anime" },
+  { href: "/manga", label: "Manga" },
+  { href: "/library", label: "Library" },
 ];
 export function PlatformShell({ children }: { children: ReactNode }) {
   const { user } = useLibrary();
   return (
     <div className="platform flex min-h-screen flex-col">
       <header className="platform-header sticky top-0 z-40 border-b border-white/8">
-        <HeaderFrame className="flex-wrap py-4 sm:flex-nowrap sm:py-0">
-          <Link href="/" aria-label="Tandem home">
-            <Logo size={29} />
+        <HeaderFrame className="platform-header-frame">
+          <Link href="/" aria-label="Tandem home" className="platform-brand">
+            <Logo size={24} />
           </Link>
           <Suspense fallback={<Navigation pathname="" />}>
             <ActiveNavigation />
           </Suspense>
-          <Link
-            href="/account"
-            className="flex items-center gap-2 rounded-xl border border-white/12 px-3 py-2 text-xs text-zinc-300 hover:border-brand-400/50"
-          >
-            <UserRound className="size-4" />
-            <span>{user ? "My account" : "Sign in"}</span>
-          </Link>
+          <div className="platform-header-actions">
+            <Link href="/account" aria-label={user ? "My account" : "Sign in"} className="platform-account"><UserRound className="size-4" /><span>{user ? "Account" : "Sign in"}</span></Link>
+            <ButtonLink href="/rooms" size="sm">Create a room</ButtonLink>
+          </div>
         </HeaderFrame>
       </header>
-      <main className="mx-auto w-full site-width flex-1 site-gutter pb-20 pt-8 sm:pt-10">
+      <main className="platform-main mx-auto w-full site-width flex-1 site-gutter pb-20 pt-8 sm:pt-10">
         {children}
       </main>
       <footer className="border-t border-white/8">
         <div className="mx-auto flex site-width flex-wrap items-center justify-between gap-4 site-gutter py-6 text-xs text-zinc-500">
-          <span>Stories are better together.</span>
-          <div className="flex gap-5">
+          <span>Shows in sync. Time together.</span>
+          <div className="flex flex-wrap gap-x-5 gap-y-3">
             <a
               href="https://kitsu.app"
               target="_blank"
@@ -72,16 +62,15 @@ function Navigation({ pathname }: { pathname: string }) {
   return (
     <nav
       aria-label="Main navigation"
-      className="platform-nav order-3 flex w-full items-center justify-between gap-1 sm:order-none sm:w-auto sm:justify-center"
+      className="platform-nav"
     >
-      {links.map(({ href, label, icon: Icon }) => (
+      {links.map(({ href, label }) => (
         <Link
           key={href}
           href={href}
           aria-current={pathname === href ? "page" : undefined}
-          className="flex items-center gap-1.5 rounded-lg px-2 py-2 text-xs sm:px-3 sm:text-sm"
+          className="platform-nav-link"
         >
-          <Icon className="size-3.5 sm:hidden" />
           {label}
         </Link>
       ))}

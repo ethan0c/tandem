@@ -67,19 +67,9 @@ export function Browse({ kind }: { kind: MediaKind }) {
   }
   return (
     <>
-      <p className="eyebrow">
-        {kind === "anime" ? "Find your next watch" : "Turn to something good"}
-      </p>
-      <h1 className="mt-2 text-4xl font-medium tracking-tight">
-        Explore {kind}.
-      </h1>
-      <p className="mt-3 text-sm text-zinc-400">
-        {kind === "anime"
-          ? "Big feelings, new worlds, and something worth watching together."
-          : "Manga, manhwa, and manhua. Your next favorite is a page away."}
-      </p>
-      <div className="catalog-filters mt-8 flex flex-wrap gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4">
-        <label className="relative min-w-48 flex-1">
+      <div className="page-heading"><h1>{kind === "anime" ? "Anime" : "Manga"}</h1><p>{kind === "anime" ? "Find your next watch." : "Manga, manhwa, and manhua. Pick up a new story."}</p></div>
+      <div className="catalog-filters mt-7">
+        <label className="catalog-search relative">
           <Search className="pointer-events-none absolute left-3 top-3 size-4 text-zinc-500" />
           <span className="sr-only">Search titles</span>
           <input
@@ -89,7 +79,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
             className="field w-full pl-10"
           />
         </label>
-        <label>
+        <label className="filter-genre">
           <span className="sr-only">Genre</span>
           <select
             className="field"
@@ -115,7 +105,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
             ))}
           </select>
         </label>
-        <label>
+        <label className="filter-status">
           <span className="sr-only">Release status</span>
           <select
             className="field"
@@ -128,7 +118,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
             <option value="upcoming">Upcoming</option>
           </select>
         </label>
-        <label>
+        <label className="filter-year">
           <span className="sr-only">Release year</span>
           <input
             className="field w-24"
@@ -139,7 +129,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
             onChange={(e) => change(setYear, e.target.value.replace(/\D/g, ""))}
           />
         </label>
-        <label>
+        <label className="filter-sort">
           <span className="sr-only">Sort titles</span>
           <select
             className="field"
@@ -153,7 +143,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
         </label>
       </div>
       <div
-        className="mb-5 mt-6 flex items-center justify-between gap-4 text-xs text-zinc-500"
+        className="catalog-result-note mb-5 mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-zinc-400"
         aria-live="polite"
       >
         <span>

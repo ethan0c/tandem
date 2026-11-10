@@ -31,6 +31,7 @@ export interface LibraryEntry {
   subscribed: boolean;
   updatedAt: number;
   readingPosition?: { chapter: number; page: number };
+  watchPosition?: { unit: string; seconds: number };
 }
 export function mediaKey(media: Pick<CatalogTitle, "kind" | "id">) {
   return `${media.kind}:${media.id}`;

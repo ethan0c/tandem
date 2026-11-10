@@ -24,6 +24,7 @@ import {
 import { newRoomId } from "@/lib/room-id";
 import { Button, ButtonLink } from "@/components/Button";
 import { useLibrary } from "./LibraryProvider";
+import { ContentChapters } from "./ContentChapters";
 
 export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
   const [fetchedMedia, setMedia] = useState<CatalogTitle | null>(
@@ -119,7 +120,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
         </div>
         <div className="min-w-0 sm:pt-16">
           <div className="flex flex-wrap gap-2 text-xs text-zinc-400">
-            <span className="uppercase text-brand-300">{media.format}</span>
+            <span className="text-brand-300">{media.format}</span>
             <span>·</span>
             <span>{media.year || "TBA"}</span>
             <span>·</span>
@@ -173,20 +174,12 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
       </section>
       <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_320px]">
         <div>
-          <div className="mb-5 flex flex-wrap gap-2">
-            {media.genres.slice(0, 8).map((g) => (
-              <span
-                key={g}
-                className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-zinc-400"
-              >
-                {g}
-              </span>
-            ))}
-          </div>
+          <p className="mb-5 text-sm leading-7 text-zinc-400">{media.genres.slice(0, 8).join(" · ")}</p>
           <h2 className="text-lg font-medium">The story</h2>
           <p className="mt-3 whitespace-pre-line text-sm leading-7 text-zinc-400">
             {media.synopsis}
           </p>
+          <ContentChapters kind={kind} id={id} />
           {media.trailer && (
             <>
               <Button

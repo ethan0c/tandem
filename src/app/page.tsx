@@ -153,10 +153,11 @@ export default function Home() {
               <Logo size={24} />
             </Link>
             <nav aria-label="Main navigation" className="hero-nav flex items-center gap-1 text-sm text-zinc-400">
-              <Link href="/discover">Discover</Link>
+              <Link href="/anime">Anime</Link>
+              <Link href="/manga">Manga</Link>
               <Link href="/library" className="hidden sm:block">Library</Link>
-              <Link href="/plan" className="hidden md:block">Plan a night</Link>
-              <Link href="/rooms" className="hidden md:block">Rooms</Link>
+              <Link href="/plan" className="hidden lg:block">Plan a night</Link>
+              
               <a href={GITHUB} target="_blank" rel="noreferrer" className="hidden sm:flex items-center gap-1">
                 GitHub <ArrowUpRight className="size-3.5" />
               </a>

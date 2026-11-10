@@ -6,10 +6,8 @@ import { mediaKey, titleHref, type CatalogTitle } from "@/lib/catalog-types";
 import { useLibrary } from "./LibraryProvider";
 export function MediaCard({
   media,
-  rank,
 }: {
   media: CatalogTitle;
-  rank?: number;
 }) {
   const { entries, save, remove, ready } = useLibrary();
   const entry = entries.find((e) => mediaKey(e.media) === mediaKey(media));
@@ -36,20 +34,12 @@ export function MediaCard({
             </span>
           )}
           <span className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-          {rank && (
-            <span className="absolute left-3 top-3 grid size-7 place-items-center rounded-lg bg-black/60 text-xs font-semibold backdrop-blur">
-              {String(rank).padStart(2, "0")}
-            </span>
-          )}
           {media.rating && (
             <span className="absolute bottom-3 left-3 flex items-center gap-1 text-xs font-semibold">
               <Star className="size-3 fill-amber-300 text-amber-300" />
               {media.rating.toFixed(1)}
             </span>
           )}
-          <span className="absolute bottom-3 right-3 rounded bg-black/50 px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
-            {media.format}
-          </span>
         </Link>
         <button
           type="button"
@@ -60,7 +50,7 @@ export function MediaCard({
               : `Save ${media.title} to library`
           }
           aria-pressed={!!entry}
-          className={`save-title absolute right-2 top-2 grid size-8 place-items-center rounded-lg border border-white/20 backdrop-blur ${entry ? "bg-brand-600 text-white" : "bg-black/65 text-white hover:bg-brand-600"}`}
+          className={`save-title absolute right-2 top-2 grid size-9 place-items-center rounded-lg border border-white/20 backdrop-blur ${entry ? "bg-brand-600 text-white" : "bg-black/65 text-white hover:bg-brand-600"}`}
           onClick={() => (entry ? remove(media) : save(media))}
         >
           {entry ? (
@@ -72,11 +62,11 @@ export function MediaCard({
       </div>
       <Link
         href={titleHref(media)}
-        className="mt-3 block truncate text-sm font-medium text-zinc-100 hover:text-brand-300"
+        className="media-title mt-3 block text-sm font-medium text-zinc-100 hover:text-brand-300"
       >
         {media.title}
       </Link>
-      <p className="mt-1 truncate text-xs text-zinc-500">
+      <p className="mt-1 text-xs leading-relaxed text-zinc-400">
         {media.year || "TBA"}
         <span className="mx-1.5 text-zinc-700">·</span>
         {media.total

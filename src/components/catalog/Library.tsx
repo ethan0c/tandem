@@ -124,14 +124,14 @@ export function Library() {
       </div>
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <div
-          className="flex gap-1 rounded-xl border border-white/10 p-1"
+          className="library-tabs flex gap-1"
           role="group"
           aria-label="Library type"
         >
           {["all", "anime", "manga"].map((k) => (
             <button
               key={k}
-              className={`rounded-lg px-4 py-2 text-xs capitalize ${kind === k ? "bg-white/10 text-white" : "text-zinc-500"}`}
+              className={`library-tab px-4 py-2 text-sm capitalize ${kind === k ? "library-tab-active text-white" : "text-zinc-500"}`}
               aria-pressed={kind === k}
               onClick={() => setKind(k)}
             >
