@@ -79,7 +79,8 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   }, [persist, flush]);
 
   useEffect(() => {
-    persist(read(KEY)); setReady(true);
+    let mounted = true;
+    queueMicrotask(() => { if (mounted) { persist(read(storageKey.current)); setReady(true); } });
     const onStorage = (event: StorageEvent) => { if (event.key === storageKey.current) { persist(read(storageKey.current)); outbox.current = readOutbox(storageKey.current); } };
     window.addEventListener("storage", onStorage);
     const subscription = supabase?.auth.onAuthStateChange((_event, session) => {
@@ -96,7 +97,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     const onFocus = () => { void sync(); };
     window.addEventListener("focus", onFocus);
     window.addEventListener("online", onFocus);
-    return () => { subscription?.data.subscription.unsubscribe(); window.removeEventListener("storage", onStorage); window.removeEventListener("focus", onFocus); window.removeEventListener("online", onFocus); };
+    return () => { mounted = false; subscription?.data.subscription.unsubscribe(); window.removeEventListener("storage", onStorage); window.removeEventListener("focus", onFocus); window.removeEventListener("online", onFocus); };
   }, [persist, sync]);
 
   const upload = useCallback((rows: LibraryEntry[], deleted = false) => {

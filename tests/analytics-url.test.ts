@@ -7,6 +7,7 @@ test('keeps public pages as they are', () => {
 });
 
 test('room codes and invite details never reach analytics', () => {
+  assert.equal(cleanAnalyticsUrl('https://www.ilovemygf.site/read/abcd-efgh?title=One+Piece'), 'https://www.ilovemygf.site/read/[id]');
   assert.equal(cleanAnalyticsUrl('https://www.ilovemygf.site/room/k3f9-x2qa'), 'https://www.ilovemygf.site/room/[id]');
   assert.equal(cleanAnalyticsUrl('https://www.ilovemygf.site/call/k3f9-x2qa'), 'https://www.ilovemygf.site/call/[id]');
   assert.equal(

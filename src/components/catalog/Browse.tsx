@@ -24,8 +24,6 @@ export function Browse({ kind }: { kind: MediaKind }) {
       finally { if (!controller.signal.aborted) setBusy(false); }
     }, 350);
     return () => { clearTimeout(timer); controller.abort(); };
-  // Every query dimension is an explicit dependency; result is only read through the state updater.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kind, q, genre, sort, status, year, page]);
   function change(set: (value: string) => void, value: string) { set(value); setPage(1); }
   return <><p className="eyebrow">{kind === "anime" ? "Find your next watch" : "Turn to something good"}</p><h1 className="mt-2 text-4xl font-medium tracking-tight">Explore {kind}.</h1><p className="mt-3 text-sm text-zinc-400">{kind === "anime" ? "Big feelings, new worlds, and something worth watching together." : "Manga, manhwa, and manhua. Your next favorite is a page away."}</p>

@@ -1,4 +1,6 @@
 "use client";
+/* Page images are local blob URLs with unknown dimensions and never go through an image server. */
+/* eslint-disable @next/next/no-img-element */
 import { useEffect, useRef, useState } from "react";
 import { BookOpen, Check, ChevronLeft, ChevronRight, Copy, FileImage, LockKeyhole, LogOut, MessageCircle, Mic, MicOff, Users } from "lucide-react";
 import { Button } from "@/components/Button";
