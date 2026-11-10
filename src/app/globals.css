@@ -583,8 +583,8 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
 .viewer-loading-note { position: absolute; z-index: 30; top: 20px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); padding: 12px 18px; border: 1px solid rgb(255 255 255 / 0.12); border-radius: 10px; background: #201b29; color: #e4e4e7; font-size: 13px; }
 .video-loading-note { pointer-events: none; position: absolute; inset: 0; display: grid; place-items: center; color: #a1a1aa; font-size: 13px; }
 .viewer-load-error { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border: 1px solid rgb(244 63 94 / 0.25); border-radius: 12px; font-size: 13px; color: #fda4af; }
-.reader-image-frame { position: relative; display: flex; align-items: center; justify-content: center; height: 75svh; }
-.reader-page[data-fit="width"] .reader-image-frame { height: auto; }
+.reader-image-frame { position: relative; display: flex; align-items: center; justify-content: center; max-height: 75svh; }
+.reader-page[data-fit="width"] .reader-image-frame { max-height: none; }
 .reader-image-loading { position: absolute; inset: 0; display: grid; place-items: center; color: #a1a1aa; font-size: 13px; }
 .reader-image-pending { opacity: 0; }
 .reader-image-ready { opacity: 1; transition: opacity 150ms ease; }

@@ -2,11 +2,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Bookmark, Check, Star } from "lucide-react";
+import { useState } from "react";
 import { mediaKey, titleHref, type CatalogTitle } from "@/lib/catalog-types";
 import { useLibrary } from "./LibraryProvider";
 export function MediaCard({ media }: { media: CatalogTitle }) {
   const { entries, save, remove, ready } = useLibrary();
   const entry = entries.find((e) => mediaKey(e.media) === mediaKey(media));
+  const [artworkReady, setArtworkReady] = useState(false);
+  const [artworkFailed, setArtworkFailed] = useState(false);
   return (
     <article className="media-card group min-w-0">
       <div className="relative">
@@ -15,15 +18,20 @@ export function MediaCard({ media }: { media: CatalogTitle }) {
           className="poster-link relative block overflow-hidden rounded-xl bg-white/5"
           aria-label={`View ${media.title}`}
         >
-          {media.poster ? (
+          {media.poster && !artworkFailed ? (
+            <>
+            {!artworkReady && <span aria-hidden="true" className="loading-shape absolute inset-0" />}
             <Image
               src={media.poster}
               alt=""
               fill
               sizes="(max-width: 639px) 45vw, (max-width: 1023px) 28vw, 180px"
               unoptimized
-              className="object-cover transition duration-300 group-hover:scale-105"
+              className={`object-cover transition duration-300 motion-reduce:transition-none group-hover:scale-105 ${artworkReady ? "opacity-100" : "opacity-0"}`}
+              onLoad={() => setArtworkReady(true)}
+              onError={() => setArtworkFailed(true)}
             />
+            </>
           ) : (
             <span className="absolute inset-0 grid place-items-center text-brand-300">
               {media.title}

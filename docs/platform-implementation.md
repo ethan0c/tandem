@@ -30,6 +30,20 @@ Kitsu supplies metadata and artwork, not playable episodes or manga pages. Anime
 
 The saved catalog selection in `src/content/catalog.json` was fetched from Kitsu on 10 November 2026. In-process API caching lasts 15 minutes and is bounded to 200 requests. It is intentionally separate from private library data.
 
+## Watch and read controls
+
+Anime and manga use separate viewer components while keeping the existing raised buttons and sentence-case labels. Anime keeps native playback, seeking, volume and mobile inline playback, and adds ten-second seek buttons, speed, fullscreen, supported picture in picture, keyboard shortcuts, and format switching that preserves position and speed. Controls only list formats actually supplied by the source.
+
+Manga supports page/scroll modes, left/right reading direction, fit-to-screen/width, fullscreen where supported, swipe and arrow-key navigation, page selection, and chapter selection with previous/next navigation. Alternate releases of the same chapter are skipped when advancing. Scroll mode tracks the visible reading page. Chapter completion is explicit, and neither viewer advances automatically. The selected reading settings survive chapter changes.
+
+Episode/chapter navigation uses numbers rather than provider story titles. Unfinished titles are omitted from the rendered series list until the user explicitly reveals them or marks that content complete. Starting a chapter does not reveal its title. Comments are not implemented. Any future comments must be scoped to a series and episode/chapter, exclude content beyond the reader's confirmed progress, and require a separate reveal for spoiler-tagged text, previews and replies. This same restriction must apply to search, notifications and activity previews; a blurred comment body alone is insufficient.
+
+## Loading and navigation
+
+Title and player routes have dedicated Suspense/loading placeholders, and client-fetched uncached titles use the same title skeleton. Title-load failures offer retry. Chapter/episode transitions keep the previous viewer mounted with an explicit loading status and disable its controls until the requested unit arrives; failure preserves the previous content and offers retry. New chapter images reserve an image frame and show a page-loading state; adjacent pages preload. Existing catalog results and chapter lists stay visible while filters or list pages refresh. Empty search results use a skeleton during the next request rather than an incorrect empty-state message.
+
+All loading motion respects reduced-motion preferences. No artificial minimum wait or timed progress percentage is introduced. Public metadata responses have a short browser cache; title and provider lookups run concurrently rather than serially. Signed chapter/playback responses remain uncached.
+
 ## Supabase
 
 The linked Tandem project is `appjtkiyiylosjcnkzpm`. Its public client settings are configured in ignored `.env.local`. The migration `20261110190000_library.sql` is applied and recorded in remote migration history.
@@ -47,6 +61,8 @@ npm run build
 node e2e/reading-sync.mjs
 node e2e/platform-mobile.mjs
 node e2e/content.mjs
+node e2e/viewer-controls.mjs
+node e2e/loading.mjs
 node scripts/check-supabase.mjs <project-ref>
 ```
 

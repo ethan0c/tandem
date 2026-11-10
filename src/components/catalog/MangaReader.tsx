@@ -125,7 +125,7 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
           const dy = event.changedTouches[0].clientY - start.y;
           if (Math.abs(dx) > 70 && Math.abs(dy) < 50) go(position + ((dx < 0) === (settings.direction === "ltr") ? 1 : -1));
         }}>
-        {settings.mode === "page" ? <div className="reader-image-frame" style={settings.fit === "width" ? { aspectRatio: pageRatio } : undefined} aria-busy={loadedPage !== pages[position]}>
+        {settings.mode === "page" ? <div className="reader-image-frame" style={{ aspectRatio: pageRatio }} aria-busy={loadedPage !== pages[position]}>
           {loadedPage !== pages[position] && <div className="reader-image-loading loading-shape" role="status"><span>Loading page {position + 1}…</span></div>}
           <img src={pages[position]} alt={`Page ${position + 1} of ${label}`} referrerPolicy="no-referrer" className={loadedPage === pages[position] ? "reader-image-ready" : "reader-image-pending"} onLoad={(event) => { setPageRatio(event.currentTarget.naturalWidth / event.currentTarget.naturalHeight); setLoadedPage(pages[position]); }} onError={() => onFailure("This page couldn’t be loaded. Retry to refresh the page source.")} />
         </div> : pages.map((url, index) => (

@@ -17,7 +17,9 @@
     "e2e:extension": "node e2e/extension-live.mjs",
     "e2e:reading": "node e2e/reading-sync.mjs",
     "e2e:mobile": "node e2e/platform-mobile.mjs",
-    "e2e:content": "node e2e/content.mjs"
+    "e2e:content": "node e2e/content.mjs",
+    "e2e:viewer": "node e2e/viewer-controls.mjs",
+    "e2e:loading": "node e2e/loading.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

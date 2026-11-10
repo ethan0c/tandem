@@ -100,6 +100,14 @@ try {
     await page.locator('h1:visible').click();
     await page.keyboard.press('l');
     assert.ok(await page.locator('video').evaluate(v => v.currentTime >= 9.9));
+    if (width === 390 && engine === 'chromium') {
+      await page.getByRole('combobox', { name: 'Video format' }).selectOption('1');
+      await page.waitForFunction(() => {
+        const video = document.querySelector('video');
+        return video?.readyState >= 1 && video.currentSrc.includes('wikimedia') && video.currentTime >= 9.9;
+      }, null, { timeout: 30000 });
+      assert.equal(await page.locator('video').evaluate(v => v.playbackRate), 1.5);
+    }
     await geometry(page, `${width} anime`);
     await page.screenshot({ path: `${output}/${width}-anime.png`, fullPage: true });
     console.log(`PASS ${engine} ${width}px: spoiler reveals, chapter navigation, RTL keys, sizing, scroll progress, video speed/seeking, chevrons and layout.`);

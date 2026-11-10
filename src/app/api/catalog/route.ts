@@ -8,12 +8,14 @@ export async function GET(request: Request) {
   if (id) {
     if (!/^\d{1,10}$/.test(id))
       return Response.json({ error: "Invalid title." }, { status: 400 });
-    const title = await getCatalogTitle(kind, id);
+    const [title, providers] = await Promise.all([
+      getCatalogTitle(kind, id),
+      kind === "anime" ? getProviders(id) : Promise.resolve([]),
+    ]);
     if (!title)
       return Response.json({ error: "Title not found." }, { status: 404 });
-    return Response.json({
-      title,
-      providers: kind === "anime" ? await getProviders(id) : [],
+    return Response.json({ title, providers }, {
+      headers: { "Cache-Control": "public, max-age=60" },
     });
   }
   const result = await browseCatalog({
@@ -27,5 +29,7 @@ export async function GET(request: Request) {
     sort: p.get("sort") || "popular",
     page: Math.min(100, Math.max(1, Number(p.get("page")) || 1)),
   });
-  return Response.json(result);
+  return Response.json(result, {
+    headers: { "Cache-Control": "public, max-age=60" },
+  });
 }

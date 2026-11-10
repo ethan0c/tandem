@@ -76,7 +76,7 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
       `/${kind === "manga" ? "read" : "room"}/${newRoomId()}?${togetherParams}`,
     );
   const changingUnit = !failure && !!playback && (loading || playback.unit.id !== unitId);
-  if ((!ready || (!catalog.data && catalog.pending) || loading) && !playback) return <ViewerSkeleton kind={kind} />;
+  if ((!ready || (!catalog.data && catalog.pending) || (unitId && !failure && !catalog.error)) && !playback) return <ViewerSkeleton kind={kind} />;
   return (
     <>
       <Link
@@ -142,7 +142,7 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
           <p className="mt-7 text-xs leading-6 text-zinc-400">
             {playback.credit}{" "}
             <a
-              className="underline underline-offset-4 hover:text-white"
+              className="whitespace-nowrap underline underline-offset-4 hover:text-white"
               href={playback.sourceUrl}
               target="_blank"
               rel="noreferrer"

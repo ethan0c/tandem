@@ -48,11 +48,12 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
           </label>
         )}
       </div>
-      {content.pending ? (
-        <p className="py-4 text-sm text-zinc-400" role="status">
-          Checking available {kind === "anime" ? "episodes" : "chapters"}…
-        </p>
-      ) : content.error ? (
+      {content.pending && !content.data ? (
+        <div role="status" aria-busy="true" aria-label="Loading available content">
+          <span className="sr-only">Checking available {kind === "anime" ? "episodes" : "chapters"}…</span>
+          <div className="space-y-3" aria-hidden="true">{[0, 1, 2].map((index) => <div key={index} className="loading-shape h-16 w-full" />)}</div>
+        </div>
+      ) : content.error && !content.data ? (
         <div className="space-y-4">
           <p role="status" className="text-sm text-zinc-400">
             {content.error}
@@ -63,6 +64,8 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
         </div>
       ) : (
         <>
+          {content.error && <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-zinc-400" role="alert"><p>{content.error}</p><Button variant="ghost" size="sm" onClick={content.retry}>Try again</Button></div>}
+          <p className="mb-2 min-h-5 text-xs text-zinc-400" role="status">{content.pending ? "Updating available content…" : ""}</p>
           {content.data?.source && (
             <p className="mb-4 text-xs text-zinc-400">
               Source: {content.data.source}
@@ -79,7 +82,7 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
               Show unfinished {kind === "anime" ? "episode" : "chapter"} titles (may contain spoilers)
             </label>
           )}
-          <div className="chapter-list">
+          <div className="chapter-list" inert={content.pending} aria-busy={content.pending}>
             {content.data?.units.map((unit) => (
               <div key={unit.id} className="chapter-row">
                 <div className="min-w-0">
@@ -113,7 +116,7 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
               <Button
                 variant="ghost"
                 size="sm"
-                disabled={offset === 0}
+                disabled={content.pending || offset === 0}
                 onClick={() => setOffset((n) => Math.max(0, n - 100))}
               >
                 Previous chapters
@@ -121,7 +124,7 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
               <Button
                 variant="ghost"
                 size="sm"
-                disabled={!content.data?.hasMore}
+                disabled={content.pending || !content.data?.hasMore}
                 onClick={() => setOffset((n) => n + 100)}
               >
                 More chapters

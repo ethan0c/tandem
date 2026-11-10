@@ -30,7 +30,7 @@ export function ViewerSkeleton({ kind }: { kind?: MediaKind }) {
       <div className="loading-shape h-4 w-28" />
       <div className="loading-shape h-9 w-80 max-w-full" />
       <div className="loading-shape h-4 w-48" />
-      <div className={`loading-shape rounded-xl ${kind === "manga" ? "mx-auto h-[75svh] max-w-[850px]" : "aspect-video"}`} />
+      <div className={`loading-shape rounded-xl ${kind === "manga" ? "mx-auto aspect-[0.7] max-h-[75svh] max-w-[850px]" : "aspect-video"}`} />
       <div className="loading-shape mx-auto h-11 w-full max-w-[600px]" />
     </div>
   </section>;
