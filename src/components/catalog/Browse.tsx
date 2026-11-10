@@ -176,11 +176,11 @@ export function Browse({ kind }: { kind: MediaKind }) {
       )}
       {result.items.length ? (
         <div
-          className={`media-grid transition-opacity motion-reduce:transition-none ${busy ? "opacity-60" : ""}`}
+          className="media-grid"
           aria-busy={busy}
         >
-          {result.items.map((media) => (
-            <MediaCard key={media.id} media={media} />
+          {result.items.map((media, index) => (
+            <MediaCard key={media.id} media={media} eager={index < 2} />
           ))}
         </div>
       ) : busy ? (

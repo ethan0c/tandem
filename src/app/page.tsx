@@ -10,7 +10,6 @@ import { LandingMotion } from "@/components/landing/LandingMotion";
 import { RotatingHeadline } from "@/components/landing/RotatingHeadline";
 import { RejoinRoom } from "@/components/landing/RejoinRoom";
 import { Preview } from "@/components/landing/Preview";
-import { IntroLoader } from "@/components/landing/IntroLoader";
 import { DISCORD_ADD_URL, EXTENSION_URL, SITE_URL } from "@/lib/links";
 
 const madeForTwo = [
@@ -139,7 +138,6 @@ const structuredData = [
 export default function Home() {
   return (
     <LandingMotion>
-      <IntroLoader />
       <script
         type="application/ld+json"
         // Escaped so nothing in the text can close the script tag.

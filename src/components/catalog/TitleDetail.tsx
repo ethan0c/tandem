@@ -102,8 +102,8 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
             src={media.cover}
             alt=""
             fill
-            sizes="1200px"
-            unoptimized
+            sizes="(max-width: 1279px) 100vw, 1184px"
+            loading="eager"
             className="-z-20 object-cover opacity-60"
           />
         )}
@@ -116,8 +116,9 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
               src={media.poster}
               alt={`${media.title} cover`}
               fill
-              unoptimized
-              sizes="180px"
+              sizes="(max-width: 639px) 128px, 180px"
+              loading="eager"
+              fetchPriority="high"
               className="object-cover"
             />
           )}

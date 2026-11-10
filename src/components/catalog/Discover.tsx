@@ -28,9 +28,8 @@ export function Discover() {
             src={featured.cover}
             alt=""
             fill
-            priority
+            preload
             sizes="(max-width: 700px) 100vw, 1200px"
-            unoptimized
             className="-z-20 object-cover object-center"
           />
         )}
