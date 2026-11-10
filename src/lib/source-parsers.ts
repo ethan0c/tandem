@@ -6,6 +6,17 @@ import type { ContentUnit } from "./content-types";
 type ObjectValue = Record<string, unknown>;
 const record = (value: unknown): ObjectValue => value && typeof value === "object" && !Array.isArray(value) ? value as ObjectValue : {};
 const list = (value: unknown): unknown[] => Array.isArray(value) ? value : [];
+function firstList(value: unknown, keys: string[]): unknown[] {
+  if (Array.isArray(value)) return value;
+  const root = record(value);
+  for (const key of keys) {
+    const nested = root[key];
+    if (Array.isArray(nested)) return nested;
+    const item = record(nested);
+    for (const name of ["data", "results", "items", "episodes"]) if (Array.isArray(item[name])) return item[name] as unknown[];
+  }
+  return [];
+}
 const string = (value: unknown): string => typeof value === "string" ? value.trim() : "";
 const number = (value: unknown): number => typeof value === "number" ? value : Number(value);
 
@@ -18,8 +29,7 @@ export function pickExactTitle<T extends { title: string; year?: number | null }
 }
 
 export function parseReAnimeSearch(value: unknown): { slug: string; title: string; year: number | null; anilist: string }[] {
-  const root = record(value);
-  const entries = Array.isArray(value) ? value : list(root.data || root.results || root.anime || root.items);
+  const entries = firstList(value, ["data", "results", "anime", "items"]);
   return entries.flatMap((entry) => {
     const item = record(entry);
     const slug = string(item.slug || item.id);
@@ -31,11 +41,10 @@ export function parseReAnimeSearch(value: unknown): { slug: string; title: strin
 }
 
 export function parseReAnimeEpisodes(value: unknown): ContentUnit[] {
-  const root = record(value);
-  const entries = Array.isArray(value) ? value : list(root.data || root.episodes || root.results);
+  const entries = firstList(value, ["data", "episodes", "results"]);
   return entries.flatMap((entry) => {
     const item = record(entry);
-    const n = number(item.number ?? item.episode ?? item.episode_number ?? item.ep);
+    const n = number(item.number ?? item.episode_number ?? item.episodeNumber ?? item.episode ?? item.ep);
     if (!Number.isInteger(n) || n < 1 || n > 10000) return [];
     return [{ id: `ra-${n}`, number: n, label: `Episode ${n}`, title: string(item.title || item.name), language: "ja" }];
   }).sort((a, b) => a.number - b.number);

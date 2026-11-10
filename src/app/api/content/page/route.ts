@@ -14,10 +14,12 @@ export async function GET(request: Request) {
     const source = await weebPageUrl(media, unit, page);
     if (!source) return new Response("Page not found.", { status: 404 });
     const url = new URL(source);
-    if (url.protocol !== "https:" || url.username || url.password || url.hostname === "localhost" || url.hostname.endsWith(".localhost") || /^\d+\.\d+\.\d+\.\d+$/.test(url.hostname))
+    const allowedHosts = (process.env.WEEBCENTRAL_IMAGE_HOSTS || "official.lowee.us,temp.compsci88.com")
+      .split(",").map((host) => host.trim().toLowerCase()).filter(Boolean);
+    if (url.protocol !== "https:" || url.username || url.password || !allowedHosts.includes(url.hostname.toLowerCase()))
       return new Response("Unsupported page source.", { status: 502 });
     const image = await fetch(url, {
-      headers: { Accept: "image/avif,image/webp,image/png,image/jpeg,image/gif", Referer: "https://weebcentral.com/" },
+      headers: { Accept: "image/avif,image/webp,image/png,image/jpeg,image/gif", Referer: `${process.env.WEEBCENTRAL_ORIGIN || "https://weebcentral.com"}/` },
       redirect: "error",
       signal: AbortSignal.timeout(15_000),
       cache: "no-store",

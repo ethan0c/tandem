@@ -120,7 +120,7 @@ async function weebSourcePlayback(media: CatalogTitle, unitId: string): Promise<
   const unit = (await weebChapters(match.id)).find((item) => item.id === unitId);
   if (!unit) return null;
   const sourceUrl = `${WEEBCENTRAL}/chapters/${chapterId}`;
-  const html = await sourceRequest<string>(`${sourceUrl}/images?reading_style=long_strip`, true, 30_000, { "HX-Request": "true", "HX-Current-URL": sourceUrl });
+  const html = await sourceRequest<string>(`${sourceUrl}/images?is_prev=False&reading_style=long_strip`, true, 30_000, { "HX-Request": "true", "HX-Current-URL": sourceUrl });
   const pages = parseWeebPages(html);
   if (!pages.length) throw new Error("WeebCentral returned no pages for this chapter.");
   return { source: "WeebCentral", credit: "Chapter pages supplied by WeebCentral", sourceUrl, unit, pages };
