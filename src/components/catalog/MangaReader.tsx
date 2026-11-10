@@ -53,11 +53,15 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure }
     if (settings.mode !== "scroll" || !canvas.current) return;
     canvas.current.querySelector(`[data-page="${currentPage.current}"]`)?.scrollIntoView({ block: "start" });
     // A narrow viewport band follows the page being read, rather than the last loaded image.
+    const visible = new Set<number>();
     const observer = new IntersectionObserver((observed) => {
-      const visible = observed.filter((item) => item.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-      const next = visible[0]?.target.getAttribute("data-page");
-      if (next !== undefined && next !== null) setPosition(Number(next));
-    }, { rootMargin: "-15% 0px -65% 0px", threshold: 0 });
+      for (const item of observed) {
+        const page = Number(item.target.getAttribute("data-page"));
+        if (item.isIntersecting) visible.add(page);
+        else visible.delete(page);
+      }
+      if (visible.size) setPosition(Math.min(...visible));
+    }, { rootMargin: `${-Math.round(window.innerHeight * 0.15)}px 0px ${-Math.round(window.innerHeight * 0.65)}px 0px`, threshold: 0 });
     canvas.current.querySelectorAll("[data-page]").forEach((element) => observer.observe(element));
     return () => observer.disconnect();
   }, [settings.mode]);
