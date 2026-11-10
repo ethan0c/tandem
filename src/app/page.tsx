@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, CalendarHeart, Clapperboard, Heart, History, Smartphone, Video } from "lucide-react";
-import { HeaderFrame } from "@/components/HeaderFrame";
+import { PlatformHeader } from "@/components/catalog/PlatformShell";
+import { LibraryProvider } from "@/components/catalog/LibraryProvider";
 import { Logo } from "@/components/Logo";
 import { ButtonLink } from "@/components/Button";
 import { Footer } from "@/components/landing/Footer";
@@ -147,25 +148,7 @@ export default function Home() {
       />
       {/* Theater */}
       <section className="hero-shell relative text-white">
-        <header className="relative z-10">
-          <HeaderFrame>
-            <Link href="/" aria-label="Tandem home" className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-brand-400 focus-visible:outline-offset-4">
-              <Logo size={24} />
-            </Link>
-            <nav aria-label="Main navigation" className="hero-nav flex items-center gap-1 text-sm text-zinc-400">
-              <Link href="/anime">Anime</Link>
-              <Link href="/manga">Manga</Link>
-              <Link href="/library" className="hidden sm:block">Library</Link>
-              <Link href="/plan" className="hidden lg:block">Plan a night</Link>
-              
-              <a href={GITHUB} target="_blank" rel="noreferrer" className="hidden sm:flex items-center gap-1">
-                GitHub <ArrowUpRight className="size-3.5" />
-              </a>
-              <span aria-hidden="true" className="mx-2 hidden h-5 w-px bg-white/10 md:block" />
-              <ButtonLink href="#start" size="sm">Create a room</ButtonLink>
-            </nav>
-          </HeaderFrame>
-        </header>
+        <LibraryProvider><PlatformHeader /></LibraryProvider>
 
         <div className="hero-body relative z-10 mx-auto flex site-width flex-1 flex-col items-center site-gutter">
           <div className="hero-intro flex flex-col items-center text-center">

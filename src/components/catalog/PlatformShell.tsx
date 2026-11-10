@@ -15,23 +15,9 @@ const links = [
   { href: "/library", label: "Library" },
 ];
 export function PlatformShell({ children }: { children: ReactNode }) {
-  const { user } = useLibrary();
   return (
     <div className="platform flex min-h-screen flex-col">
-      <header className="platform-header sticky top-0 z-40 border-b border-white/8">
-        <HeaderFrame className="platform-header-frame">
-          <Link href="/" aria-label="Tandem home" className="platform-brand">
-            <Logo size={24} />
-          </Link>
-          <Suspense fallback={<Navigation pathname="" />}>
-            <ActiveNavigation />
-          </Suspense>
-          <div className="platform-header-actions">
-            <Link href="/account" aria-label={user ? "My account" : "Sign in"} className="platform-account"><UserRound className="size-4" /><span>{user ? "Account" : "Sign in"}</span></Link>
-            <ButtonLink href="/rooms" size="sm">Create a room</ButtonLink>
-          </div>
-        </HeaderFrame>
-      </header>
+      <PlatformHeader />
       <main className="platform-main mx-auto w-full site-width flex-1 site-gutter pb-20 pt-8 sm:pt-10">
         {children}
       </main>
@@ -76,4 +62,22 @@ function Navigation({ pathname }: { pathname: string }) {
       ))}
     </nav>
   );
+}
+
+export function PlatformHeader() {
+  const { user } = useLibrary();
+  return (<header className="platform-header sticky top-0 z-40 border-b border-white/8">
+        <HeaderFrame className="platform-header-frame">
+          <Link href="/" aria-label="Tandem home" className="platform-brand">
+            <Logo size={24} />
+          </Link>
+          <Suspense fallback={<Navigation pathname="" />}>
+            <ActiveNavigation />
+          </Suspense>
+          <div className="platform-header-actions">
+            <Link href="/account" aria-label={user ? "My account" : "Sign in"} className="platform-account"><UserRound className="size-4" /><span>{user ? "Account" : "Sign in"}</span></Link>
+            <ButtonLink href="/rooms" size="sm">Create a room</ButtonLink>
+          </div>
+        </HeaderFrame>
+      </header>);
 }
