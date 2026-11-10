@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Cloud, LogOut, ShieldCheck } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Button, ButtonLink } from "@/components/Button";
 import { useLibrary } from "./LibraryProvider";
 export function Account() {
@@ -11,13 +11,15 @@ export function Account() {
   const [message, setMessage] = useState("");
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!supabase) return;
+    if (!isSupabaseConfigured || busy) return;
     setBusy(true);
     setMessage("");
     const form = new FormData(event.currentTarget);
     const email = String(form.get("email"));
     const password = String(form.get("password") || "");
     try {
+      const supabase = await getSupabase();
+      if (!supabase) throw new Error("Accounts are unavailable.");
       if (mode === "reset") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${location.origin}/account/reset`,
@@ -65,7 +67,7 @@ export function Account() {
           ? "Your anime, manga, and progress are saved to your private account."
           : "Sign in to sync your library across devices. You can always browse and join rooms as a guest."}
       </p>
-      {!supabase ? (
+      {!isSupabaseConfigured ? (
         <div className="mt-7 rounded-2xl border border-white/10 p-6">
           <p className="text-sm text-zinc-300">
             Accounts are not configured on this installation yet.
@@ -90,7 +92,8 @@ export function Account() {
             variant="ghost"
             className="mt-4 w-full"
             onClick={async () => {
-              await supabase!.auth.signOut();
+              const client = await getSupabase();
+              await client?.auth.signOut();
             }}
           >
             <LogOut className="size-4" />
@@ -199,18 +202,20 @@ export function ResetPassword() {
         className="mt-8 space-y-5"
         onSubmit={async (e) => {
           e.preventDefault();
-          if (!supabase) return;
+          if (!isSupabaseConfigured || busy) return;
           setBusy(true);
           const password = String(
             new FormData(e.currentTarget).get("password"),
           );
-          const { error } = await supabase.auth.updateUser({ password });
-          setMessage(
-            error
-              ? error.message
-              : "Password updated. You can return to your library.",
-          );
-          setBusy(false);
+          try {
+            const client = await getSupabase();
+            if (!client) throw new Error("Accounts are unavailable.");
+            const { error } = await client.auth.updateUser({ password });
+            if (error) throw error;
+            setMessage("Password updated. You can return to your library.");
+          } catch (error) {
+            setMessage(error instanceof Error ? error.message : "Couldn’t connect. Try again.");
+          } finally { setBusy(false); }
         }}
       >
         <label className="block text-sm">
@@ -224,7 +229,7 @@ export function ResetPassword() {
             className="field mt-2 w-full"
           />
         </label>
-        <Button disabled={busy || !supabase}>Update password</Button>
+        <Button disabled={busy || !isSupabaseConfigured}>Update password</Button>
       </form>
       <p className="mt-4 text-sm" role="status">
         {message}

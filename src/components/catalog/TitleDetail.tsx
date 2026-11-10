@@ -26,6 +26,8 @@ import { Button, ButtonLink } from "@/components/Button";
 import { useLibrary } from "./LibraryProvider";
 import { ContentChapters } from "./ContentChapters";
 import { TitleSkeleton } from "./LoadingStates";
+import { useTitlePreview } from "./useTitlePreview";
+import { fetchPublicCatalog } from "@/lib/public-catalog-client";
 
 export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
   const [fetchedMedia, setMedia] = useState<CatalogTitle | null>(
@@ -43,19 +45,14 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
   const { entries, save, ready } = useLibrary();
   const router = useRouter();
   const entry = entries.find((e) => mediaKey(e.media) === `${kind}:${id}`);
-  const media = fetchedMedia || entry?.media || null;
+  const preview = useTitlePreview(kind, id);
+  const media = fetchedMedia || preview || entry?.media || null;
   const [progress, setProgress] = useState<string | null>(null);
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`/api/catalog?kind=${kind}&id=${id}`, { signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok)
-          throw new Error(
-            "This title couldn’t be loaded. Try again from the catalog.",
-          );
-        return response.json();
-      })
+    fetchPublicCatalog<{ title: CatalogTitle; providers: { name: string; url: string }[] }>(`/api/catalog?kind=${kind}&id=${id}`, retry > 0)
       .then((data) => {
+        if (controller.signal.aborted) return;
         setMedia(data.title);
         setProviders(data.providers);
       })

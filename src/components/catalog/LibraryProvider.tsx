@@ -15,7 +15,7 @@ import {
   type LibraryEntry,
 } from "@/lib/catalog-types";
 import { isLibraryEntry, mergeEntries } from "@/lib/library";
-import { supabase } from "@/lib/supabase";
+import { getSupabase, needsAccountClient, onSupabaseReady, supabase } from "@/lib/supabase";
 
 const KEY = "tandem:library:v1";
 interface LibraryContext {
@@ -184,8 +184,9 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    const restoreAccount = needsAccountClient();
     queueMicrotask(() => {
-      if (mounted) {
+      if (mounted && !restoreAccount) {
         persist(read(storageKey.current));
         setReady(true);
       }
@@ -197,19 +198,31 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       }
     };
     window.addEventListener("storage", onStorage);
-    const subscription = supabase?.auth.onAuthStateChange((_event, session) => {
+    let unsubscribeAuth: (() => void) | undefined;
+    const unsubscribeClient = onSupabaseReady((client) => {
+      const subscription = client.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
       const next = session?.user || null;
-      if (next?.id === userRef.current?.id) return;
+      if (next?.id === userRef.current?.id) {
+        if (_event === "INITIAL_SESSION") { persist(read(storageKey.current)); setReady(true); }
+        return;
+      }
       ++syncGeneration.current;
       userRef.current = next;
       storageKey.current = next ? `${KEY}:${next.id}` : KEY;
       outbox.current = readOutbox(storageKey.current);
       setUser(next);
       persist(read(storageKey.current));
+      setReady(true);
       if (next) {
         setNotice("Syncing your library…");
         queueMicrotask(() => void sync());
       } else setNotice("");
+      });
+      unsubscribeAuth = () => subscription.data.subscription.unsubscribe();
+    });
+    if (restoreAccount) void getSupabase().catch(() => {
+      if (mounted) { persist(read(storageKey.current)); setReady(true); setNotice("Account connection is unavailable. Try signing in again."); }
     });
     const onFocus = () => {
       void sync();
@@ -218,7 +231,8 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     window.addEventListener("online", onFocus);
     return () => {
       mounted = false;
-      subscription?.data.subscription.unsubscribe();
+      unsubscribeClient();
+      unsubscribeAuth?.();
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("online", onFocus);

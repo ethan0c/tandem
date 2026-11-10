@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import type { MediaKind } from "@/lib/catalog-types";
 import type { ContentCatalog } from "@/lib/content-types";
+import { fetchPublicCatalog } from "@/lib/public-catalog-client";
 
 export function useContent(
   kind: MediaKind,
@@ -20,13 +21,10 @@ export function useContent(
       setPending(true);
       setError("");
       try {
-        const response = await fetch(
+        const value = await fetchPublicCatalog<ContentCatalog>(
           `/api/content?${new URLSearchParams({ kind, id, language, offset: String(offset) })}`,
-          { signal: controller.signal },
+          retry > 0,
         );
-        const value = await response.json();
-        if (!response.ok)
-          throw new Error(value.error || "This source could not be loaded.");
         if (!controller.signal.aborted) setData(value);
       } catch (e) {
         if (!controller.signal.aborted)

@@ -6,6 +6,7 @@ import type { CatalogTitle, MediaKind } from "@/lib/catalog-types";
 import { MediaCard } from "./MediaCard";
 import { Button } from "@/components/Button";
 import Link from "next/link";
+import { fetchPublicCatalog } from "@/lib/public-catalog-client";
 
 export function Browse({ kind }: { kind: MediaKind }) {
   const [q, setQ] = useState("");
@@ -31,13 +32,9 @@ export function Browse({ kind }: { kind: MediaKind }) {
       setBusy(true);
       setError("");
       try {
-        const response = await fetch(
+        const data = await fetchPublicCatalog<typeof result>(
           `/api/catalog?${new URLSearchParams({ kind, q, genre, sort, status, year, page: String(page) })}`,
-          { signal: controller.signal },
         );
-        if (!response.ok)
-          throw new Error("Couldn’t load the catalog. Try again.");
-        const data = (await response.json()) as typeof result;
         if (!controller.signal.aborted)
           setResult((prev) => ({
             ...data,

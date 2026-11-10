@@ -5,6 +5,7 @@ import { Bookmark, Check, Star } from "lucide-react";
 import { useState } from "react";
 import { mediaKey, titleHref, type CatalogTitle } from "@/lib/catalog-types";
 import { useLibrary } from "./LibraryProvider";
+import { rememberTitle } from "@/lib/public-catalog-client";
 export function MediaCard({ media, eager = false }: { media: CatalogTitle; eager?: boolean }) {
   const { entries, save, remove, ready } = useLibrary();
   const entry = entries.find((e) => mediaKey(e.media) === mediaKey(media));
@@ -17,6 +18,9 @@ export function MediaCard({ media, eager = false }: { media: CatalogTitle; eager
           href={titleHref(media)}
           className="poster-link relative block overflow-hidden rounded-xl bg-white/5"
           aria-label={`View ${media.title}`}
+          onPointerEnter={() => rememberTitle(media)}
+          onFocus={() => rememberTitle(media)}
+          onClick={() => rememberTitle(media)}
         >
           {media.poster && !artworkFailed ? (
             <>
@@ -67,6 +71,9 @@ export function MediaCard({ media, eager = false }: { media: CatalogTitle; eager
       </div>
       <Link
         href={titleHref(media)}
+        onPointerEnter={() => rememberTitle(media)}
+        onFocus={() => rememberTitle(media)}
+        onClick={() => rememberTitle(media)}
         className="media-title mt-3 block text-sm font-medium text-zinc-100 hover:text-brand-300"
       >
         {media.title}
