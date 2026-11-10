@@ -286,7 +286,7 @@ app.prepare().then(() => {
     socket.on("reading:update", (patch) => {
       const { roomId, clientId } = socket.data;
       const room = roomId ? rooms.get(roomId) : undefined;
-      if (!room || !clientId || socketOf.get(clientId) !== socket.id) return;
+      if (!room || !clientId || !room.members.some(m => m.id === clientId) || socketOf.get(clientId) !== socket.id) return;
       const now = Date.now();
       const recent = (socket.data.readingTimes ?? []).filter(t => now - t < 1000);
       if (recent.length >= 20) return;

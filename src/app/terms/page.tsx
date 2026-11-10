@@ -32,6 +32,14 @@ const sections = [
     ],
   },
   {
+    title: "Your library and reading rooms",
+    body: [
+      "Accounts are optional and let you sync a private library. Keep your sign-in details secure. You can export your library and remove saved titles at any time.",
+      "Catalog descriptions and artwork are supplied by Kitsu. Provider links and trailers open services with their own terms and availability. Tandem does not promise that a listed title is available in your region or subscription.",
+      "In reading rooms, each person selects their own page images. Only use images you are allowed to read. Tandem shares your reading position with the room and does not upload those page images.",
+    ],
+  },
+  {
     title: "How you behave",
     body: [
       "Do not use Tandem to harass, threaten or exploit anyone, to share illegal content, to send spam, or to break the law.",

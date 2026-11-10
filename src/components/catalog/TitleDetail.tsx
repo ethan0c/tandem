@@ -11,11 +11,12 @@ import { Button, ButtonLink } from "@/components/Button";
 import { useLibrary } from "./LibraryProvider";
 
 export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
-  const [media, setMedia] = useState<CatalogTitle | null>(() => (seed as CatalogTitle[]).find(t => t.id === id && t.kind === kind) || null);
+  const [fetchedMedia, setMedia] = useState<CatalogTitle | null>(() => (seed as CatalogTitle[]).find(t => t.id === id && t.kind === kind) || null);
   const [providers, setProviders] = useState<{ name: string; url: string }[]>([]);
   const [busy, setBusy] = useState(true); const [error, setError] = useState(""); const [trailer, setTrailer] = useState(false);
   const { entries, save, ready } = useLibrary(); const router = useRouter();
   const entry = entries.find(e => mediaKey(e.media) === `${kind}:${id}`);
+  const media = fetchedMedia || entry?.media || null;
   const [progress, setProgress] = useState<string | null>(null);
   useEffect(() => {
     const controller = new AbortController();

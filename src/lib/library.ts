@@ -36,6 +36,7 @@ export function isLibraryEntry(value: unknown): value is LibraryEntry {
     && (m.total === null || (Number.isFinite(m.total) && m.total > 0))
     && ["current", "planned", "completed", "paused", "dropped"].includes(e.status)
     && typeof e.progress === "number" && Number.isFinite(e.progress) && e.progress >= 0 && e.progress <= 1_000_000
+    && (!e.readingPosition || (Number.isFinite(e.readingPosition.chapter) && e.readingPosition.chapter >= 1 && Number.isInteger(e.readingPosition.page) && e.readingPosition.page >= 0 && e.readingPosition.page < 500))
     && typeof e.updatedAt === "number" && Number.isFinite(e.updatedAt) && typeof e.favorite === "boolean" && typeof e.subscribed === "boolean";
 }
 export function parseBackup(text: string): LibraryEntry[] {
