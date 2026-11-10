@@ -289,7 +289,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
                   save(media, {
                     status: e.target.value as LibraryStatus,
                     ...(e.target.value === "completed" && media.total
-                      ? { progress: media.total }
+                      ? { progress: Math.max(media.total, entry?.progress || 0) }
                       : {}),
                   })
                 }
@@ -306,7 +306,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
               <input
                 type="number"
                 min="0"
-                max={media.total || 1_000_000}
+                max={1_000_000}
                 step={kind === "manga" ? "0.1" : "1"}
                 value={progress ?? entry?.progress ?? 0}
                 onChange={(e) => setProgress(e.target.value)}

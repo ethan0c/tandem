@@ -277,12 +277,12 @@ export function Library() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  disabled={!!e.media.total && e.progress >= e.media.total}
+                  disabled={e.progress >= 1_000_000}
                   onClick={() =>
                     save(e.media, {
                       progress: Math.floor(e.progress) + 1,
                       status:
-                        e.media.total && e.progress + 1 >= e.media.total
+                        e.media.status === "finished" && e.media.total === Math.floor(e.progress) + 1
                           ? "completed"
                           : "current",
                     })

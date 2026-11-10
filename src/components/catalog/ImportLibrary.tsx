@@ -86,21 +86,23 @@ export function ImportLibrary() {
     }
   }
   async function find(index: number, name: string) {
+    const run = generation.current;
     setBusy(true);
     setError("");
     try {
       const data = await fetchPublicCatalog<{ items: CatalogTitle[] }>(
         `/api/catalog?kind=manga&q=${encodeURIComponent(name)}`,
       );
+      if (run !== generation.current) return;
       setRows((prev) =>
-        prev!.map((row, i) =>
+        prev?.map((row, i) =>
           i === index ? { ...row, candidates: data.items.slice(0, 10) } : row,
-        ),
+        ) || null,
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Search failed.");
+      if (run === generation.current) setError(e instanceof Error ? e.message : "Search failed.");
     } finally {
-      setBusy(false);
+      if (run === generation.current) setBusy(false);
     }
   }
   function finish() {

@@ -21,7 +21,8 @@
     "e2e:viewer": "node e2e/viewer-controls.mjs",
     "e2e:loading": "node e2e/loading.mjs",
     "e2e:reader-performance": "node e2e/reader-performance.mjs",
-    "e2e:contrast": "node e2e/contrast.mjs"
+    "e2e:contrast": "node e2e/contrast.mjs",
+    "e2e:import": "node e2e/weebcentral-import.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

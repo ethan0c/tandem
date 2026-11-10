@@ -7,7 +7,7 @@ The platform uses the approved site sketch and the existing Tandem typography, v
 - `/anime` and `/manga`: live Kitsu metadata search, alternative-title search, genres, release year, status, popular/rating/newest sorting, and pagination. A clearly labeled saved selection is available when the upstream provider cannot be reached.
 - `/title/[kind]/[id]`: artwork, synopsis, genres, rating, episode/chapter count, progress, favorites, follows, trailers, provider links, and a watch/read room action.
 - `/library`: separate anime and manga filters, reading/watching status, favorites, progress, sorting, search, deletion, and JSON export.
-- `/library/import`: pasted manga lists and Tandem JSON backups, exact matching against title aliases, manual match correction, review, duplicate detection, and progress merging. Pasted lists are limited to 100 unique titles per batch. Weeb Central layouts vary; the parser does not claim to support every copied page layout.
+- `/library/import`: full Weeb Central subscription-page pastes, simple manga lists and Tandem JSON backups. Title/Latest/Last Read/Status blocks are recognized; progress comes only from Last Read, including episode labels and decimals. None means not started; release status does not silently mark reading complete. Season-based progress is flagged and initially unselected for review. Up to 100 titles appear immediately; at most three metadata searches run concurrently. Exact matching, manual corrections and duplicate merging remain available. Imported or existing progress is preserved when catalog counts are behind.
 - `/account` and `/account/reset`: Supabase email/password accounts, email confirmation handling, reset flow, and sign-out.
 - Account libraries use Supabase RLS. Guest libraries remain browser-local. Export and import a guest library to move it into an account. Pending cloud writes and deletions are retained in a per-account outbox and retried on focus, reconnect, or manual sync. A database trigger rejects stale updates.
 - `/rooms`: watch-room and reading-room creation, invite joining, and a watch-night planning link.
@@ -44,6 +44,20 @@ Title and player routes have dedicated Suspense/loading placeholders, and client
 
 All loading motion respects reduced-motion preferences. No artificial minimum wait or timed progress percentage is introduced. Public metadata responses have a short browser cache; title and provider lookups run concurrently rather than serially. Signed chapter/playback responses remain uncached.
 
+## Performance and visibility
+
+Catalog artwork and the homepage preview use responsive WebP optimization with accurate sizes. Only the first catalog cards load eagerly at high priority; remaining artwork is lazy. Optimized images have a one-day minimum cache lifetime, and local licensed reader images have a seven-day public cache. Comic source quality is retained. Unsupported custom artwork hosts retain direct loading.
+
+Public catalog requests share in-flight requests and a bounded 60-second memory cache (24 responses). Already-seen card metadata supplies a bounded title preview (96 entries). Playback URLs and private data are excluded. The account SDK loads for account actions, existing sessions or auth callbacks; guest browsing does not download it. The blocking first-visit intro was removed.
+
+In the same local production payload comparison, guest catalog JavaScript fell from 896,062 to 664,390 decoded bytes (about 26%). Three representative 256px posters fell from 171,613 combined original bytes to 72,328 WebP bytes (about 58%). The homepage preview was 7,121,526 bytes as a PNG and 60,204 bytes as a 1080px WebP. These compare payloads, not field latency or every image/device/network.
+
+Reader mode, direction and sizing persist across reloads. Fullscreen has a labeled action and an expanded viewport fallback with focus containment and scroll/focus restoration. Scroll chapters reserve page dimensions and mount images only near the viewport. Page-by-page preloading follows the current image, at low priority with at most two speculative requests; obsolete waiting batches are replaced. Save Data suppresses speculative requests. Explicit page jumps are instant rather than animating through intervening pages. A 120-page fixture verified windowed loading and a direct jump to page 60 in Chromium and WebKit.
+
+Secondary text uses a readable semantic gray, important small catalog notes are at least 12px, input borders/placeholders are clearer, and refreshing results retain contrast. The rendered-background scan passed 612 visible text samples across nine routes in each of Chromium and WebKit, using 4.5:1 for ordinary text and 3:1 for large text. Occluded/inert/decorative UI is excluded. This is a targeted check, not a claim of full WCAG conformance.
+
+Personal GitHub and ocelabs links/credits were removed from the public UI, privacy/terms contact sections and store-listing source. Media/license attribution remains.
+
 ## Supabase
 
 The linked Tandem project is `appjtkiyiylosjcnkzpm`. Its public client settings are configured in ignored `.env.local`. The migration `20261110190000_library.sql` is applied and recorded in remote migration history.
@@ -51,6 +65,8 @@ The linked Tandem project is `appjtkiyiylosjcnkzpm`. Its public client settings 
 On a different installation, set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, apply the migration, and allow the installation's account and password-reset URLs in Supabase Auth redirect settings. Only the public key belongs in browser code. Project administration keys are not stored by the app.
 
 `scripts/configure-supabase.mjs <project-ref>` can configure the public client settings through an authenticated Supabase CLI. `scripts/check-supabase.mjs <project-ref>` creates two disposable auth users, checks isolation and persistence, and removes the test users and library rows. It reads administration credentials into process memory only.
+
+`scripts/check-supabase-browser.mjs <project-ref>` verifies guest SDK deferral, real browser sign-in, private cloud saves, session restoration and sign-out isolation. It sends no email and removes its disposable test account and rows. The user does not want an external email service. No email delivery or CAPTCHA provider was configured by this work. A future username/password plus CAPTCHA or social sign-in decision is separate from the existing email/password implementation; CAPTCHA alone cannot verify email ownership.
 
 ## Checks
 
@@ -63,7 +79,11 @@ node e2e/platform-mobile.mjs
 node e2e/content.mjs
 node e2e/viewer-controls.mjs
 node e2e/loading.mjs
+node e2e/reader-performance.mjs
+node e2e/contrast.mjs
+node e2e/weebcentral-import.mjs
 node scripts/check-supabase.mjs <project-ref>
+node scripts/check-supabase-browser.mjs <project-ref>
 ```
 
 The socket integration check verifies shared positions, host controls, late joining, separate-room isolation, and reconnect restoration. The Supabase check verifies real password authentication, cloud save/load, user isolation, anonymous denial, stale-write rejection, and deletion tombstones.
@@ -80,4 +100,4 @@ The shared header uses a second navigation row on smaller screens. Catalog filte
 
 The production browser checks passed 126 layout/interaction assertions across widths 320, 360, 375, 390, 414, 430, 768, 1024, and 1440 in Chromium, and 42 assertions across 320, 390, and 430 in WebKit. Checks cover eleven routes, import review, local reading, navigation overlap, horizontal overflow, and icon containment. Separate live tests verified native media playback, actual licensed chapter images, saved position/reload resume, late-joining readers, host controls, independent reading, and mobile-to-desktop watch-room play/pause sync. WebKit also decoded the actual MP4 and chapter WebP pages at phone width. Browser emulation does not replace testing on physical phones.
 
-Additional viewer checks cover Chromium at 320, 390, 430, 768 and 1440px and WebKit at 320, 390 and 430px. They exercise spoiler reveals, chapter changes, RTL keys, page sizing, scroll progress, stable height during delayed chapter loads, video speed/seeking, button icon containment and layout. Native video format switching also preserves playback time and speed. Extra units in these tests are fixtures; images and video use the actual verified sources. Separate delayed-response tests exercise uncached title skeletons, reduced motion, failed title loads/retry and empty-result search loading in both browsers. Unit tests total 40 passing cases.
+Additional viewer checks cover Chromium at 320, 390, 430, 768 and 1440px and WebKit at 320, 390 and 430px. They exercise spoiler reveals, chapter changes, RTL keys, page sizing, scroll progress, stable height during delayed chapter loads, video speed/seeking, button icon containment and layout. Native video format switching also preserves playback time and speed. Extra units in these tests are fixtures; images and video use the actual verified sources. Separate delayed-response tests exercise uncached title skeletons, reduced motion, failed title loads/retry and empty-result search loading in both browsers. Unit tests total 45 passing cases.

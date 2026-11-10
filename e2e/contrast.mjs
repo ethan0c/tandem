@@ -23,7 +23,7 @@ async function audit(path) {
   const candidates = await page.evaluate(() => {
     const canvas = document.createElement('canvas'); canvas.width = canvas.height = 1;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    function rgba(color) { ctx.clearRect(0,0,1,1); ctx.fillStyle = color; ctx.fillRect(0,0,1,1); return [...ctx.getImageData(0,0,1,1).data]; }
+    function rgba(color) { ctx.clearRect(0,0,1,1); ctx.fillStyle = '#000'; ctx.fillStyle = color; ctx.fillRect(0,0,1,1); return [...ctx.getImageData(0,0,1,1).data]; }
     const result = [];
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
@@ -40,7 +40,7 @@ async function audit(path) {
         if (box.width < 3 || box.height < 3 || box.top < 0 || box.bottom > innerHeight || box.left < 0 || box.right > innerWidth) continue;
         const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
         if (hit && !el.contains(hit)) continue;
-        result.push({ text: text.slice(0,100), className: String(el.className), color: rgba(style.color), opacity, size: parseFloat(style.fontSize), weight: parseFloat(style.fontWeight), x: box.x, y: box.y, w: box.width, h: box.height });
+        result.push({ text: text.slice(0,100), className: String(el.className), color: rgba(style.color), rawColor: style.color, opacity, size: parseFloat(style.fontSize), weight: parseFloat(style.fontWeight), x: box.x, y: box.y, w: box.width, h: box.height });
       }
     }
     for (const el of document.querySelectorAll('input[placeholder]:not(:disabled)')) {
@@ -52,7 +52,7 @@ async function audit(path) {
     }
     return result;
   });
-  const hide = await page.addStyleTag({ content: 'body,body * { transition:none!important; color:transparent!important; -webkit-text-fill-color:transparent!important; text-shadow:none!important; }' });
+  const hide = await page.addStyleTag({ content: 'body,body * { transition:none!important; -webkit-text-fill-color:transparent!important; text-shadow:none!important; }' });
   await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
   const screenshot = await page.screenshot(); await hide.evaluate(el => el.remove());
   await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
@@ -69,7 +69,7 @@ async function audit(path) {
       if(sample<ratio){ratio=sample;worstBg=bg;worstPoint=[x,y]}
     }
     const threshold = item.size >= 24 || (item.size >= 18.66 && item.weight >= 700) ? 3 : 4.5;
-    const row = { path, text:item.text, className:item.className, ratio:Math.round(ratio*100)/100, required:threshold, background:worstBg, point:worstPoint, foreground:item.color, opacity:item.opacity };
+    const row = { path, text:item.text, className:item.className, ratio:Math.round(ratio*100)/100, required:threshold, background:worstBg, point:worstPoint, foreground:item.color, rawColor:item.rawColor, opacity:item.opacity };
     all.push(row); if (ratio < threshold) { failures.push(row); writeFileSync(`/private/tmp/tandem-contrast-bg-${path.split("?")[0].replaceAll("/","_")}.png`,screenshot); }
   }
 }
