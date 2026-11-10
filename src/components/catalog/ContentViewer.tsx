@@ -10,7 +10,8 @@ import type { ContentPlayback, ContentUnit } from "@/lib/content-types";
 import { useLibrary } from "./LibraryProvider";
 import { useContent } from "./useContent";
 import { AnimePlayer } from "./AnimePlayer";
-import { MangaReader, type ReadingSettings } from "./MangaReader";
+import { MangaReader } from "./MangaReader";
+import { useReadingSettings } from "./useReadingSettings";
 import { UnitNavigator } from "./UnitNavigator";
 import { unitLabel } from "@/lib/spoilers";
 import { ViewerSkeleton } from "./LoadingStates";
@@ -28,7 +29,7 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
   const [failure, setFailure] = useState("");
   const [loading, setLoading] = useState(false);
   const [retry, setRetry] = useState(0);
-  const [readingSettings, setReadingSettings] = useState<ReadingSettings>({ mode: "page", direction: "ltr", fit: "height" });
+  const [readingSettings, setReadingSettings] = useReadingSettings();
   const { ready } = useLibrary();
   const media = catalog.data?.media;
   useEffect(() => {

@@ -28,6 +28,7 @@ import { ContentChapters } from "./ContentChapters";
 import { TitleSkeleton } from "./LoadingStates";
 import { useTitlePreview } from "./useTitlePreview";
 import { fetchPublicCatalog } from "@/lib/public-catalog-client";
+import { canOptimizeArtwork } from "@/lib/artwork";
 
 export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
   const [fetchedMedia, setMedia] = useState<CatalogTitle | null>(
@@ -97,6 +98,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
         {media.cover && (
           <Image
             src={media.cover}
+            unoptimized={!canOptimizeArtwork(media.cover)}
             alt=""
             fill
             sizes="(max-width: 1279px) 100vw, 1184px"
@@ -111,6 +113,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
           {media.poster && (
             <Image
               src={media.poster}
+              unoptimized={!canOptimizeArtwork(media.poster)}
               alt={`${media.title} cover`}
               fill
               sizes="(max-width: 639px) 128px, 180px"

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { mediaKey, titleHref, type CatalogTitle } from "@/lib/catalog-types";
 import { useLibrary } from "./LibraryProvider";
 import { rememberTitle } from "@/lib/public-catalog-client";
+import { canOptimizeArtwork } from "@/lib/artwork";
 export function MediaCard({ media, eager = false }: { media: CatalogTitle; eager?: boolean }) {
   const { entries, save, remove, ready } = useLibrary();
   const entry = entries.find((e) => mediaKey(e.media) === mediaKey(media));
@@ -31,6 +32,7 @@ export function MediaCard({ media, eager = false }: { media: CatalogTitle; eager
               fill
               sizes="(max-width: 479px) calc((100vw - 56px) / 2), (max-width: 767px) calc((92vw - 32px) / 3), (max-width: 1023px) calc((92vw - 48px) / 4), (max-width: 1279px) calc((92vw - 100px) / 6), 181px"
               loading={eager ? "eager" : "lazy"}
+              unoptimized={!canOptimizeArtwork(media.poster)}
               fetchPriority={eager ? "high" : "auto"}
               className={`object-cover transition duration-300 motion-reduce:transition-none group-hover:scale-105 ${artworkReady ? "opacity-100" : "opacity-0"}`}
               onLoad={() => setArtworkReady(true)}

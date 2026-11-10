@@ -20,6 +20,7 @@ import {
 } from "@/lib/catalog-types";
 import { useLibrary } from "./LibraryProvider";
 import { Button, ButtonLink } from "@/components/Button";
+import { canOptimizeArtwork } from "@/lib/artwork";
 
 export function Library() {
   const { entries, ready, save, remove, user, notice, sync } = useLibrary();
@@ -223,7 +224,7 @@ export function Library() {
                     alt=""
                     fill
                     sizes="56px"
-                    unoptimized
+                    unoptimized={!canOptimizeArtwork(e.media.poster)}
                     className="object-cover"
                   />
                 )}

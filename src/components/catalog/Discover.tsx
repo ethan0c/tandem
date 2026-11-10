@@ -7,6 +7,7 @@ import { titleHref, type CatalogTitle } from "@/lib/catalog-types";
 import { ButtonLink } from "@/components/Button";
 import { MediaCard } from "./MediaCard";
 import { useLibrary } from "./LibraryProvider";
+import { canOptimizeArtwork } from "@/lib/artwork";
 
 const titles = seed as CatalogTitle[];
 export function Discover() {
@@ -26,6 +27,7 @@ export function Discover() {
         {featured.cover && (
           <Image
             src={featured.cover}
+            unoptimized={!canOptimizeArtwork(featured.cover)}
             alt=""
             fill
             preload
