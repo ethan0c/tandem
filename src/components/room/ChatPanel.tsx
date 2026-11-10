@@ -73,7 +73,7 @@ export function ChatPanel({ open, onClose, messages, selfId, onSend }: Props) {
 
       <div ref={listRef} onScroll={onScroll} role="log" aria-live="polite" className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
         {messages.length === 0 ? (
-          <p className="mt-6 text-center text-sm leading-relaxed text-zinc-500">
+          <p className="mt-6 text-center text-sm leading-relaxed text-muted">
             Say hi. Messages stay in the room and go away when everyone leaves.
           </p>
         ) : (
@@ -87,7 +87,7 @@ export function ChatPanel({ open, onClose, messages, selfId, onSend }: Props) {
                   {!grouped && (
                     <div className="mb-0.5 flex items-baseline gap-2">
                       <span className={`text-xs font-semibold ${mine ? "text-brand-300" : "text-zinc-200"}`}>{mine ? "You" : m.name}</span>
-                      <time dateTime={new Date(m.at).toISOString()} className="text-[10px] text-zinc-500">
+                      <time dateTime={new Date(m.at).toISOString()} className="text-[10px] text-muted">
                         {timeFormat.format(m.at)}
                       </time>
                     </div>
@@ -109,7 +109,7 @@ export function ChatPanel({ open, onClose, messages, selfId, onSend }: Props) {
           placeholder="Send a message"
           aria-label="Message"
           autoComplete="off"
-          className="h-10 min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-zinc-500 focus:border-white/30 focus:outline-none"
+          className="h-10 min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-white placeholder:text-muted focus:border-white/30 focus:outline-none"
         />
         <button
           type="submit"

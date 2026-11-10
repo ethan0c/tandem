@@ -106,7 +106,7 @@ export function Reader({ roomId }: { roomId: string }) {
           </p>
         )}
       </form>
-      <p className="mt-5 text-center font-mono text-[10px] text-zinc-600">
+      <p className="mt-5 text-center font-mono text-xs text-muted">
         Room {roomId}
       </p>
     </div>
@@ -294,7 +294,7 @@ function ReadingSession({
           <h1 className="mt-2 text-2xl font-medium tracking-tight">
             {room.story?.title || "A story for the two of you."}
           </h1>
-          <p className="mt-2 text-xs text-zinc-500">
+          <p className="mt-2 text-xs text-muted">
             {room.members.map((m) => m.name).join(" & ") || "Connecting…"}
           </p>
         </div>
@@ -500,7 +500,7 @@ function ReadingSession({
           {error}
         </p>
       )}
-      <p className="my-4 text-center text-[11px] text-zinc-500">
+      <p className="my-4 text-center text-xs text-muted">
         {follow
           ? room.reading.hostOnly && !isHost
             ? "Following the host. Switch to independent reading to turn your own pages."

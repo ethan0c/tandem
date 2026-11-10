@@ -175,7 +175,7 @@ export function ImportLibrary() {
             onChange={(e) => setText(e.target.value)}
             maxLength={100_000}
           />
-          <p className="mt-3 text-xs leading-6 text-zinc-500">
+          <p className="mt-3 text-xs leading-6 text-muted">
             One title per line. Chapter numbers are optional. Up to 100 unique
             titles per paste. You can also restore a Tandem JSON export.
           </p>
@@ -263,7 +263,7 @@ export function ImportLibrary() {
                         : ""}
                     </p>
                   </div>
-                  <label className="text-[10px] text-zinc-500">
+                  <label className="text-xs text-muted">
                     Chapter
                     <input
                       className="field ml-2 w-20 text-xs"
@@ -287,7 +287,7 @@ export function ImportLibrary() {
                     />
                   </label>
                 </div>
-                <details className="mt-3 text-xs text-zinc-500">
+                <details className="mt-3 text-xs text-muted">
                   <summary className="cursor-pointer">
                     {row.media ? "Change match" : "Find a match"}
                   </summary>
@@ -346,7 +346,7 @@ export function ImportLibrary() {
               </div>
             ))}
           </div>
-          <p className="my-4 text-xs leading-6 text-zinc-500">
+          <p className="my-4 text-xs leading-6 text-muted">
             Only checked, matched titles will be imported. Existing progress is
             kept if it’s further ahead. No chapters are downloaded.
           </p>

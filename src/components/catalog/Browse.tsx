@@ -77,7 +77,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
       </div>
       <div className="catalog-filters mt-7">
         <label className="catalog-search relative">
-          <Search className="pointer-events-none absolute left-3 top-3 size-4 text-zinc-500" />
+          <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted" />
           <span className="sr-only">Search titles</span>
           <input
             value={q}

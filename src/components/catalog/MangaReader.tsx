@@ -149,6 +149,7 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
   const change = (changes: Partial<ReadingSettings>) => onSettings({ ...settings, ...changes });
   return (
     <section className="manga-reader mt-6" aria-label="Manga reader" data-expanded={expanded || undefined} tabIndex={-1} ref={root}>
+      {isExpanded && <Button className="reader-immersive-close" variant="dark" size="sm" onClick={fullscreen} aria-label="Close reader view"><Minimize className="size-4" />Close reader view</Button>}
       <div className="reader-toolbar">
         <label><span className="sr-only">Reading mode</span><select className="field" value={settings.mode} onChange={(event) => change({ mode: event.target.value as ReadingSettings["mode"] })}>
           <option value="page">Page by page</option><option value="scroll">Vertical scroll</option>

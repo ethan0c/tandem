@@ -15,7 +15,7 @@ export async function fetchPublicCatalog<T>(url: string, refresh = false): Promi
   const active = requests.get(url);
   if (active) return active as Promise<T>;
   const request = (async () => {
-    const response = await fetch(url, refresh ? { cache: "no-cache" } : undefined);
+    const response = await fetch(url, { signal: AbortSignal.timeout(20_000), ...(refresh ? { cache: "no-cache" } : {}) });
     const value = await response.json();
     if (!response.ok) throw new Error(value.error || "This source could not be loaded. Try again.");
     responses.delete(url);

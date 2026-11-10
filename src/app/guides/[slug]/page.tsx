@@ -28,13 +28,13 @@ function Content({ block }: { block: Block }) {
   if ("p" in block) return <p className="mt-4 leading-relaxed text-zinc-300">{block.p}</p>;
   if ("steps" in block) {
     return (
-      <ol className="mt-4 list-decimal space-y-2 pl-5 leading-relaxed text-zinc-300 marker:text-zinc-500">
+      <ol className="mt-4 list-decimal space-y-2 pl-5 leading-relaxed text-zinc-300 marker:text-muted">
         {block.steps.map((s) => <li key={s}>{s}</li>)}
       </ol>
     );
   }
   return (
-    <ul className="mt-4 list-disc space-y-2 pl-5 leading-relaxed text-zinc-300 marker:text-zinc-500">
+    <ul className="mt-4 list-disc space-y-2 pl-5 leading-relaxed text-zinc-300 marker:text-muted">
       {block.list.map((s) => <li key={s}>{s}</li>)}
     </ul>
   );
@@ -61,11 +61,11 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
       />
       <article>
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-muted">
           <Link href="/guides" className="hover:text-white">Guides</Link>
         </p>
         <h1 className="mt-2 font-display text-3xl font-medium leading-tight tracking-[-0.03em] sm:text-4xl">{g.title}</h1>
-        <p className="mt-3 font-sans text-xs text-zinc-500">Updated {new Date(`${g.updated}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
+        <p className="mt-3 font-sans text-xs text-muted">Updated {new Date(`${g.updated}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
         {g.body.map((block, i) => <Content key={i} block={block} />)}
       </article>
       <section className="mt-14 rounded-2xl border border-white/10 bg-white/5 p-6">

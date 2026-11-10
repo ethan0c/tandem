@@ -19,7 +19,7 @@ function defaultTime() {
 }
 
 const FIELD =
-  "h-11 w-full rounded-xl border border-white/10 bg-ink-700 px-3.5 text-sm text-white placeholder:text-zinc-500 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20";
+  "h-11 w-full rounded-xl border border-white/10 bg-ink-700 px-3.5 text-sm text-white placeholder:text-muted focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20";
 
 export function PlanForm() {
   const storedName = useClientValue(() => {
@@ -81,7 +81,7 @@ export function PlanForm() {
     return (
       <section className="mt-8 space-y-5 rounded-2xl border border-white/10 bg-white/5 p-5">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Planned for</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted">Planned for</p>
           <p className="mt-1 text-lg font-medium">{formatWhen(result.plan.start)}</p>
         </div>
         <div>
@@ -102,7 +102,7 @@ export function PlanForm() {
             <Download className="size-3.5" /> Apple / Outlook (.ics)
           </button>
         </div>
-        <p className="text-xs leading-relaxed text-zinc-500">
+        <p className="text-xs leading-relaxed text-muted">
           When it’s time, open the link yourself too. It’s the same room for both of you.
         </p>
         <div className="flex flex-wrap gap-2 border-t border-white/10 pt-4">
@@ -120,13 +120,13 @@ export function PlanForm() {
         <input value={name} onChange={(e) => setName(e.target.value)} maxLength={32} placeholder="Cash" className={FIELD} />
       </label>
       <label className="block">
-        <span className="mb-1.5 block text-sm text-zinc-300">What are you watching? <span className="text-zinc-500">(optional)</span></span>
+        <span className="mb-1.5 block text-sm text-zinc-300">What are you watching? <span className="text-muted">(optional)</span></span>
         <input value={what} onChange={(e) => setWhat(e.target.value)} maxLength={120} placeholder="Frieren, episode 4" className={FIELD} />
       </label>
       <label className="block">
-        <span className="mb-1.5 block text-sm text-zinc-300">Link to the episode <span className="text-zinc-500">(optional)</span></span>
+        <span className="mb-1.5 block text-sm text-zinc-300">Link to the episode <span className="text-muted">(optional)</span></span>
         <input value={link} onChange={(e) => setLink(e.target.value)} inputMode="url" placeholder="https://…" className={FIELD} />
-        <span className="mt-1 block text-xs text-zinc-500">With a link, your partner goes straight to the episode with the call beside it.</span>
+        <span className="mt-1 block text-xs text-muted">With a link, your partner goes straight to the episode with the call beside it.</span>
       </label>
       <label className="block">
         <span className="mb-1.5 block text-sm text-zinc-300">When</span>

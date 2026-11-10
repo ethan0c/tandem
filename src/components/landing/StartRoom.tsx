@@ -53,7 +53,7 @@ export function StartRoom({ tone = "light" }: { tone?: "light" | "dark" | "brand
             }}
             placeholder="…or paste a room link"
             className={`min-w-0 flex-1 bg-transparent text-sm focus:outline-none ${
-              dark ? "text-white placeholder:text-white/60" : "text-ink placeholder:text-zinc-500"
+              dark ? "text-white placeholder:text-white/60" : "text-ink placeholder:text-muted"
             }`}
             aria-label="Room link or code"
             aria-invalid={!!error}

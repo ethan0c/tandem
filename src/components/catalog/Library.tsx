@@ -93,7 +93,7 @@ export function Library() {
             <span className="mx-2 text-zinc-700">/</span>
             {entries.filter((e) => e.status === "completed").length} completed
           </p>
-          <p className="mt-1.5 text-[11px] text-zinc-500">
+          <p className="mt-1.5 text-xs text-muted">
             {notice ||
               (user
                 ? "Your private library syncs across devices."
@@ -131,7 +131,7 @@ export function Library() {
           {["all", "anime", "manga"].map((k) => (
             <button
               key={k}
-              className={`library-tab px-4 py-2 text-sm capitalize ${kind === k ? "library-tab-active text-white" : "text-zinc-500"}`}
+              className={`library-tab px-4 py-2 text-sm capitalize ${kind === k ? "library-tab-active text-white" : "text-muted"}`}
               aria-pressed={kind === k}
               onClick={() => setKind(k)}
             >
@@ -166,7 +166,7 @@ export function Library() {
           Favorites
         </Button>
         <label className="relative ml-auto">
-          <Search className="absolute left-3 top-3 size-4 text-zinc-500" />
+          <Search className="absolute left-3 top-3 size-4 text-muted" />
           <span className="sr-only">Search library</span>
           <input
             className="field w-full pl-9 sm:w-48"
@@ -188,7 +188,7 @@ export function Library() {
         </label>
       </div>
       {!ready ? (
-        <p className="py-20 text-center text-sm text-zinc-500">
+        <p className="py-20 text-center text-sm text-muted">
           Opening your library…
         </p>
       ) : !filtered.length ? (
@@ -235,7 +235,7 @@ export function Library() {
                 >
                   {e.media.title}
                 </Link>
-                <p className="mt-1 text-[11px] capitalize text-zinc-500">
+                <p className="mt-1 text-xs capitalize text-muted">
                   {e.media.kind} · {e.media.year || "TBA"}
                 </p>
                 <p className="mt-2 text-xs text-brand-300">

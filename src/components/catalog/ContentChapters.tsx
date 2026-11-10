@@ -93,10 +93,10 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
                     </p>
                   )}
                   {unit.title && unit.title !== unit.label && !showTitles && !isUnitCompleted(unit.number, progress) && (
-                    <p className="mt-1 text-xs leading-6 text-zinc-500">Title hidden until completed</p>
+                    <p className="mt-1 text-xs leading-6 text-muted">Title hidden until completed</p>
                   )}
                   {unit.group && (
-                    <p className="mt-1 text-xs text-zinc-500">{unit.group}</p>
+                    <p className="mt-1 text-xs text-muted">{unit.group}</p>
                   )}
                 </div>
                 <ButtonLink

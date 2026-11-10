@@ -70,7 +70,7 @@ export function Invite({ roomId, from, what, to, at, timeZone }: Props) {
 
         {start && (
           <section className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5">
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">When</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted">When</p>
             <p className="mt-1 text-lg font-medium">{formatWhen(start)} <span className="text-sm font-normal text-zinc-400">your time</span></p>
             {timeZone && ownZone && timeZone !== ownZone && (
               <p className="mt-0.5 text-sm text-zinc-400">That’s {formatWhen(start, timeZone)} for {who}.</p>
@@ -93,7 +93,7 @@ export function Invite({ roomId, from, what, to, at, timeZone }: Props) {
                 </button>
               </div>
             )}
-            {reminder === "set" && <p className="mt-2 text-xs text-zinc-500">Keep this tab open for the reminder. The calendar invite works even if you close it.</p>}
+            {reminder === "set" && <p className="mt-2 text-xs text-muted">Keep this tab open for the reminder. The calendar invite works even if you close it.</p>}
             {reminder === "blocked" && <p className="mt-2 text-xs text-amber-300">Notifications are blocked. Add it to your calendar instead.</p>}
           </section>
         )}

@@ -23,7 +23,7 @@ export default function Guides() {
                 <span className="block font-display text-lg font-medium group-hover:text-brand-200">{g.title}</span>
                 <span className="mt-1.5 block text-sm leading-relaxed text-zinc-400">{g.description}</span>
               </span>
-              <ArrowRight aria-hidden="true" className="mt-1.5 size-4 shrink-0 text-zinc-500 transition group-hover:translate-x-1 group-hover:text-white" />
+              <ArrowRight aria-hidden="true" className="mt-1.5 size-4 shrink-0 text-muted transition group-hover:translate-x-1 group-hover:text-white" />
             </Link>
           </li>
         ))}

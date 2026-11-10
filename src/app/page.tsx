@@ -209,7 +209,7 @@ export default function Home() {
               </li>
             ))}
           </ul>
-          <p className="mt-5 text-sm text-zinc-500">Support varies by video. You both need episode access. Ads may interrupt sync.</p>
+          <p className="mt-5 text-sm text-muted">Support varies by video. You both need episode access. Ads may interrupt sync.</p>
         </div>
       </section>
 
@@ -242,7 +242,7 @@ export default function Home() {
               ["Press play", "With synced playback, either person can pause or skip for both."],
             ].map(([t, b], i) => (
               <li key={t} className="grid gap-3 py-7 sm:grid-cols-[3rem_1fr]">
-                <span className="font-sans text-sm text-zinc-500">0{i + 1}</span>
+                <span className="font-sans text-sm text-muted">0{i + 1}</span>
                 <div>
                   <h3 className="font-display text-xl font-medium">{t}</h3>
                   <p className="mt-2 max-w-lg leading-relaxed text-zinc-400">{b}</p>
@@ -284,7 +284,7 @@ export default function Home() {
               <details key={q} className="faq group">
                 <summary className="flex items-center justify-between gap-6 py-5 font-display text-lg font-medium">
                   {q}
-                  <span aria-hidden="true" className="faq-plus shrink-0 font-sans text-xl font-normal text-zinc-500 transition">+</span>
+                  <span aria-hidden="true" className="faq-plus shrink-0 font-sans text-xl font-normal text-muted transition">+</span>
                 </summary>
                 <p className="max-w-2xl pb-6 leading-relaxed text-zinc-400">{a}</p>
               </details>

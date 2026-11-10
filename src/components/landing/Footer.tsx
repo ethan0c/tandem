@@ -69,7 +69,7 @@ export function Footer() {
             </div>
           ))}
         </div>
-        <div className="mt-14 flex flex-col gap-2 border-t border-white/10 pt-6 font-sans text-[11px] text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-2 border-t border-white/10 pt-6 font-sans text-[11px] text-muted sm:flex-row sm:items-center sm:justify-between">
           <span>© 2026 tandem</span>
           <span>
             built by{" "}

@@ -203,13 +203,13 @@ export function Recap() {
               <h1 className="font-display text-3xl font-medium tracking-[-0.03em]">Your story card</h1>
               <p className="mt-2 text-sm leading-relaxed text-zinc-400">Sized for Instagram and TikTok stories. Made in your browser from your Tandem history; nothing is uploaded.</p>
               <label className="mt-6 block">
-                <span className="mb-1.5 block text-sm text-zinc-300">Your names <span className="text-zinc-500">(optional)</span></span>
+                <span className="mb-1.5 block text-sm text-zinc-300">Your names <span className="text-muted">(optional)</span></span>
                 <input
                   value={names}
                   onChange={(e) => setNames(e.target.value)}
                   maxLength={40}
                   placeholder="Alex & Sam"
-                  className="h-11 w-full rounded-xl border border-white/10 bg-ink-700 px-3.5 text-sm text-white placeholder:text-zinc-500 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20"
+                  className="h-11 w-full rounded-xl border border-white/10 bg-ink-700 px-3.5 text-sm text-white placeholder:text-muted focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20"
                 />
               </label>
               <div className="mt-5 flex flex-wrap gap-3">

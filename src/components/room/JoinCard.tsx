@@ -174,7 +174,7 @@ export function JoinCard({
           </div>
           <div className={compact ? "space-y-3 p-4" : "space-y-4 p-5"}>
             <div>
-              <p className="text-xs font-medium text-zinc-500">Joining room</p>
+              <p className="text-xs font-medium text-muted">Joining room</p>
               <p className={`font-sans text-white ${compact ? "text-base" : "text-lg"}`}>{roomId}</p>
             </div>
             {mediaError && <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-300">{mediaError}</p>}
@@ -186,7 +186,7 @@ export function JoinCard({
                 maxLength={32}
                 placeholder="Cash"
                 autoFocus
-                className="h-11 w-full rounded-xl border border-white/10 bg-ink-700 px-3.5 text-sm text-white placeholder:text-zinc-500 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20"
+                className="h-11 w-full rounded-xl border border-white/10 bg-ink-700 px-3.5 text-sm text-white placeholder:text-muted focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20"
               />
             </label>
             <button

@@ -395,7 +395,7 @@ export function Player({
             <RotateCw className="size-4" />
           </IconButton>
           <span className="ml-1 font-sans text-xs text-zinc-300">
-            {formatTime(shown)} <span className="text-zinc-500">/</span> {formatTime(shownDuration)}
+            {formatTime(shown)} <span className="text-muted">/</span> {formatTime(shownDuration)}
           </span>
           <div className="ml-auto flex items-center gap-2">
             <div className="group flex items-center gap-1">

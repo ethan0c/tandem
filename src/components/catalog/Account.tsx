@@ -72,7 +72,7 @@ export function Account() {
           <p className="text-sm text-zinc-300">
             Accounts are not configured on this installation yet.
           </p>
-          <p className="mt-3 text-xs leading-6 text-zinc-500">
+          <p className="mt-3 text-xs leading-6 text-muted">
             You can still save a library in this browser and export a backup.
           </p>
           <ButtonLink href="/library" className="mt-5">
@@ -82,7 +82,7 @@ export function Account() {
       ) : user ? (
         <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.025] p-6">
           <p className="break-all text-sm">{user.email}</p>
-          <p className="mt-3 text-xs text-zinc-500">
+          <p className="mt-3 text-xs text-muted">
             {entries.length} stories · {notice}
           </p>
           <ButtonLink href="/library" className="mt-6 w-full">
@@ -109,7 +109,7 @@ export function Account() {
             <button
               type="button"
               aria-pressed={mode === "signin"}
-              className={mode === "signin" ? "text-white" : "text-zinc-500"}
+              className={mode === "signin" ? "text-white" : "text-muted"}
               onClick={() => {
                 setMode("signin");
                 setMessage("");
@@ -120,7 +120,7 @@ export function Account() {
             <button
               type="button"
               aria-pressed={mode === "signup"}
-              className={mode === "signup" ? "text-white" : "text-zinc-500"}
+              className={mode === "signup" ? "text-white" : "text-muted"}
               onClick={() => {
                 setMode("signup");
                 setMessage("");
@@ -166,7 +166,7 @@ export function Account() {
           </Button>
           <button
             type="button"
-            className="text-xs text-zinc-500 hover:text-brand-300"
+            className="text-xs text-muted hover:text-brand-300"
             onClick={() => {
               setMode("reset");
               setMessage("");
@@ -174,7 +174,7 @@ export function Account() {
           >
             Forgot your password?
           </button>
-          <p className="text-[11px] leading-6 text-zinc-600">
+          <p className="text-xs leading-6 text-muted">
             Your guest library stays in this browser. Export it before signing
             in, then import it into your account to bring it along.
           </p>
@@ -185,7 +185,7 @@ export function Account() {
           {message}
         </p>
       )}
-      <p className="mt-6 flex items-center gap-2 text-[11px] text-zinc-600">
+      <p className="mt-6 flex items-center gap-2 text-xs text-muted">
         <ShieldCheck className="size-3.5" />
         Private by default. Your library is yours.
       </p>

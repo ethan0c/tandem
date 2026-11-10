@@ -50,7 +50,7 @@ export function AnimePicker({
         />
       </label>
       <div className="mt-3 max-h-60 space-y-1 overflow-auto">
-        {busy && <p className="py-2 text-xs text-zinc-500">Searching…</p>}
+        {busy && <p className="py-2 text-xs text-muted">Searching…</p>}
         {titles.map((t) => (
           <button
             type="button"
@@ -59,11 +59,11 @@ export function AnimePicker({
             onClick={() => onPick({ id: t.id, title: t.title, kind: "anime" })}
           >
             <span>{t.title}</span>
-            <span className="text-zinc-500">{t.year}</span>
+            <span className="text-muted">{t.year}</span>
           </button>
         ))}
         {!titles.length && (
-          <p className="py-4 text-xs text-zinc-500">No titles found.</p>
+          <p className="py-4 text-xs text-muted">No titles found.</p>
         )}
       </div>
     </div>

@@ -141,7 +141,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
             {media.title}
           </h1>
           {media.originalTitle !== media.title && (
-            <p className="mt-2 text-sm text-zinc-500">{media.originalTitle}</p>
+            <p className="mt-2 text-sm text-muted">{media.originalTitle}</p>
           )}
           <div className="mt-5 flex flex-wrap gap-3">
             <ButtonLink href="#episodes">
@@ -212,7 +212,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
             <h2 className="text-lg font-medium">
               {kind === "anime" ? "Where to watch" : "Where to read"}
             </h2>
-            <p className="mt-2 text-xs leading-6 text-zinc-500">
+            <p className="mt-2 text-xs leading-6 text-muted">
               {kind === "anime"
                 ? "Open a provider, then use Tandem’s extension to watch in sync. Availability and subscriptions vary by region."
                 : "Find a licensed edition through the publisher. To read inside Tandem, open a reading room and choose page images you have access to."}
@@ -245,12 +245,12 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
               )}
             </div>
             {busy && (
-              <p className="mt-3 text-xs text-zinc-500">
+              <p className="mt-3 text-xs text-muted">
                 Checking provider links…
               </p>
             )}
             {!busy && !providers.length && (
-              <p className="mt-3 text-xs text-zinc-500">
+              <p className="mt-3 text-xs text-muted">
                 No direct provider link is listed. Search results may vary.
               </p>
             )}
@@ -259,7 +259,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
         <aside className="h-fit rounded-2xl border border-white/10 bg-white/[0.025] p-6">
           <p className="eyebrow">Your place in the story</p>
           <h2 className="mt-2 text-xl">Keep it close.</h2>
-          <p className="mt-2 text-xs leading-6 text-zinc-500">
+          <p className="mt-2 text-xs leading-6 text-muted">
             {media.total
               ? `${media.total} ${unit}s in the catalog.`
               : `The total ${unit} count isn’t listed yet.`}{" "}
@@ -323,14 +323,14 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
           >
             {entry?.subscribed ? "Following series" : "Follow series"}
           </Button>
-          <p className="mt-3 text-[10px] leading-5 text-zinc-600">
+          <p className="mt-3 text-xs leading-5 text-muted">
             Following keeps this title in your library. Progress on external
             providers is updated manually.
           </p>
         </aside>
       </div>
       {error && (
-        <p className="mt-5 text-xs text-zinc-500" role="status">
+        <p className="mt-5 text-xs text-muted" role="status">
           Showing the saved catalog selection. {error}
         </p>
       )}

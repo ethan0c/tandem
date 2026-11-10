@@ -109,7 +109,7 @@ export function Rooms() {
         <RejoinRoom />
       </section>
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4 px-2 text-sm">
-        <p className="flex items-center gap-2 text-zinc-500">
+        <p className="flex items-center gap-2 text-muted">
           <Users className="size-4" />
           Private links. Good company.
         </p>

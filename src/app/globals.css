@@ -10,6 +10,7 @@
   --color-ink: #0a0a0a;
   --color-ink-800: #141414;
   --color-ink-700: #1f1f1f;
+  --color-muted: #a8a8b3;
 
   /* Brand purple scale (violet). Swap these to retheme the whole app. */
   --color-brand-50: #f5f3ff;
@@ -534,11 +535,11 @@ html:has(#intro) .hero-preview > figure { animation-delay: 2.3s; }
 .media-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6; min-height: 2.4em; }
 .save-title { transition: background-color 150ms; cursor: pointer; }
 .together-banner { background: rgb(255 255 255 / 0.02); }
-.field { min-height: 44px; height: 44px; max-width: 100%; min-width: 0; border: 1px solid rgb(255 255 255 / 0.14); border-radius: 10px; padding: 0 12px; background: rgb(0 0 0 / 0.18); color: #e4e4e7; font-size: 14px; outline: none; transition: border-color 150ms, box-shadow 150ms; }
+.field { min-height: 44px; height: 44px; max-width: 100%; min-width: 0; border: 1px solid #706a78; border-radius: 10px; padding: 0 12px; background: rgb(0 0 0 / 0.18); color: #e4e4e7; font-size: 14px; outline: none; transition: border-color 150ms, box-shadow 150ms; }
 textarea.field { height: auto; padding-block: 12px; }
 .field.pl-10 { padding-left: 2.5rem; }
 .field.pl-9 { padding-left: 2.25rem; }
-.field::placeholder { color: #71717a; }
+.field::placeholder { color: #a8a8b3; opacity: 1; }
 .field:focus { border-color: var(--color-brand-500); box-shadow: 0 0 0 3px rgb(139 92 246 / 0.12); }
 .field option { background: #1a171f; color: #e4e4e7; }
 select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: 16px 16px; background-position: right 12px center; }
@@ -579,13 +580,18 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
 .reader-page[data-mode="page"][data-fit="width"] img { max-height: none; width: 100%; }
 .reader-pagination[data-direction="rtl"] > .btn3d:first-child { order: 2; }
 .reader-pagination[data-direction="rtl"] > label { order: 1; }
-.manga-reader:fullscreen { overflow-y: auto; background: #100e14; padding: 20px; }
+.manga-reader:fullscreen, .manga-reader[data-expanded="true"] { overflow-y: auto; background: #100e14; padding: 72px 20px 24px; margin: 0; }
+.manga-reader[data-expanded="true"] { position: fixed; inset: 0; z-index: 100; }
+.manga-reader:is(:fullscreen, [data-expanded="true"]) > .reader-toolbar { max-width: 850px; margin-inline: auto; }
+.reader-immersive-close { position: fixed; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); z-index: 60; }
+.reader-scroll-page { position: relative; width: 100%; }
+.reader-scroll-page > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .spoiler-toggle { display: flex; align-items: center; gap: 12px; min-height: 44px; color: #a1a1aa; font-size: 12px; line-height: 1.8; cursor: pointer; }
 .spoiler-toggle input { flex-shrink: 0; width: 18px; height: 18px; accent-color: var(--color-brand-500); }
 .loading-shape { border-radius: 6px; background: rgb(255 255 255 / 0.06); animation: loading-breathe 1.8s ease-in-out infinite; }
 @keyframes loading-breathe { 50% { background-color: rgb(255 255 255 / 0.1); } }
 .viewer-content { position: relative; }
-.viewer-content-pending { opacity: 0.4; transition: opacity 150ms ease; }
+.viewer-content-pending { pointer-events: none; }
 .viewer-loading-note { position: absolute; z-index: 30; top: 20px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); padding: 12px 18px; border: 1px solid rgb(255 255 255 / 0.12); border-radius: 10px; background: #201b29; color: #e4e4e7; font-size: 13px; }
 .video-loading-note { pointer-events: none; position: absolute; inset: 0; display: grid; place-items: center; color: #a1a1aa; font-size: 13px; }
 .viewer-load-error { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border: 1px solid rgb(244 63 94 / 0.25); border-radius: 12px; font-size: 13px; color: #fda4af; }
