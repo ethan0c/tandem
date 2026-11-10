@@ -7,10 +7,12 @@ import { MediaCard } from "./MediaCard";
 import { Button } from "@/components/Button";
 import Link from "next/link";
 import { fetchPublicCatalog } from "@/lib/public-catalog-client";
+import { FormatFilter } from "./FormatFilter";
 
 export function Browse({ kind }: { kind: MediaKind }) {
   const [q, setQ] = useState("");
   const [genre, setGenre] = useState("");
+  const [format, setFormat] = useState("");
   const [sort, setSort] = useState("popular");
   const [status, setStatus] = useState("");
   const [year, setYear] = useState("");
@@ -33,7 +35,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
       setError("");
       try {
         const data = await fetchPublicCatalog<typeof result>(
-          `/api/catalog?${new URLSearchParams({ kind, q, genre, sort, status, year, page: String(page) })}`,
+          `/api/catalog?${new URLSearchParams({ kind, q, genre, format, sort, status, year, page: String(page) })}`,
         );
         if (!controller.signal.aborted)
           setResult((prev) => ({
@@ -58,7 +60,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [kind, q, genre, sort, status, year, page]);
+  }, [kind, q, genre, format, sort, status, year, page]);
   function change(set: (value: string) => void, value: string, current: string) {
     if (value === current) return;
     setBusy(true);
@@ -86,6 +88,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
             className="field w-full pl-10"
           />
         </label>
+        <FormatFilter kind={kind} value={format} onChange={(value) => change(setFormat, value, format)} />
         <label className="filter-genre">
           <span className="sr-only">Genre</span>
           <select
@@ -192,9 +195,10 @@ export function Browse({ kind }: { kind: MediaKind }) {
           <Button
             variant="ghost"
             onClick={() => {
-              if (q || genre || status || year || page !== 1) setBusy(true);
+              if (q || genre || format || status || year || page !== 1) setBusy(true);
               setQ("");
               setGenre("");
+              setFormat("");
               setStatus("");
               setYear("");
               setPage(1);

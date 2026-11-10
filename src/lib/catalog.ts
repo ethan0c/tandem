@@ -1,6 +1,7 @@
 import "server-only";
 import seed from "@/content/catalog.json";
 import type { CatalogTitle, MediaKind } from "./catalog-types";
+import { catalogQueryParams, fallbackCatalog, type CatalogQuery } from "./catalog-query";
 
 interface Resource {
   id: string;
@@ -93,34 +94,8 @@ async function request(path: string): Promise<Payload> {
     pending.delete(path);
   }
 }
-export interface CatalogQuery {
-  kind: MediaKind;
-  q?: string;
-  genre?: string;
-  status?: string;
-  year?: string;
-  sort?: string;
-  page?: number;
-}
 export async function browseCatalog(query: CatalogQuery) {
-  const p = new URLSearchParams({
-    "page[limit]": "18",
-    "page[offset]": String(((query.page || 1) - 1) * 18),
-    include: "categories",
-  });
-  if (query.kind === "anime") p.set("filter[ageRating]", "G,PG,R");
-  if (query.q) p.set("filter[text]", query.q);
-  if (query.genre) p.set("filter[categories]", query.genre);
-  if (query.status) p.set("filter[status]", query.status);
-  if (query.year) p.set("filter[year]", query.year);
-  p.set(
-    "sort",
-    query.sort === "rating"
-      ? "-averageRating"
-      : query.sort === "newest"
-        ? "-startDate"
-        : "-userCount",
-  );
+  const p = catalogQueryParams(query);
   try {
     const data = await request(`${query.kind}?${p}`);
     const items = (Array.isArray(data.data) ? data.data : [data.data])
@@ -128,28 +103,7 @@ export async function browseCatalog(query: CatalogQuery) {
       .map((i) => normalizeTitle(i, data.included));
     return { items, hasMore: !!data.links?.next, source: "live" as const };
   } catch {
-    let items = (seed as CatalogTitle[]).filter((i) => i.kind === query.kind);
-    if (query.q) {
-      const q = query.q.toLowerCase();
-      items = items.filter((i) =>
-        [i.title, ...i.aliases].some((t) => t.toLowerCase().includes(q)),
-      );
-    }
-    if (query.genre)
-      items = items.filter((i) =>
-        i.genres.some((g) => g.toLowerCase() === query.genre),
-      );
-    if (query.status) items = items.filter((i) => i.status === query.status);
-    if (query.year) items = items.filter((i) => String(i.year) === query.year);
-    if (query.sort === "rating")
-      items.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    if (query.sort === "newest")
-      items.sort((a, b) => (b.year || 0) - (a.year || 0));
-    return {
-      items: (query.page || 1) === 1 ? items : [],
-      hasMore: false,
-      source: "cached" as const,
-    };
+    return fallbackCatalog(seed as CatalogTitle[], query);
   }
 }
 export async function getCatalogTitle(kind: MediaKind, id: string) {

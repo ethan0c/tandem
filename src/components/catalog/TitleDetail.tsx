@@ -29,6 +29,7 @@ import { TitleSkeleton } from "./LoadingStates";
 import { useTitlePreview } from "./useTitlePreview";
 import { fetchPublicCatalog } from "@/lib/public-catalog-client";
 import { canOptimizeArtwork } from "@/lib/artwork";
+import { catalogFormatLabel } from "@/lib/catalog-formats";
 
 export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
   const [fetchedMedia, setMedia] = useState<CatalogTitle | null>(
@@ -125,7 +126,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
         </div>
         <div className="min-w-0 sm:pt-16">
           <div className="flex flex-wrap gap-2 text-xs text-zinc-400">
-            <span className="text-brand-300">{media.format}</span>
+            <span className="text-brand-300">{catalogFormatLabel(media)}</span>
             <span>·</span>
             <span>{media.year || "TBA"}</span>
             <span>·</span>

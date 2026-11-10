@@ -12,6 +12,7 @@ import { matchTitle, parseBackup, parseLibraryText } from "@/lib/library";
 import { Button, ButtonLink } from "@/components/Button";
 import { useLibrary } from "./LibraryProvider";
 import { fetchPublicCatalog } from "@/lib/public-catalog-client";
+import { catalogFormatLabel } from "@/lib/catalog-formats";
 interface ReviewRow {
   name: string;
   progress: number;
@@ -336,7 +337,7 @@ export function ImportLibrary() {
                       <option value="">Leave unmatched</option>
                       {row.candidates.map((t) => (
                         <option key={t.id} value={t.id}>
-                          {t.title} ({t.year || "TBA"})
+                          {t.title} ({catalogFormatLabel(t)} · {t.year || "TBA"})
                         </option>
                       ))}
                     </select>

@@ -17,14 +17,18 @@ import {
   mediaKey,
   titleHref,
   type LibraryStatus,
+  type MediaKind,
 } from "@/lib/catalog-types";
 import { useLibrary } from "./LibraryProvider";
 import { Button, ButtonLink } from "@/components/Button";
 import { canOptimizeArtwork } from "@/lib/artwork";
+import { catalogFormatLabel, matchesCatalogFormat } from "@/lib/catalog-formats";
+import { FormatFilter } from "./FormatFilter";
 
 export function Library() {
   const { entries, ready, save, remove, user, notice, sync } = useLibrary();
-  const [kind, setKind] = useState("all");
+  const [kind, setKind] = useState<MediaKind | "all">("all");
+  const [format, setFormat] = useState("");
   const [status, setStatus] = useState("all");
   const [q, setQ] = useState("");
   const [sort, setSort] = useState("recent");
@@ -36,6 +40,7 @@ export function Library() {
     .filter(
       (e) =>
         (kind === "all" || e.media.kind === kind) &&
+        matchesCatalogFormat(e.media, format) &&
         (status === "all" || e.status === status) &&
         (!favorites || e.favorite) &&
         e.media.title.toLowerCase().includes(q.toLowerCase()),
@@ -129,17 +134,18 @@ export function Library() {
           role="group"
           aria-label="Library type"
         >
-          {["all", "anime", "manga"].map((k) => (
+          {(["all", "anime", "manga"] as const).map((k) => (
             <button
               key={k}
               className={`library-tab px-4 py-2 text-sm capitalize ${kind === k ? "library-tab-active text-white" : "text-muted"}`}
               aria-pressed={kind === k}
-              onClick={() => setKind(k)}
+              onClick={() => { setKind(k); setFormat(""); }}
             >
               {k === "all" ? "All stories" : k}
             </button>
           ))}
         </div>
+        <FormatFilter kind={kind} value={format} onChange={setFormat} className="w-full sm:w-auto" />
         <label>
           <span className="sr-only">Filter by status</span>
           <select
@@ -237,7 +243,7 @@ export function Library() {
                   {e.media.title}
                 </Link>
                 <p className="mt-1 text-xs capitalize text-muted">
-                  {e.media.kind} · {e.media.year || "TBA"}
+                  {catalogFormatLabel(e.media)} · {e.media.year || "TBA"}
                 </p>
                 <p className="mt-2 text-xs text-brand-300">
                   {e.media.kind === "anime" ? "Episode" : "Chapter"}{" "}

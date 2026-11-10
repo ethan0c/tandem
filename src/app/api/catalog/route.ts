@@ -1,9 +1,12 @@
 import { browseCatalog, getCatalogTitle, getProviders } from "@/lib/catalog";
+import { canonicalCatalogFormat } from "@/lib/catalog-formats";
 export async function GET(request: Request) {
   const p = new URL(request.url).searchParams;
   const kind = p.get("kind") || "anime";
   if (kind !== "anime" && kind !== "manga")
     return Response.json({ error: "Choose anime or manga." }, { status: 400 });
+  const format = canonicalCatalogFormat(kind, (p.get("format") || "").trim());
+  if (format === undefined) return Response.json({ error: "Choose a supported format." }, { status: 400 });
   const id = p.get("id");
   if (id) {
     if (!/^\d{1,10}$/.test(id))
@@ -22,6 +25,7 @@ export async function GET(request: Request) {
     kind,
     q: (p.get("q") || "").slice(0, 150),
     genre: (p.get("genre") || "").slice(0, 40),
+    format,
     status: ["current", "finished", "upcoming"].includes(p.get("status") || "")
       ? p.get("status")!
       : "",

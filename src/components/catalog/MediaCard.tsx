@@ -7,6 +7,7 @@ import { mediaKey, titleHref, type CatalogTitle } from "@/lib/catalog-types";
 import { useLibrary } from "./LibraryProvider";
 import { rememberTitle } from "@/lib/public-catalog-client";
 import { canOptimizeArtwork } from "@/lib/artwork";
+import { catalogFormatLabel } from "@/lib/catalog-formats";
 export function MediaCard({ media, eager = false }: { media: CatalogTitle; eager?: boolean }) {
   const { entries, save, remove, ready } = useLibrary();
   const entry = entries.find((e) => mediaKey(e.media) === mediaKey(media));
@@ -81,6 +82,8 @@ export function MediaCard({ media, eager = false }: { media: CatalogTitle; eager
         {media.title}
       </Link>
       <p className="mt-1 text-xs leading-relaxed text-zinc-400">
+        {catalogFormatLabel(media)}
+        <span className="mx-1.5 text-muted">·</span>
         {media.year || "TBA"}
         <span className="mx-1.5 text-muted">·</span>
         {media.total
