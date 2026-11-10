@@ -559,6 +559,23 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
 .reader-pagination > .btn3d { flex: 0 0 44px; width: 44px; height: 44px; padding: 0; }
 .reader-pagination > label { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 13px; }
 .reader-pagination .field { width: 56px; flex-shrink: 0; margin-inline: 0; padding-inline: 7px; }
+.unit-navigation { max-width: 600px; margin-inline: auto; }
+.unit-navigation-row { display: flex; align-items: center; gap: 12px; }
+.unit-navigation-row > .btn3d { flex: 0 0 44px; width: 44px; height: 44px; padding: 0; }
+.player-tools { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 20px; }
+.player-tools .btn3d { min-height: 44px; }
+.player-settings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 100%; }
+.player-settings label { display: flex; min-width: 0; flex-direction: column; gap: 8px; color: #a1a1aa; font-size: 12px; }
+.player-settings select { width: 100%; }
+.viewer-shortcuts { color: #a1a1aa; font-size: 12px; line-height: 1.9; }
+.viewer-shortcuts summary { cursor: pointer; padding-block: 12px; min-height: 44px; }
+.viewer-shortcuts p { padding-bottom: 12px; }
+.reader-page[data-mode="page"][data-fit="width"] img { max-height: none; width: 100%; }
+.reader-pagination[data-direction="rtl"] > .btn3d:first-child { order: 2; }
+.reader-pagination[data-direction="rtl"] > label { order: 1; }
+.manga-reader:fullscreen { overflow-y: auto; background: #100e14; padding: 20px; }
+.spoiler-toggle { display: flex; align-items: center; gap: 12px; min-height: 44px; color: #a1a1aa; font-size: 12px; line-height: 1.8; cursor: pointer; }
+.spoiler-toggle input { flex-shrink: 0; width: 18px; height: 18px; accent-color: var(--color-brand-500); }
 @media (max-width: 1023px) {
   .media-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px; }
   .platform-header-frame { grid-template-columns: auto 1fr; gap: 8px 20px; }
@@ -580,6 +597,7 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .platform .field { font-size: 16px; }
   .reader-toolbar > label { flex: 1 1 180px; }
   .reader-toolbar select { width: 100%; }
+  .player-settings { width: 100%; }
   .library-row { padding: 14px; }
   .chapter-row { gap: 12px; }
 }

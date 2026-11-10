@@ -58,7 +58,12 @@ export const directAnime: Record<
   },
 };
 export function approvedVideo(mediaId: string, url: string) {
-  if (typeof mediaId !== "string" || typeof url !== "string" || !Object.hasOwn(directAnime, mediaId)) return false;
+  if (
+    typeof mediaId !== "string" ||
+    typeof url !== "string" ||
+    !Object.hasOwn(directAnime, mediaId)
+  )
+    return false;
   return (
     directAnime[mediaId]?.streams.some((stream) => stream.url === url) === true
   );

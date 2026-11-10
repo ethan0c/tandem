@@ -149,7 +149,8 @@ function ReadingSession({
   const query = useClientValue(() => location.search, "");
   const isHost = room.selfId !== null && room.selfId === room.hostId;
   const page = follow ? room.reading.page : independentPage;
-  const canNavigate = !follow || (room.status === "joined" && (!room.reading.hostOnly || isHost));
+  const canNavigate =
+    !follow || (room.status === "joined" && (!room.reading.hostOnly || isHost));
   const { changeReading, changeStory } = room;
   useEffect(() => {
     const params = new URLSearchParams(query);

@@ -4,10 +4,16 @@ import { ArrowRight } from "lucide-react";
 import type { MediaKind } from "@/lib/catalog-types";
 import { useContent } from "./useContent";
 import { Button, ButtonLink } from "@/components/Button";
+import { useLibrary } from "./LibraryProvider";
+import { isUnitCompleted, unitLabel } from "@/lib/spoilers";
 
 export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
   const [language, setLanguage] = useState("en");
   const [offset, setOffset] = useState(0);
+  const [revealedFor, setRevealedFor] = useState("");
+  const { entries } = useLibrary();
+  const progress = entries.find((entry) => entry.media.kind === kind && entry.media.id === id)?.progress || 0;
+  const showTitles = revealedFor === `${kind}:${id}`;
   const content = useContent(kind, id, language, offset);
   return (
     <section
@@ -67,21 +73,31 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
               {content.data.notice}
             </p>
           )}
+          {!!content.data?.units.length && (
+            <label className="spoiler-toggle mb-4">
+              <input type="checkbox" checked={showTitles} onChange={(event) => setRevealedFor(event.target.checked ? `${kind}:${id}` : "")} />
+              Show unfinished {kind === "anime" ? "episode" : "chapter"} titles (may contain spoilers)
+            </label>
+          )}
           <div className="chapter-list">
             {content.data?.units.map((unit) => (
               <div key={unit.id} className="chapter-row">
                 <div className="min-w-0">
-                  <h3 className="text-sm">{unit.label}</h3>
-                  {unit.title && unit.title !== unit.label && (
+                  <h3 className="text-sm">{unitLabel(kind, unit)}</h3>
+                  {unit.title && unit.title !== unit.label && (showTitles || isUnitCompleted(unit.number, progress)) && (
                     <p className="mt-1 text-xs leading-6 text-zinc-400">
                       {unit.title}
                     </p>
+                  )}
+                  {unit.title && unit.title !== unit.label && !showTitles && !isUnitCompleted(unit.number, progress) && (
+                    <p className="mt-1 text-xs leading-6 text-zinc-500">Title hidden until completed</p>
                   )}
                   {unit.group && (
                     <p className="mt-1 text-xs text-zinc-500">{unit.group}</p>
                   )}
                 </div>
                 <ButtonLink
+                  aria-label={`${kind === "anime" ? "Watch" : "Read"} ${unitLabel(kind, unit).toLowerCase()}`}
                   href={`/play/${kind}/${id}?${new URLSearchParams({ unit: unit.id, language })}`}
                   variant="ghost"
                   size="sm"

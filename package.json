@@ -15,7 +15,9 @@
     "discord:register": "tsx scripts/discord/register.mjs",
     "turn:check": "tsx scripts/turn/check.mjs",
     "e2e:extension": "node e2e/extension-live.mjs",
-    "e2e:reading": "node e2e/reading-sync.mjs"
+    "e2e:reading": "node e2e/reading-sync.mjs",
+    "e2e:mobile": "node e2e/platform-mobile.mjs",
+    "e2e:content": "node e2e/content.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

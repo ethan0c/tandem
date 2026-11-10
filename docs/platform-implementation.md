@@ -1,6 +1,6 @@
 # Anime and manga platform
 
-The new experience starts at `/discover` and uses the existing Tandem typography, violet palette, dark surfaces, logo, and raised buttons. The original homepage and watch-room flows remain available. This is the implemented core of the larger roadmap in `site-plan.md`.
+The platform uses the approved site sketch and the existing Tandem typography, violet palette, dark surfaces, logo, and raised buttons. Home keeps its watch-together focus; the shared header links to Anime, Manga, Library, and account access, with Create a room as an action. The catalog hub remains available at `/discover`. The original homepage and watch-room flows remain available. This is the implemented core of the larger roadmap in `site-plan.md`.
 
 ## Available now
 
@@ -17,6 +17,14 @@ The new experience starts at `/discover` and uses the existing Tandem typography
 Reading pages stay on each participant's device. Everyone must select their own matching images in the same order. Selecting a new chapter does not download or automatically open its files. In vertical mode, choose a page to bring the room to it. Rooms and shared reading state are held in memory and expire under the existing room cleanup rules.
 
 ## Content integration
+
+`/play/[kind]/[id]` supplies in-site video and chapter reading, page/direction/scroll controls, saved reading position, resumable watch position, source attribution, and a route into a shared room. In-site content availability is separate from metadata catalog coverage.
+
+The first verified native sources are Namakura Gatana (Kitsu anime 4650, a public-domain silent film supplied by Internet Archive/Wikimedia Commons) and Ubunchu! chapter 12 (Kitsu manga 24249, an openly licensed English translation). The Ubunchu images are stored as resized WebP pages with the original attribution and license under `public/reader/ubunchu`. The original manga is CC BY-NC-SA 2.1 JP and the English translation CC BY-NC-SA 4.0; this source is restricted to non-commercial use and must be reviewed before adding commercial use. Credit names Hiroshi Seo, ASCII Media Works, Tarek Saier, and PublicDesert. No artwork or dialogue was added or removed.
+
+The MangaDex adapter matches Kitsu/MyAnimeList identifiers before falling back to unambiguous names, supports chapter languages and paginated chapter lists, validates a chapter belongs to the selected series, and restricts page servers to provider hosts. The live catalog and chapter metadata worked in testing, but tested chapter page-server requests returned 404. Those failures are shown explicitly; the adapter is not claimed to have verified broad live chapter coverage. ReAnime and Weeb Central public endpoints returned anti-bot 403 responses, so neither is advertised as a working source. No anti-bot or decryption bypass was added.
+
+Remote watch-room URLs must exactly match registered sources. Reading rooms share the selected provider chapter as well as page number, so late joiners load the same chapter automatically. Local page images remain supported.
 
 Kitsu supplies metadata and artwork, not playable episodes or manga pages. Anime provider URLs are restricted to known HTTPS streaming-provider hosts. Where no direct link exists, a clearly labeled provider search is offered. Trailers use YouTube's privacy-enhanced embed. No unauthorized media proxy or scraping integration is included.
 
@@ -37,6 +45,8 @@ node --import tsx --test tests/*.test.ts
 npm run typecheck
 npm run build
 node e2e/reading-sync.mjs
+node e2e/platform-mobile.mjs
+node e2e/content.mjs
 node scripts/check-supabase.mjs <project-ref>
 ```
 
@@ -44,6 +54,12 @@ The socket integration check verifies shared positions, host controls, late join
 
 ## Remaining roadmap
 
-Licensed in-site episode and chapter providers still need to be selected and integrated. Progress on external providers remains manual; local reader positions save automatically. Following a series currently saves a subscription preference; it does not yet generate release notifications.
+Broader in-site episode and chapter sources still need working, permitted integrations; the two native proof sources are not a claim of a complete streaming catalog. Progress on external providers remains manual; local reader positions save automatically. Following a series currently saves a subscription preference; it does not yet generate release notifications.
 
 Background release checks and notifications, personalized recommendations, avatars and public profiles, friends, additional importer formats, and the admin/moderation dashboard remain future phases. The UI does not advertise these as available. Supabase Auth redirect configuration and delivery of confirmation/reset emails should be tested for the eventual deployment origin before launch. Local development has not been deployed to production.
+
+## Responsive verification
+
+The shared header uses a second navigation row on smaller screens. Catalog filters use full-width search and a two-column phone layout. Labels use sentence case, metadata is plain text, and dropdown chevrons have a fixed inset. Icon buttons do not shrink and reader pagination uses square 44px controls. The hidden reading-room chat panel is clipped without widening the document.
+
+The production browser checks passed 126 layout/interaction assertions across widths 320, 360, 375, 390, 414, 430, 768, 1024, and 1440 in Chromium, and 42 assertions across 320, 390, and 430 in WebKit. Checks cover eleven routes, import review, local reading, navigation overlap, horizontal overflow, and icon containment. Separate live tests verified native media playback, actual licensed chapter images, saved position/reload resume, late-joining readers, host controls, independent reading, and mobile-to-desktop watch-room play/pause sync. WebKit also decoded the actual MP4 and chapter WebP pages at phone width. Browser emulation does not replace testing on physical phones.
