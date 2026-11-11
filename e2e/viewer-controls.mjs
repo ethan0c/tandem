@@ -20,8 +20,7 @@ async function geometry(page, label) {
       const r = e.getBoundingClientRect();
       return r.width && (r.width < 120 || r.left < 0 || r.right > width + 1);
     });
-    const beyond = [...document.querySelectorAll('body *')].map(e => ({ e, r: e.getBoundingClientRect() })).filter(({ r }) => r.width && r.right > width + 1).slice(0, 12).map(({ e, r }) => ({ tag: e.tagName, className: e.className?.baseVal || e.className, right: Math.round(r.right), width: Math.round(r.width) }));
-    return { width, scroll: document.documentElement.scrollWidth, icons: icons.length, fields: fields.length, beyond };
+    return { width, scroll: document.documentElement.scrollWidth, icons: icons.length, fields: fields.length };
   });
   assert.ok(result.scroll <= result.width + 1, `${label}: overflow ${JSON.stringify(result)}`);
   assert.equal(result.icons, 0, `${label}: chevron containment`);
@@ -94,9 +93,7 @@ try {
     await page.waitForFunction(() => document.querySelector('video')?.readyState >= 1, null, { timeout: 60000 });
     await page.getByLabel('Playback settings').click();
     const settingsPanel = await page.locator('.custom-player-settings-panel').boundingBox();
-    const settingsRight = await page.locator('.custom-player-settings-panel').evaluate(element => getComputedStyle(element).right);
-    const viewport = await page.evaluate(() => ({ innerWidth, clientWidth: document.documentElement.clientWidth, narrow: matchMedia('(max-width: 479px)').matches }));
-    assert.ok(settingsPanel && settingsPanel.x >= 0 && settingsPanel.x + settingsPanel.width <= width, `${width}px: settings menu stays on screen ${JSON.stringify({ settingsPanel, settingsRight, viewport })}`);
+    assert.ok(settingsPanel && settingsPanel.x >= 0 && settingsPanel.x + settingsPanel.width <= width, `${width}px: settings menu stays on screen ${JSON.stringify(settingsPanel)}`);
     await page.screenshot({ path: `${output}/${width}-settings.png`, fullPage: true });
     await page.getByRole("combobox", { name: "Playback speed" }).selectOption("1.5");
     assert.equal(await page.locator('video').evaluate(v => v.playbackRate), 1.5);
@@ -108,6 +105,7 @@ try {
     await page.keyboard.press('l');
     assert.ok(await page.locator('video').evaluate(v => v.currentTime >= 9.9));
     if (width === 390 && engine === 'chromium') {
+      await page.getByLabel('Playback settings').click();
       await page.getByRole('combobox', { name: 'Video format' }).selectOption('1');
       await page.waitForFunction(() => {
         const video = document.querySelector('video');
