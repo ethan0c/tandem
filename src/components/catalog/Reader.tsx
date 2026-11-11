@@ -25,6 +25,7 @@ import { StreamVideo } from "@/components/room/StreamVideo";
 import { ChatPanel } from "@/components/room/ChatPanel";
 import { TakenOver } from "@/components/TakenOver";
 import type { CatalogTitle } from "@/lib/catalog-types";
+import type { ContentPlayback } from "@/lib/content-types";
 import { useLibrary } from "./LibraryProvider";
 import { useContent } from "./useContent";
 
@@ -142,7 +143,11 @@ function ReadingSession({
   const [chat, setChat] = useState(false);
   const [media, setMedia] = useState<CatalogTitle | null>(null);
   const [loadingPages, setLoadingPages] = useState(false);
-  const chapters = useContent("manga", room.story?.id || "");
+  const [chapterPage, setChapterPage] = useState({ id: "", offset: 0 });
+  const [pageCredit, setPageCredit] = useState<Pick<ContentPlayback, "source" | "sourceUrl" | "credit"> | null>(null);
+  const chapterId = room.story?.id || "";
+  const chapterOffset = chapterPage.id === chapterId ? chapterPage.offset : 0;
+  const chapters = useContent("manga", chapterId, "en", chapterOffset);
   const input = useRef<HTMLInputElement>(null);
   const canvas = useRef<HTMLDivElement>(null);
   const sentPosition = useRef("");
@@ -186,19 +191,22 @@ function ReadingSession({
           `/api/content?${new URLSearchParams({ kind: "manga", id: storyId, unit: room.reading.unit! })}`,
           { signal: controller.signal },
         );
-        const data = await response.json();
+        const data = await response.json() as ContentPlayback & { error?: string };
         if (!response.ok)
           throw new Error(data.error || "The chapter couldn’t be loaded.");
-        if (!controller.signal.aborted)
+        if (!controller.signal.aborted) {
           setPages(
-            data.pages.map((url: string, i: number) => ({
+            (data.pages || []).map((url: string, i: number) => ({
               url,
               name: `Page ${i + 1}`,
             })),
           );
+          setPageCredit({ source: data.source, sourceUrl: data.sourceUrl, credit: data.credit });
+        }
       } catch (e) {
         if (!controller.signal.aborted) {
           setPages([]);
+          setPageCredit(null);
           setError(
             e instanceof Error ? e.message : "The chapter couldn’t be loaded.",
           );
@@ -352,6 +360,12 @@ function ReadingSession({
           </Button>
         </div>
       </div>
+      {chapters.data && (chapterOffset > 0 || chapters.data.hasMore) && (
+        <div className="mt-3 flex justify-end gap-2">
+          <Button size="sm" variant="ghost" disabled={chapters.pending || chapterOffset === 0} onClick={() => setChapterPage({ id: chapterId, offset: Math.max(0, chapterOffset - 100) })}>Previous chapters</Button>
+          <Button size="sm" variant="ghost" disabled={chapters.pending || !chapters.data?.hasMore} onClick={() => setChapterPage({ id: chapterId, offset: chapterOffset + 100 })}>More chapters</Button>
+        </div>
+      )}
       <div className="reader-toolbar mt-6 border-y border-white/10 py-4">
         {!!chapters.data?.units.length && (
           <label>
@@ -488,6 +502,7 @@ function ReadingSession({
             return;
           }
           setError("");
+          setPageCredit(null);
           if (room.reading.unit) changeReading({ unit: "", page: 0 });
           setPages(
             files.map((f) => ({ url: URL.createObjectURL(f), name: f.name })),
@@ -581,6 +596,12 @@ function ReadingSession({
               <ChevronRight className="size-5" />
             </Button>
           </div>
+          {pageCredit && (
+            <p className="mt-4 text-center text-xs leading-6 text-zinc-400">
+              Pages: <a href={pageCredit.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{pageCredit.source}</a>
+              {pageCredit.credit ? ` · ${pageCredit.credit}` : ""}
+            </p>
+          )}
           {media && (
             <div className="mt-6 text-center">
               <Button

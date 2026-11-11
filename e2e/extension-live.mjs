@@ -121,6 +121,8 @@ async function joinPanel(p) {
   await p.page.goto(episodeLink);
   await until(`${p.name} panel mounts`, async () => !!overlay(p));
   const f = overlay(p);
+  await f.waitForLoadState('load');
+  await p.page.waitForTimeout(1200);
   await f.waitForFunction(() => {
     const b = document.querySelector('button[aria-label*="microphone"]');
     return b && !b.disabled;

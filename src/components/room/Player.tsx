@@ -154,19 +154,20 @@ export function Player({
 
   useEffect(() => {
     if (!mangaId) {
+      let active = true;
       queueMicrotask(() => {
+        if (!active) return;
         setMangaCatalog(null);
         setMangaPlayback(null);
         setMangaCatalogLoading(false);
         setMangaPlaybackLoading(false);
       });
-      return;
+      return () => { active = false; };
     }
     const controller = new AbortController();
     queueMicrotask(() => {
       if (controller.signal.aborted) return;
       setMangaCatalog(null);
-      setMangaPlayback(null);
       setMangaCatalogLoading(true);
       setError(null);
     });
@@ -202,11 +203,13 @@ export function Player({
 
   useEffect(() => {
     if (!mangaId || !reading.unit) {
+      let active = true;
       queueMicrotask(() => {
+        if (!active) return;
         setMangaPlayback(null);
         setMangaPlaybackLoading(false);
       });
-      return;
+      return () => { active = false; };
     }
     const controller = new AbortController();
     queueMicrotask(() => {
