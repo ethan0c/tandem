@@ -549,11 +549,12 @@ function ReadingSession({
             <Button
               variant="ghost"
               size="icon"
+              className="nav-chevron"
               aria-label="Previous page"
               disabled={page <= 0 || !canNavigate}
               onClick={() => go(page - 1)}
             >
-              <ChevronLeft className="size-4" />
+              <ChevronLeft className="size-5" />
             </Button>
             <label className="text-xs text-zinc-400">
               Page{" "}
@@ -572,11 +573,12 @@ function ReadingSession({
             <Button
               variant="ghost"
               size="icon"
+              className="nav-chevron"
               aria-label="Next page"
               disabled={page >= pages.length - 1 || !canNavigate}
               onClick={() => go(page + 1)}
             >
-              <ChevronRight className="size-4" />
+              <ChevronRight className="size-5" />
             </Button>
           </div>
           {media && (

@@ -94,7 +94,8 @@ try {
     await page.getByLabel('Playback settings').click();
     const settingsPanel = await page.locator('.custom-player-settings-panel').boundingBox();
     const settingsRight = await page.locator('.custom-player-settings-panel').evaluate(element => getComputedStyle(element).right);
-    assert.ok(settingsPanel && settingsPanel.x >= 0 && settingsPanel.x + settingsPanel.width <= width, `${width}px: settings menu stays on screen ${JSON.stringify({ settingsPanel, settingsRight })}`);
+    const viewport = await page.evaluate(() => ({ innerWidth, clientWidth: document.documentElement.clientWidth, narrow: matchMedia('(max-width: 479px)').matches }));
+    assert.ok(settingsPanel && settingsPanel.x >= 0 && settingsPanel.x + settingsPanel.width <= width, `${width}px: settings menu stays on screen ${JSON.stringify({ settingsPanel, settingsRight, viewport })}`);
     await page.screenshot({ path: `${output}/${width}-settings.png`, fullPage: true });
     await page.getByRole("combobox", { name: "Playback speed" }).selectOption("1.5");
     assert.equal(await page.locator('video').evaluate(v => v.playbackRate), 1.5);

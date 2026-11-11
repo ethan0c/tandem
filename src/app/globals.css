@@ -602,6 +602,9 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
 .reader-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .reader-pagination { position: sticky; bottom: 12px; z-index: 20; margin: 24px auto 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; width: min(100%, 360px); padding: 12px; background: rgb(23 19 29 / 0.97); border: 1px solid rgb(255 255 255 / 0.15); border-radius: 12px; }
 .reader-pagination > .btn3d { flex: 0 0 44px; width: 44px; height: 44px; padding: 0; }
+.nav-chevron { background: transparent; border-color: transparent; box-shadow: none; color: #c4b5fd; }
+.nav-chevron:hover, .nav-chevron:active { background: rgb(196 181 253 / 0.12); box-shadow: none; filter: none; transform: none; }
+.btn3d-icon.nav-chevron:hover svg { transform: none; }
 .reader-pagination > label { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 13px; }
 .reader-pagination .field { width: 56px; flex-shrink: 0; margin-inline: 0; padding-inline: 7px; }
 .unit-navigation { max-width: 600px; margin-inline: auto; }
@@ -706,6 +709,8 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .chapter-row { gap: 12px; }
 }
 @media (max-width: 479px) {
+  .custom-player-control-row { flex-wrap: wrap; justify-content: space-between; }
+  .custom-player-time { order: -1; flex: 0 0 100%; margin-left: 0; text-align: right; }
   .custom-player-settings-panel { right: -16px; }
   .catalog-filters .filter-genre, .catalog-filters .filter-sort { grid-column: 1 / -1; }
   .media-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; }
