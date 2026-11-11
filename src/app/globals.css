@@ -869,3 +869,4 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .platform-account, .platform-nav-link { min-height: 44px; }
   .platform summary { min-height: 44px; padding-block: 12px; }
 }
+.billboard-top .page-heading > p { color: #d4d2da; }
