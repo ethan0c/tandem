@@ -25,7 +25,8 @@ function isContentCatalog(value: unknown): value is ContentCatalog {
   const catalog = value as ContentCatalog;
   return !!catalog.media && (catalog.media.kind === "anime" || catalog.media.kind === "manga") &&
     /^\d{1,10}$/.test(catalog.media.id) && typeof catalog.media.title === "string" &&
-    typeof catalog.source === "string" && Array.isArray(catalog.units) && catalog.units.length <= 100 &&
+    typeof catalog.source === "string" && (catalog.sourceId === undefined || /^\d{1,10}$/.test(catalog.sourceId)) &&
+    Array.isArray(catalog.units) && catalog.units.length <= 100 &&
     catalog.units.every((unit) => unit && typeof unit.id === "string" && /^[a-z0-9][a-z0-9_-]{0,79}$/i.test(unit.id) && Number.isFinite(unit.number) && typeof unit.label === "string") &&
     Number.isInteger(catalog.total) && catalog.total >= 0 && typeof catalog.hasMore === "boolean";
 }

@@ -11,6 +11,7 @@ export interface ContentUnit {
 export interface ContentCatalog {
   media: CatalogTitle;
   source: string;
+  sourceId?: string;
   units: ContentUnit[];
   total: number;
   hasMore: boolean;
@@ -19,6 +20,7 @@ export interface ContentCatalog {
 }
 export interface ContentPlayback {
   source: string;
+  sourceId?: string;
   credit: string;
   sourceUrl: string;
   unit: ContentUnit;

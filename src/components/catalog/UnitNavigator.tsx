@@ -55,8 +55,8 @@ export function UnitNavigator({ kind, catalog, current, onSelect, offset, onOffs
   return (
     <nav className="unit-navigation mt-6" inert={disabled} aria-busy={disabled} aria-label="Chapter navigation">
       <div className="unit-navigation-row">
-        <Button variant="ghost" size="icon" aria-label={`Previous ${noun}`} disabled={!previous} onClick={() => previous && onSelect(previous)}>
-          <ChevronLeft className="size-4" />
+        <Button variant="ghost" size="icon" className="nav-chevron" aria-label={`Previous ${noun}`} disabled={!previous} onClick={() => previous && onSelect(previous)}>
+          <ChevronLeft className="size-5" />
         </Button>
         <label className="min-w-0 flex-1">
           <span className="sr-only">Choose {noun}</span>
@@ -67,8 +67,8 @@ export function UnitNavigator({ kind, catalog, current, onSelect, offset, onOffs
             {choices.map((unit) => <option key={unit.id} value={unit.id}>{unitLabel(kind, unit)}{kind === "manga" && unit.group ? ` · ${unit.group}` : ""}</option>)}
           </select>
         </label>
-        <Button variant="ghost" size="icon" aria-label={`Next ${noun}`} disabled={!next} onClick={() => next && onSelect(next)}>
-          <ChevronRight className="size-4" />
+        <Button variant="ghost" size="icon" className="nav-chevron" aria-label={`Next ${noun}`} disabled={!next} onClick={() => next && onSelect(next)}>
+          <ChevronRight className="size-5" />
         </Button>
       </div>
       {pagination}

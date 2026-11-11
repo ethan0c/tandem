@@ -32,6 +32,7 @@ export interface LibraryEntry {
   updatedAt: number;
   readingPosition?: { chapter: number; page: number };
   watchPosition?: { unit: string; seconds: number };
+  sourceId?: string;
   likedEpisodes?: { unit: string; number: number; group?: "Sub" | "Dub" }[];
 }
 export function mediaKey(media: Pick<CatalogTitle, "kind" | "id">) {

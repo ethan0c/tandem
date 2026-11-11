@@ -184,12 +184,12 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
         ))}
       </div>
       <div className="reader-pagination" data-direction={settings.direction}>
-        <Button variant="ghost" size="icon" disabled={position === 0} onClick={() => go(position - 1)} aria-label="Previous page">
-          {settings.direction === "rtl" ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
+        <Button variant="ghost" size="icon" className="nav-chevron" disabled={position === 0} onClick={() => go(position - 1)} aria-label="Previous page">
+          {settings.direction === "rtl" ? <ChevronRight className="size-5" /> : <ChevronLeft className="size-5" />}
         </Button>
         <label>Page<input className="field" type="number" aria-label="Page number" min="1" max={pages.length} value={position + 1} onChange={(event) => go(Number(event.target.value) - 1)} /><span>/ {pages.length}</span></label>
-        <Button variant="ghost" size="icon" disabled={position >= pages.length - 1} onClick={() => go(position + 1)} aria-label="Next page">
-          {settings.direction === "rtl" ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
+        <Button variant="ghost" size="icon" className="nav-chevron" disabled={position >= pages.length - 1} onClick={() => go(position + 1)} aria-label="Next page">
+          {settings.direction === "rtl" ? <ChevronLeft className="size-5" /> : <ChevronRight className="size-5" />}
         </Button>
       </div>
       <div className="mt-7 text-center">

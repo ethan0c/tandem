@@ -135,6 +135,7 @@ export function isLibraryEntry(value: unknown): value is LibraryEntry {
         Number.isFinite(e.watchPosition.seconds) &&
         e.watchPosition.seconds >= 0 &&
         e.watchPosition.seconds < 1_000_000)) &&
+    (e.sourceId === undefined || (m.kind === "anime" && typeof e.sourceId === "string" && /^\d{1,10}$/.test(e.sourceId))) &&
     (!e.likedEpisodes ||
       (m.kind === "anime" &&
         Array.isArray(e.likedEpisodes) &&
