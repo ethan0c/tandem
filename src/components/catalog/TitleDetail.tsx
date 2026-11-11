@@ -5,10 +5,10 @@ import Link from "next/link";
 import {
   ArrowLeft,
   ArrowUpRight,
-  Bookmark,
   Check,
   Heart,
   Play,
+  Plus,
   Star,
   Users,
 } from "lucide-react";
@@ -28,8 +28,10 @@ import { ContentChapters } from "./ContentChapters";
 import { TitleSkeleton } from "./LoadingStates";
 import { useTitlePreview } from "./useTitlePreview";
 import { fetchPublicCatalog } from "@/lib/public-catalog-client";
-import { canOptimizeArtwork } from "@/lib/artwork";
+import { canOptimizeArtwork, largeArtwork } from "@/lib/artwork";
 import { catalogFormatLabel } from "@/lib/catalog-formats";
+
+const statusLabels: Record<string, string> = { current: "Ongoing", finished: "Finished", upcoming: "Upcoming", tba: "TBA", unreleased: "Unreleased" };
 
 export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
   const [fetchedMedia, setMedia] = useState<CatalogTitle | null>(
@@ -86,115 +88,122 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
     );
   }
   const unit = kind === "anime" ? "episode" : "chapter";
+  const backdrop = media.cover ? largeArtwork(media.cover) : media.poster;
+  const synopsis = media.synopsis.replace(/\s*\(Source:[^)]*\)\s*$/, "");
   return (
     <>
-      <Link
-        href={`/${kind}`}
-        className="mb-4 inline-flex items-center gap-2 text-xs text-zinc-400 hover:text-white"
-      >
-        <ArrowLeft className="size-3.5" />
-        Back to {kind}
-      </Link>
-      <div className="detail-banner relative isolate -mx-5 mb-[-48px] h-36 overflow-hidden sm:mx-0 sm:rounded-2xl">
-        {media.cover && (
+      <section className="title-hero bleed under-header">
+        {backdrop && (
           <Image
-            src={media.cover}
-            unoptimized={!canOptimizeArtwork(media.cover)}
+            src={backdrop}
+            unoptimized={!canOptimizeArtwork(backdrop)}
             alt=""
             fill
-            sizes="(max-width: 1279px) 100vw, 1184px"
+            sizes="100vw"
             loading="eager"
-            className="-z-20 object-cover opacity-60"
+            className={`title-hero-art ${media.cover ? "" : "scale-110 blur-2xl"}`}
           />
         )}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#111015] via-[#111015]/50 to-transparent" />
-      </div>
-      <section className="relative grid grid-cols-[96px_minmax(0,1fr)] items-end gap-4 sm:grid-cols-[128px_1fr] sm:gap-6 sm:px-5">
-        <div className="relative aspect-[0.7] w-24 overflow-hidden rounded-xl border border-white/15 bg-ink-700 shadow-2xl sm:w-32">
-          {media.poster && (
-            <Image
-              src={media.poster}
-              unoptimized={!canOptimizeArtwork(media.poster)}
-              alt={`${media.title} cover`}
-              fill
-              sizes="(max-width: 639px) 96px, 128px"
-              loading="eager"
-              fetchPriority="high"
-              className="object-cover"
-            />
-          )}
-        </div>
-        <div className="min-w-0 pb-1">
-          <div className="flex flex-wrap gap-2 text-xs text-zinc-400">
-            <span className="text-brand-300">{catalogFormatLabel(media)}</span>
-            <span>·</span>
-            <span>{media.year || "TBA"}</span>
-            <span>·</span>
-            <span className="capitalize">{media.status}</span>
-            {media.rating && (
-              <>
-                <span>·</span>
-                <span className="flex items-center gap-1 text-amber-200">
-                  <Star className="size-3 fill-amber-200" />
-                  {media.rating.toFixed(1)}
-                </span>
-              </>
-            )}
+        <div className="title-hero-scrim" aria-hidden="true" />
+        <div className="hero-inner site-width site-gutter">
+          <Link
+            href={`/${kind}`}
+            className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-zinc-300 hover:text-white"
+          >
+            <ArrowLeft className="size-4" />
+            Back to {kind}
+          </Link>
+          <div className="title-hero-grid">
+            <div className="title-poster">
+              {media.poster && (
+                <Image
+                  src={media.poster}
+                  unoptimized={!canOptimizeArtwork(media.poster)}
+                  alt={`${media.title} cover`}
+                  fill
+                  sizes="(max-width: 767px) 112px, 240px"
+                  loading="eager"
+                  fetchPriority="high"
+                  className="object-cover"
+                />
+              )}
+            </div>
+            <div className="title-info">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="pill pill-brand">{catalogFormatLabel(media)}</span>
+                <span className="pill">{statusLabels[media.status] || media.status}</span>
+              </div>
+              <h1 className="detail-title mt-3">{media.title}</h1>
+              {media.originalTitle !== media.title && (
+                <p className="mt-2 text-sm text-zinc-300">{media.originalTitle}</p>
+              )}
+              <div className="billboard-meta">
+                {media.rating && (
+                  <>
+                    <span className="rating-chip"><Star className="size-3.5 fill-current" aria-hidden="true" />{media.rating.toFixed(1)}</span>
+                    <span className="dot" aria-hidden="true" />
+                  </>
+                )}
+                <span>{media.year || "TBA"}</span>
+                {media.total && media.total > 1 ? (
+                  <>
+                    <span className="dot" aria-hidden="true" />
+                    <span>{media.total} {unit}s</span>
+                  </>
+                ) : null}
+              </div>
+            </div>
           </div>
-          <h1 className="detail-title mt-2 font-medium tracking-[-0.035em]">
-            {media.title}
-          </h1>
-          {media.originalTitle !== media.title && (
-            <p className="mt-2 text-sm text-muted">{media.originalTitle}</p>
-          )}
-          <div className="mt-3 flex flex-wrap gap-2">
-            <ButtonLink href="#episodes">
+          <div className="title-actions">
+            <ButtonLink href="#episodes" variant="light" size="lg">
+              <Play className="size-5 fill-current" aria-hidden="true" />
               {kind === "anime" ? "Watch" : "Read"}
             </ButtonLink>
-            <Button variant="ghost" onClick={startTogether}>
-              <Users className="size-4" />
+            <Button size="lg" onClick={startTogether}>
+              <Users className="size-5" />
               {kind === "anime" ? "Watch together" : "Read together"}
             </Button>
             <Button
               variant="ghost"
+              size="icon"
+              aria-label={entry ? "In your library" : "Save for later"}
+              title={entry ? "In your library" : "Save for later"}
               disabled={!ready || !!entry}
               onClick={() => save(media)}
             >
-              {entry ? (
-                <Check className="size-4" />
-              ) : (
-                <Bookmark className="size-4" />
-              )}
-              {entry ? "In your library" : "Save for later"}
+              {entry ? <Check className="size-5" /> : <Plus className="size-5" />}
             </Button>
             <Button
               variant="ghost"
+              size="icon"
               aria-label="Favorite title"
+              title="Favorite"
               aria-pressed={entry?.favorite || false}
               disabled={!ready}
               onClick={() => save(media, { favorite: !entry?.favorite })}
             >
-              <Heart
-                className={`size-4 ${entry?.favorite ? "fill-brand-400 text-brand-400" : ""}`}
-              />
+              <Heart className={`size-5 ${entry?.favorite ? "fill-brand-400 text-brand-400" : ""}`} />
             </Button>
           </div>
         </div>
       </section>
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_280px]">
-        <div>
-          <p className="mb-3 text-xs leading-6 text-zinc-400">
-            {media.genres.slice(0, 8).join(" · ")}
+      <div className="title-body grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="min-w-0">
+          <p className="max-w-3xl whitespace-pre-line text-[15px] leading-7 text-zinc-300 line-clamp-4">
+            {synopsis}
           </p>
-          <h2 className="text-sm font-medium">The story</h2>
-          <p className="mt-2 line-clamp-2 whitespace-pre-line text-sm leading-6 text-zinc-400">
-            {media.synopsis}
-          </p>
-          {media.synopsis.length > 180 && (
-            <details className="mt-1 text-sm text-zinc-400">
-              <summary className="w-fit cursor-pointer text-brand-300">Full description</summary>
-              <p className="mt-2 whitespace-pre-line leading-6">{media.synopsis}</p>
+          {synopsis.length > 320 && (
+            <details className="mt-1 max-w-3xl text-[15px] text-zinc-300">
+              <summary className="w-fit cursor-pointer text-sm font-semibold text-brand-300">Full description</summary>
+              <p className="mt-2 whitespace-pre-line leading-7">{synopsis}</p>
             </details>
+          )}
+          {!!media.genres.length && (
+            <ul className="mt-5 flex flex-wrap gap-2" aria-label="Genres">
+              {media.genres.slice(0, 8).map((genre) => (
+                <li key={genre} className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1 text-xs text-zinc-300">{genre}</li>
+              ))}
+            </ul>
           )}
           <ContentChapters kind={kind} id={id} />
           {media.trailer && (
@@ -218,8 +227,8 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
               )}
             </>
           )}
-          <section className="mt-9 rounded-2xl border border-white/10 p-6">
-            <h2 className="text-lg font-medium">
+          <section className="mt-10 rounded-xl border border-white/[0.08] bg-ink-800 p-6">
+            <h2 className="text-lg font-bold tracking-tight">
               {kind === "anime" ? "Where to watch" : "Where to read"}
             </h2>
             <p className="mt-2 text-xs leading-6 text-muted">
@@ -266,9 +275,9 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
             )}
           </section>
         </div>
-        <aside className="h-fit rounded-2xl border border-white/10 bg-white/[0.025] p-6">
+        <aside className="h-fit rounded-xl border border-white/[0.08] bg-ink-800 p-6 lg:sticky lg:top-[calc(var(--header-h)+16px)]">
           <p className="eyebrow">Your place in the story</p>
-          <h2 className="mt-2 text-xl">Keep it close.</h2>
+          <h2 className="mt-2 text-xl font-bold tracking-tight">Keep it close.</h2>
           <p className="mt-2 text-xs leading-6 text-muted">
             {media.total
               ? `${media.total} ${unit}s in the catalog.`

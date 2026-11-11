@@ -12,13 +12,17 @@ export function TitleSkeleton() {
   return <section aria-label="Loading title" aria-busy="true" role="status">
     <span className="sr-only">Loading title details…</span>
     <div aria-hidden="true">
-      <div className="loading-shape mb-4 h-4 w-28" />
-      <div className="loading-shape h-36 rounded-2xl" />
-      <div className="relative -mt-12 grid grid-cols-[96px_minmax(0,1fr)] items-end gap-4 sm:grid-cols-[128px_1fr] sm:gap-6 sm:px-5">
-        <div className="loading-shape aspect-[0.7] w-24 rounded-xl sm:w-32" />
-        <div className="min-w-0 space-y-3"><div className="loading-shape h-4 w-40" /><div className="loading-shape h-9 w-4/5" /><div className="loading-shape h-11 w-64 max-w-full" /></div>
+      <div className="title-hero bleed under-header">
+        <div className="hero-inner site-width site-gutter">
+          <div className="loading-shape h-5 w-32" />
+          <div className="title-hero-grid">
+            <div className="title-poster loading-shape" />
+            <div className="min-w-0 space-y-3"><div className="loading-shape h-5 w-40" /><div className="loading-shape h-12 w-4/5" /><div className="loading-shape h-4 w-48" /></div>
+          </div>
+          <div className="title-actions"><div className="loading-shape h-13 w-36 rounded-lg" /><div className="loading-shape h-13 w-48 rounded-lg" /></div>
+        </div>
       </div>
-      <div className="mt-6 space-y-3"><div className="loading-shape h-4 w-full" /><div className="loading-shape h-4 w-5/6" /><div className="loading-shape h-4 w-2/3" /></div>
+      <div className="space-y-3"><div className="loading-shape h-4 w-full max-w-3xl" /><div className="loading-shape h-4 w-5/6 max-w-2xl" /><div className="loading-shape h-4 w-2/3 max-w-xl" /></div>
     </div>
   </section>;
 }

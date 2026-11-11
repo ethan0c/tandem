@@ -9,6 +9,14 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { fetchPublicCatalog } from "@/lib/public-catalog-client";
 import { FormatFilter } from "./FormatFilter";
+import { Billboard } from "./Billboard";
+
+function spotlight(kind: MediaKind) {
+  return (seed as CatalogTitle[])
+    .filter((t) => t.kind === kind && t.cover && t.synopsis)
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+    .slice(0, 4);
+}
 
 export function Browse({ kind }: { kind: MediaKind }) {
   const searchParams = useSearchParams();
@@ -71,18 +79,32 @@ export function Browse({ kind }: { kind: MediaKind }) {
     set(value);
     setPage(1);
   }
+  const heading = (
+    <div className="page-heading">
+      <h1>{kind === "anime" ? "Anime" : "Manga"}</h1>
+      <p>
+        {kind === "anime"
+          ? "Series and films to watch together."
+          : "Manga, manhwa, and manhua. Pick up a new story."}
+      </p>
+    </div>
+  );
   const activeFilterCount = [format, genre, status, year, sort !== "popular" ? sort : ""].filter(Boolean).length;
   return (
     <>
-      <div className="page-heading">
-        <h1>{kind === "anime" ? "Anime" : "Manga"}</h1>
-        <p>
-          {kind === "anime"
-            ? "Find your next watch."
-            : "Manga, manhwa, and manhua. Pick up a new story."}
-        </p>
+      {queryFromUrl ? heading : (
+        <Billboard
+          items={spotlight(kind)}
+          compact
+          eyebrow={(media) => <span className="pill pill-brand">{media.rating ? `Top rated ${kind}` : kind}</span>}
+        >
+          {heading}
+        </Billboard>
+      )}
+      <div className={`section-heading ${queryFromUrl ? "" : "mt-10"}`}>
+        <h2>{q ? `Results for “${q}”` : `Browse all ${kind}`}</h2>
       </div>
-      <div className="catalog-filters mt-4">
+      <div className="catalog-filters">
         <label className="catalog-search relative">
           <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted" />
           <span className="sr-only">Search titles</span>

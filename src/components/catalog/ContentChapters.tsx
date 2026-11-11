@@ -25,7 +25,7 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
     : content.data?.units || [];
   return (
     <section
-      className="content-chapters mt-5 border-t border-white/10 pt-4"
+      className="content-chapters mt-10 scroll-mt-[calc(var(--header-h)+16px)]"
       id="episodes"
     >
       <div className="section-heading">

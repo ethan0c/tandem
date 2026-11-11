@@ -30,7 +30,7 @@ import { unitLabel } from "@/lib/spoilers";
 import { FormatFilter } from "./FormatFilter";
 import { useClientValue } from "@/hooks/useClientValue";
 
-function resumeHref(entry: LibraryEntry): string | null {
+export function resumeHref(entry: LibraryEntry): string | null {
   const unit = entry.watchPosition?.unit;
   return entry.media.kind === "anime" && unit && /^(?:film|av-mkissa-(?:sub|dub)-\d{1,4}|ra-\d{1,4})$/.test(unit)
     ? `/play/anime/${entry.media.id}?${new URLSearchParams({ unit })}`
@@ -84,13 +84,10 @@ export function Library() {
   }
   return (
     <>
-      <div className="flex flex-wrap items-start justify-between gap-5">
+      <div className="flex flex-wrap items-end justify-between gap-5 pt-2">
         <div>
-          <p className="eyebrow">A home for your favorites</p>
-          <h1 className="mt-1 text-3xl font-medium tracking-tight">
-            Your library.
-          </h1>
-          <p className="mt-1 text-sm text-zinc-400">
+          <h1>My library</h1>
+          <p className="mt-2 text-[15px] text-zinc-400">
             Every story you’re in the middle of. Every one still to come.
           </p>
         </div>
@@ -110,17 +107,21 @@ export function Library() {
         </div>
       </div>
       <a ref={exportLink} download="tandem-library.json" className="hidden" />
-      <div className="my-4 flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.025] px-4 py-3">
-        <LibraryIcon className="size-5 text-brand-400" />
-        <div className="flex-1">
-          <p className="text-xs">
-            {entries.length} saved titles{" "}
-            <span className="mx-2 text-muted">/</span>
-            {entries.filter((e) => e.status === "current").length} in progress{" "}
-            <span className="mx-2 text-muted">/</span>
-            {entries.filter((e) => e.status === "completed").length} completed
-          </p>
-          <p className="mt-1.5 text-xs text-muted">
+      <div className="mb-6 mt-6 grid gap-3 sm:grid-cols-[repeat(3,minmax(0,1fr))_minmax(0,1.6fr)]">
+        {([
+          ["Saved", entries.length],
+          ["In progress", entries.filter((e) => e.status === "current").length],
+          ["Completed", entries.filter((e) => e.status === "completed").length],
+        ] as const).map(([label, value]) => (
+          <div key={label} className="rounded-xl border border-white/[0.08] bg-ink-800 px-4 py-3">
+            <p className="text-2xl font-bold tracking-tight tabular-nums">{value}</p>
+            <p className="mt-0.5 text-xs text-zinc-400">{label}</p>
+          </div>
+        ))}
+      <div className="flex items-center gap-3 rounded-xl border border-brand-500/25 bg-brand-950/40 px-4 py-3">
+        <LibraryIcon className="size-5 shrink-0 text-brand-300" />
+        <div className="min-w-0 flex-1">
+          <p className="text-xs leading-5 text-zinc-300">
             {notice ||
               (user
                 ? "Your private library syncs across devices."
@@ -144,21 +145,22 @@ export function Library() {
             Sync
           </Button>
         ) : (
-          <Link href="/account" className="text-xs text-brand-300">
+          <Link href="/account" className="shrink-0 text-xs font-semibold text-brand-300 hover:text-white">
             Sign in <span aria-hidden>→</span>
           </Link>
         )}
       </div>
-      <div className="mb-3 flex flex-wrap items-center gap-2">
+      </div>
+      <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-white/[0.08] pb-4">
         <div
-          className="library-tabs flex gap-1"
+          className="library-tabs mr-2 flex gap-1"
           role="group"
           aria-label="Library type"
         >
           {(["all", "anime", "manga"] as const).map((k) => (
             <button
               key={k}
-              className={`library-tab px-4 py-2 text-sm capitalize ${kind === k ? "library-tab-active text-white" : "text-muted"}`}
+              className={`library-tab px-4 py-2 text-sm font-semibold capitalize ${kind === k ? "library-tab-active" : ""}`}
               aria-pressed={kind === k}
               onClick={() => { setKind(k); setFormat(""); }}
             >
@@ -243,22 +245,22 @@ export function Library() {
           <ButtonLink href="/discover">Find your first story</ButtonLink>
         </div>
       ) : (
-        <div className={view === "grid" ? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" : "space-y-2"}>
+        <div className={view === "grid" ? "grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5" : "space-y-2"}>
           {filtered.map((e) => (
             <article
               key={mediaKey(e.media)}
-              className={`library-row flex gap-3 rounded-xl border border-white/8 bg-white/[0.025] p-3 ${view === "grid" ? "min-w-0 flex-col items-stretch" : "flex-wrap items-center"}`}
+              className={`library-row flex gap-4 rounded-xl border border-white/[0.07] bg-ink-800 p-3 transition-colors hover:border-white/15 ${view === "grid" ? "min-w-0 flex-col items-stretch" : "flex-wrap items-center"}`}
             >
               <Link
                 href={resumeHref(e) || titleHref(e.media)}
-                className={`relative shrink-0 overflow-hidden rounded-lg ${view === "grid" ? "aspect-[0.7] w-full" : "h-16 w-11"}`}
+                className={`relative shrink-0 overflow-hidden rounded-md bg-ink-700 ${view === "grid" ? "aspect-[0.7] w-full" : "h-20 w-14"}`}
               >
                 {e.media.poster && (
                   <Image
                     src={e.media.poster}
                     alt=""
                     fill
-                    sizes={view === "grid" ? "(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw" : "44px"}
+                    sizes={view === "grid" ? "(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 20vw" : "56px"}
                     unoptimized={!canOptimizeArtwork(e.media.poster)}
                     className="object-cover"
                   />
@@ -267,7 +269,7 @@ export function Library() {
               <div className={`min-w-0 ${view === "grid" ? "w-full" : "flex-1"}`}>
                 <Link
                   href={resumeHref(e) || titleHref(e.media)}
-                  className={`${view === "grid" ? "line-clamp-2" : "line-clamp-1"} text-sm font-medium hover:text-brand-300`}
+                  className={`${view === "grid" ? "line-clamp-2" : "line-clamp-1"} text-[15px] font-semibold hover:text-brand-300`}
                 >
                   {e.media.title}
                 </Link>
@@ -286,7 +288,7 @@ export function Library() {
                   <Link href={titleHref(e.media)} className="text-muted hover:text-white">Series details</Link>
                 </div>}
                 {e.media.total && (
-                  <div className="mt-2 h-1 max-w-56 rounded-full bg-white/10">
+                  <div className="mt-2 h-1 max-w-64 overflow-hidden rounded-full bg-white/10">
                     <div
                       className="h-full rounded-full bg-brand-500"
                       style={{

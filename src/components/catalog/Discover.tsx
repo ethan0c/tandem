@@ -1,114 +1,115 @@
 "use client";
-import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight } from "lucide-react";
+import { CalendarHeart, Users } from "lucide-react";
 import seed from "@/content/catalog.json";
-import { titleHref, type CatalogTitle } from "@/lib/catalog-types";
+import type { CatalogTitle, MediaKind } from "@/lib/catalog-types";
 import { ButtonLink } from "@/components/Button";
 import { MediaCard } from "./MediaCard";
+import { MediaRow } from "./MediaRow";
+import { Billboard } from "./Billboard";
 import { useLibrary } from "./LibraryProvider";
-import { canOptimizeArtwork } from "@/lib/artwork";
+import { resumeHref } from "./Library";
+import { useCatalogRow } from "./useCatalogRow";
 
 const titles = seed as CatalogTitle[];
+const featuredNames = ["Your Name.", "Fullmetal Alchemist: Brotherhood", "Demon Slayer: Kimetsu no Yaiba", "A Silent Voice", "Attack on Titan"];
+const featured = featuredNames
+  .map((name) => titles.find((t) => t.title === name && t.cover))
+  .filter((t): t is CatalogTitle => !!t);
+
 export function Discover() {
   const { entries } = useLibrary();
   const continuing = entries
     .filter((e) => e.status === "current")
     .sort((a, b) => b.updatedAt - a.updatedAt)
-    .slice(0, 6);
-  const featured = titles.find((t) => t.title === "Your Name.") || titles[0];
+    .slice(0, 12);
   return (
     <>
-      <div className="page-heading">
-        <h1>Find something to share.</h1>
-        <p>Anime, manga, and a place to keep your favorites.</p>
-      </div>
-      <section className="discovery-hero relative isolate overflow-hidden rounded-2xl border border-white/10">
-        {featured.cover && (
-          <Image
-            src={featured.cover}
-            unoptimized={!canOptimizeArtwork(featured.cover)}
-            alt=""
-            fill
-            preload
-            sizes="(max-width: 700px) 100vw, 1200px"
-            className="-z-20 object-cover object-center"
-          />
+      <h1 className="sr-only">Home</h1>
+      <Billboard
+        items={featured.length ? featured : titles.filter((t) => t.cover).slice(0, 5)}
+        eyebrow={(media, index) => (
+          <>
+            <span className="pill pill-brand">{media.kind}</span>
+            {index === 0 && <span className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-200">Tonight’s pick</span>}
+          </>
         )}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#121018] via-[#121018]/85 to-[#121018]/25" />
-        <div className="discovery-copy">
-          <p className="text-sm text-zinc-300">Tonight’s pick</p>
-          <h2>{featured.title}</h2>
-          <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-300">
-            A connection that crosses time. Pick a story, then bring your
-            favorite person.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <ButtonLink href={titleHref(featured)}>
-              View series <ArrowRight className="size-4" />
-            </ButtonLink>
-            <ButtonLink href="/rooms" variant="ghost">
-              Create a room
-            </ButtonLink>
-          </div>
-        </div>
-      </section>
-      {continuing.length > 0 && (
-        <section className="catalog-section">
-          <div className="section-heading">
-            <h2>Continue</h2>
-            <Link href="/library">
-              Your library <ArrowRight />
-            </Link>
-          </div>
-          <div className="media-grid">
+      />
+      <div className="rows">
+        {continuing.length > 0 && (
+          <MediaRow title="Continue watching & reading" href="/library" linkLabel="Your library">
             {continuing.map((e) => (
-              <div key={`${e.media.kind}:${e.media.id}`}>
-                <MediaCard media={e.media} />
-                <p className="mt-2 text-xs text-brand-300">
-                  {e.media.kind === "anime" ? "Episode" : "Chapter"}{" "}
-                  {e.progress}
-                </p>
-              </div>
+              <MediaCard
+                key={`${e.media.kind}:${e.media.id}`}
+                media={e.media}
+                href={resumeHref(e) || undefined}
+                progress={{
+                  value: e.media.total ? e.progress / e.media.total : 0.08,
+                  label: `${e.media.kind === "anime" ? "Episode" : "Chapter"} ${e.progress}${e.media.total ? ` of ${e.media.total}` : ""}`,
+                }}
+              />
             ))}
-          </div>
-        </section>
-      )}
-      <CatalogSection kind="anime" title="Popular anime" />
-      <CatalogSection kind="manga" title="Popular manga" />
-      <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4 border-t border-white/10 pt-4 text-sm text-zinc-400">
-        <Link href="/library/import" className="hover:text-white">
-          Import your manga list →
-        </Link>
-        <Link href="/plan" className="hover:text-white">
-          Plan a watch night →
-        </Link>
+          </MediaRow>
+        )}
+        <CatalogRow kind="anime" title="Trending anime" href="/anime" eager />
+        <CatalogRow kind="anime" title="Top 10 anime" sort="rating" ranked />
+        <CatalogRow kind="manga" title="Popular manga" href="/manga" />
+        <TogetherBand />
+        <CatalogRow kind="anime" title="Date night: romance" genre="romance" />
+        <CatalogRow kind="manga" title="Top 10 manga" sort="rating" ranked />
+        <CatalogRow kind="anime" title="Action & adventure" genre="action" />
       </div>
     </>
   );
 }
-function CatalogSection({
-  kind,
-  title,
-}: {
-  kind: "anime" | "manga";
+
+function CatalogRow({ kind, title, href, sort, genre, ranked = false, eager = false }: {
+  kind: MediaKind;
   title: string;
+  href?: string;
+  sort?: string;
+  genre?: string;
+  ranked?: boolean;
+  eager?: boolean;
 }) {
+  const { items, loading } = useCatalogRow(kind, { sort, genre });
+  const shown = items.slice(0, ranked ? 10 : 18);
+  if (!shown.length) return null;
   return (
-    <section className="catalog-section">
-      <div className="section-heading">
-        <h2>{title}</h2>
-        <Link href={`/${kind}`}>
-          View all <ArrowRight />
-        </Link>
-      </div>
-      <div className="media-grid">
-        {titles
-          .filter((t) => t.kind === kind)
-          .slice(0, 6)
-          .map((media) => (
-            <MediaCard key={media.id} media={media} />
-          ))}
+    <MediaRow title={title} href={href} ranked={ranked} busy={loading}>
+      {shown.map((media, index) => (
+        <MediaCard
+          key={`${media.kind}:${media.id}`}
+          media={media}
+          rank={ranked ? index + 1 : undefined}
+          eager={eager && index < 4}
+          sizes="(max-width: 479px) 42vw, (max-width: 767px) 30vw, (max-width: 1023px) 23vw, 200px"
+        />
+      ))}
+    </MediaRow>
+  );
+}
+
+function TogetherBand() {
+  return (
+    <section className="together-band" aria-labelledby="together-heading">
+      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div className="max-w-xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-200">Tandem rooms</p>
+          <h2 id="together-heading" className="mt-3">Better with your favorite person.</h2>
+          <p className="mt-3 text-[15px] leading-relaxed">
+            Open a private room, send the link, and press play. Your show stays in sync and your call stays on screen. No account needed.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <ButtonLink href="/rooms" variant="light" size="lg">
+            <Users className="size-5" aria-hidden="true" />
+            Create a room
+          </ButtonLink>
+          <ButtonLink href="/plan" variant="ghost" size="lg">
+            <CalendarHeart className="size-5" aria-hidden="true" />
+            Plan a night
+          </ButtonLink>
+        </div>
       </div>
     </section>
   );
