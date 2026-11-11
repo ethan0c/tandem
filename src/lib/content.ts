@@ -85,16 +85,16 @@ async function dex<T>(path: string, ttl = 5 * 60_000): Promise<T> {
 async function matchManga(media: CatalogTitle): Promise<string | null> {
   const p = new URLSearchParams({
     title: media.title,
-    limit: "20",
+    limit: "100",
     "contentRating[]": "safe",
   });
   p.append("contentRating[]", "suggestive");
-  const result = await dex<{ data: DexManga[] }>(`manga?${p}`);
-  const mal = await getExternalCatalogId(
-    "manga",
-    media.id,
-    "myanimelist/manga",
-  );
+  const [result, mal] = await Promise.all([
+    dex<{ data: DexManga[] }>(`manga?${p}`),
+    getExternalCatalogId("manga", media.id, "myanimelist/manga"),
+  ]);
+  const kitsu = result.data.filter((item) => item.attributes.links?.kt === media.id);
+  if (kitsu.length === 1) return kitsu[0].id;
   if (mal) {
     const exact = result.data.filter(
       (item) => item.attributes.links?.mal === mal,
