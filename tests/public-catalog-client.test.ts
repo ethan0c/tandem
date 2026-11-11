@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fetchPublicCatalog, readStoredContentCatalog } from "../src/lib/public-catalog-client";
+import type { ContentCatalog } from "../src/lib/content-types";
 
 test("public metadata shares concurrent requests, caches success, and can refresh", async () => {
   const original = globalThis.fetch;
@@ -51,9 +52,9 @@ test("a hard refresh can reuse a complete episode list when a provider briefly r
   let calls = 0;
   globalThis.fetch = async () => Response.json({ media, source: "MKissa", units: ++calls === 1 ? [unit(1), unit(2)] : [unit(1)], total: calls === 1 ? 2 : 1, hasMore: false });
   try {
-    assert.equal((await fetchPublicCatalog(url)).units.length, 2);
+    assert.equal((await fetchPublicCatalog<ContentCatalog>(url)).units.length, 2);
     assert.equal(readStoredContentCatalog(url)?.units.length, 2);
-    assert.equal((await fetchPublicCatalog(url, true)).units.length, 2);
+    assert.equal((await fetchPublicCatalog<ContentCatalog>(url, true)).units.length, 2);
     assert.equal(readStoredContentCatalog(url)?.units.length, 2);
     assert.equal(readStoredContentCatalog(`${url}&unit=av-mkissa-sub-1`), null);
   } finally {
