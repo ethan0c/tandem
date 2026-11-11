@@ -32,7 +32,9 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
   const [retry, setRetry] = useState(0);
   const [readingSettings, setReadingSettings] = useReadingSettings();
   const { ready, entries } = useLibrary();
-  const media = catalog.data?.media || entries.find((entry) => entry.media.kind === kind && entry.media.id === id)?.media || getTitlePreview(kind, id);
+  const libraryEntry = entries.find((entry) => entry.media.kind === kind && entry.media.id === id);
+  const media = catalog.data?.media || libraryEntry?.media || getTitlePreview(kind, id);
+  const sourceId = kind === "anime" ? catalog.data?.sourceId || libraryEntry?.sourceId : undefined;
   useEffect(() => {
     if (!unitId) return;
     const controller = new AbortController();
@@ -41,7 +43,7 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
       setFailure("");
       try {
         const response = await fetch(
-          `/api/content?${new URLSearchParams({ kind, id, unit: unitId })}`,
+          `/api/content?${new URLSearchParams({ kind, id, unit: unitId, ...(sourceId ? { sourceId } : {}) })}`,
           { signal: controller.signal },
         );
         const data = await response.json();
@@ -61,7 +63,7 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
     };
     void load();
     return () => controller.abort();
-  }, [kind, id, unitId, retry]);
+  }, [kind, id, unitId, sourceId, retry]);
   function selectUnit(unit: ContentUnit) {
     router.push(`/play/${kind}/${id}?${new URLSearchParams({ unit: unit.id, language })}`, { scroll: false });
   }

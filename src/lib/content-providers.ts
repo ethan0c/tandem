@@ -44,15 +44,20 @@ async function sourceRequest<T>(url: string, html = false, ttl = 120_000, header
 
 export const anivexaConfigured = Boolean(ANIVEXA);
 
-async function anivexaId(kitsuId: string): Promise<string> {
+async function anivexaId(kitsuId: string, savedId?: string): Promise<string> {
   if (!ANIVEXA) throw new Error("Anivexa is not configured.");
   const anilist = await getExternalCatalogId("anime", kitsuId, "anilist/anime");
-  if (!anilist || !/^\d{1,10}$/.test(anilist)) throw new Error("This title has no AniList mapping for MKissa.");
-  return anilist;
+  if (anilist && /^\d{1,10}$/.test(anilist)) return anilist;
+  if (savedId && /^\d{1,10}$/.test(savedId)) {
+    const response = await sourceRequest<unknown>(`${ANIVEXA}/map/${savedId}`, false, 60 * 60_000);
+    const top = response && typeof response === "object" && !Array.isArray(response) ? response as Record<string, unknown> : {};
+    const mapping = top.mappings && typeof top.mappings === "object" && !Array.isArray(top.mappings) ? top.mappings as Record<string, unknown> : top;
+    if (String(mapping.kitsuId) === kitsuId && String(mapping.aniId ?? mapping.id ?? mapping.anilistId) === savedId) return savedId;
+  }
+  throw new Error("The title mapping is temporarily unavailable. Try again shortly.");
 }
 
-async function anivexaEpisodes(media: CatalogTitle): Promise<ContentUnit[]> {
-  const anilist = await anivexaId(media.id);
+async function anivexaEpisodes(media: CatalogTitle, anilist: string): Promise<ContentUnit[]> {
   const saved = episodeCache.get(anilist);
   if (saved && saved.expires > Date.now()) return saved.units;
   const running = episodePending.get(anilist);
@@ -78,18 +83,19 @@ async function anivexaEpisodes(media: CatalogTitle): Promise<ContentUnit[]> {
 }
 
 export async function anivexaCatalog(media: CatalogTitle, offset: number): Promise<ContentCatalog> {
-  const units = await anivexaEpisodes(media);
+  const anilist = await anivexaId(media.id);
+  const units = await anivexaEpisodes(media, anilist);
   return {
-    media, source: "MKissa", units: units.slice(offset, offset + 100), total: units.length,
+    media, source: "MKissa", sourceId: anilist, units: units.slice(offset, offset + 100), total: units.length,
     hasMore: offset + 100 < units.length,
     ...(!units.length ? { notice: "MKissa has no episodes for this title." } : {}),
   };
 }
 
-export async function anivexaPlayback(kitsuId: string, unitId: string): Promise<ContentPlayback | null> {
+export async function anivexaPlayback(kitsuId: string, unitId: string, savedId?: string): Promise<ContentPlayback | null> {
   const match = /^av-mkissa-(sub|dub)-(\d{1,4})$/.exec(unitId);
   if (!match || Number(match[2]) < 1) return null;
-  const anilist = await anivexaId(kitsuId);
+  const anilist = await anivexaId(kitsuId, savedId);
   const [response, mal] = await Promise.all([
     sourceRequest<unknown>(`${ANIVEXA}/watch/mkissa/${anilist}/${match[1]}/mkissa-${match[2]}`, false, 0),
     getExternalCatalogId("anime", kitsuId, "myanimelist/anime"),
@@ -104,7 +110,7 @@ export async function anivexaPlayback(kitsuId: string, unitId: string): Promise<
     language: match[1] === "sub" ? "ja" : "en", group: match[1] === "sub" ? "Sub" : "Dub",
   };
   return {
-    source: "MKissa", credit: "Episode supplied by MKissa via Anivexa.",
+    source: "MKissa", sourceId: anilist, credit: "Episode supplied by MKissa via Anivexa.",
     sourceUrl: "https://mkissa.to/", unit, streams: playback.streams,
     intro: skipWindow(watch.intro), outro: skipWindow(watch.outro),
     malId: mal && /^\d{1,10}$/.test(mal) ? Number(mal) : undefined,

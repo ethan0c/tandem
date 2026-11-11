@@ -56,9 +56,10 @@ export function AnimePlayer({ media, playback, onFailure, transitioning = false 
   const streams = playback.streams || EMPTY_STREAMS;
 
   useEffect(() => {
-    if (!ready || entry?.watchPosition?.unit === playback.unit.id) return;
-    save(media, { status: "current", watchPosition: { unit: playback.unit.id, seconds: 0 } });
-  }, [ready, entry?.watchPosition?.unit, playback.unit.id, media, save]);
+    if (!ready || (entry?.watchPosition?.unit === playback.unit.id && (!playback.sourceId || entry.sourceId === playback.sourceId))) return;
+    save(media, { status: "current", sourceId: playback.sourceId,
+      watchPosition: { unit: playback.unit.id, seconds: entry?.watchPosition?.unit === playback.unit.id ? entry.watchPosition.seconds : 0 } });
+  }, [ready, entry?.watchPosition, entry?.sourceId, playback.unit.id, playback.sourceId, media, save]);
   useEffect(() => {
     const dismiss = (event: PointerEvent) => {
       if (settings.current && !settings.current.contains(event.target as Node)) settings.current.open = false;

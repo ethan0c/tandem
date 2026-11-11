@@ -242,6 +242,7 @@ export async function getContentPlayback(
   kind: MediaKind,
   id: string,
   unitId: string,
+  sourceId?: string,
 ): Promise<ContentPlayback | null> {
   if (kind === "manga" && directManga[id]?.unit.id === unitId)
     return directManga[id];
@@ -249,7 +250,7 @@ export async function getContentPlayback(
     const direct = directAnime[id];
     if (direct && unitId === "film") return { ...direct, unit: filmUnit };
     if (!/^(?:ra-\d{1,4}|av-mkissa-(?:sub|dub)-\d{1,4})$/.test(unitId)) return null;
-    if (unitId.startsWith("av-")) return anivexaPlayback(id, unitId);
+    if (unitId.startsWith("av-")) return anivexaPlayback(id, unitId, sourceId);
     const media = await getCatalogTitle(kind, id);
     return media ? reanimePlayback(media, unitId) : null;
   }

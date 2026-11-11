@@ -11,6 +11,9 @@ export async function GET(request: Request) {
       { error: "Invalid episode or chapter." },
       { status: 400 },
     );
+  const sourceId = p.get("sourceId") || undefined;
+  if (sourceId && !/^\d{1,10}$/.test(sourceId))
+    return Response.json({ error: "Invalid source ID." }, { status: 400 });
   const language = p.get("language") || "en";
   if (!/^[a-z]{2}(?:-[a-z]{2})?$/.test(language))
     return Response.json({ error: "Invalid language." }, { status: 400 });
@@ -20,7 +23,7 @@ export async function GET(request: Request) {
   );
   try {
     const data = unit
-      ? await getContentPlayback(kind, id, unit)
+      ? await getContentPlayback(kind, id, unit, sourceId)
       : await getContentCatalog(kind, id, offset, language);
     return data
       ? Response.json(data, {
