@@ -125,6 +125,17 @@ function officialMangaUrl(raw?: string): string | undefined {
       : undefined;
   } catch { return undefined; }
 }
+const officialChapterCatalogs: Record<string, { url: string; label: string }> = {
+  // Publisher chapter listings are useful when the connected reader only has a few pages.
+  "53928": {
+    url: "https://kmanga.kodansha.com/title/10008/episode/318776",
+    label: "Blue Lock chapters on K MANGA",
+  },
+  "7176": {
+    url: "https://www.viz.com/shonenjump/chapters/tokyo-ghoul",
+    label: "Tokyo Ghoul chapters on VIZ",
+  },
+};
 function chapterUnit(chapter: DexChapter): ContentUnit {
   const n = Number(chapter.attributes.chapter);
   return {
@@ -222,7 +233,12 @@ export async function getContentCatalog(
         )
         .map(chapterUnit);
       const sparse = result.total <= 10 || (!!media.total && result.total < media.total * 0.7);
-      const officialUrl = sparse ? officialMangaUrl(manga.attributes.links?.engtl) : undefined;
+      const generalOfficialUrl = officialMangaUrl(manga.attributes.links?.engtl);
+      const officialRelease = sparse
+        ? officialChapterCatalogs[id] || (generalOfficialUrl
+          ? { url: generalOfficialUrl, label: "Official English release" }
+          : undefined)
+        : undefined;
       if (language === "en" && sparse) {
         try {
           const alternate = await weebCatalog(media, offset, language);
@@ -236,8 +252,8 @@ export async function getContentCatalog(
         units,
         total: result.total,
         hasMore: offset + 100 < result.total,
-        ...(officialUrl
-          ? { externalUrl: officialUrl, externalLabel: "Official English release" }
+        ...(officialRelease
+          ? { externalUrl: officialRelease.url, externalLabel: officialRelease.label }
           : {}),
         ...(!units.length
           ? { notice: "No readable chapters were found in this language. Try another language or use your own images." }

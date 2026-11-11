@@ -87,10 +87,10 @@ export function Library() {
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div>
           <p className="eyebrow">A home for your favorites</p>
-          <h1 className="mt-2 text-4xl font-medium tracking-tight">
+          <h1 className="mt-1 text-3xl font-medium tracking-tight">
             Your library.
           </h1>
-          <p className="mt-3 text-sm text-zinc-400">
+          <p className="mt-1 text-sm text-zinc-400">
             Every story you’re in the middle of. Every one still to come.
           </p>
         </div>
@@ -110,7 +110,7 @@ export function Library() {
         </div>
       </div>
       <a ref={exportLink} download="tandem-library.json" className="hidden" />
-      <div className="my-8 flex flex-wrap items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.025] px-5 py-4">
+      <div className="my-4 flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.025] px-4 py-3">
         <LibraryIcon className="size-5 text-brand-400" />
         <div className="flex-1">
           <p className="text-xs">
@@ -149,7 +149,7 @@ export function Library() {
           </Link>
         )}
       </div>
-      <div className="mb-5 flex flex-wrap items-center gap-3">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <div
           className="library-tabs flex gap-1"
           role="group"
@@ -222,7 +222,7 @@ export function Library() {
           </div>
         </div>
       </div>
-      {ready && <p className="mb-5 text-xs text-muted" role="status">{filtered.length} of {entries.length} titles shown</p>}
+      {ready && <p className="mb-3 text-xs text-muted" role="status">{filtered.length} of {entries.length} titles shown</p>}
       {!ready ? (
         <p className="py-20 text-center text-sm text-muted">
           Opening your library…
@@ -243,22 +243,22 @@ export function Library() {
           <ButtonLink href="/discover">Find your first story</ButtonLink>
         </div>
       ) : (
-        <div className={view === "grid" ? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" : "space-y-3"}>
+        <div className={view === "grid" ? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" : "space-y-2"}>
           {filtered.map((e) => (
             <article
               key={mediaKey(e.media)}
-              className={`library-row flex gap-4 rounded-2xl border border-white/8 bg-white/[0.025] p-4 ${view === "grid" ? "min-w-0 flex-col items-stretch" : "flex-wrap items-center"}`}
+              className={`library-row flex gap-3 rounded-xl border border-white/8 bg-white/[0.025] p-3 ${view === "grid" ? "min-w-0 flex-col items-stretch" : "flex-wrap items-center"}`}
             >
               <Link
                 href={resumeHref(e) || titleHref(e.media)}
-                className={`relative shrink-0 overflow-hidden rounded-lg ${view === "grid" ? "aspect-[2/3] w-full" : "h-20 w-14"}`}
+                className={`relative shrink-0 overflow-hidden rounded-lg ${view === "grid" ? "aspect-[2/3] w-full" : "h-16 w-11"}`}
               >
                 {e.media.poster && (
                   <Image
                     src={e.media.poster}
                     alt=""
                     fill
-                    sizes={view === "grid" ? "(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw" : "56px"}
+                    sizes={view === "grid" ? "(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw" : "44px"}
                     unoptimized={!canOptimizeArtwork(e.media.poster)}
                     className="object-cover"
                   />

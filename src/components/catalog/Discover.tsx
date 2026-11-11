@@ -39,11 +39,11 @@ export function Discover() {
         <div className="discovery-copy">
           <p className="text-sm text-zinc-300">Tonight’s pick</p>
           <h2>{featured.title}</h2>
-          <p className="mt-4 max-w-sm text-sm leading-7 text-zinc-300">
+          <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-300">
             A connection that crosses time. Pick a story, then bring your
             favorite person.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-3">
             <ButtonLink href={titleHref(featured)}>
               View series <ArrowRight className="size-4" />
             </ButtonLink>
@@ -76,7 +76,7 @@ export function Discover() {
       )}
       <CatalogSection kind="anime" title="Popular anime" />
       <CatalogSection kind="manga" title="Popular manga" />
-      <div className="mt-12 flex flex-wrap gap-x-8 gap-y-4 border-t border-white/10 pt-6 text-sm text-zinc-400">
+      <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4 border-t border-white/10 pt-4 text-sm text-zinc-400">
         <Link href="/library/import" className="hover:text-white">
           Import your manga list →
         </Link>

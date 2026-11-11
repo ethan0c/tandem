@@ -96,7 +96,7 @@ try {
   const blueLockSource = await p.locator(".content-chapters").innerText();
   assert.match(blueLockSource, /MangaDex|WeebCentral/);
   if (blueLockSource.includes("MangaDex currently lists")) {
-    assert.equal(await p.getByRole("link", { name: /Official English release/ }).getAttribute("href"), "https://kodansha.us/series/blue-lock/");
+    assert.equal(await p.getByRole("link", { name: /Blue Lock chapters on K MANGA/ }).getAttribute("href"), "https://kmanga.kodansha.com/title/10008/episode/318776");
   }
   await p.locator(".chapter-row").first().getByRole("link", { name: /Read/ }).click();
   await imageReady(p);

@@ -77,7 +77,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
             : "Manga, manhwa, and manhua. Pick up a new story."}
         </p>
       </div>
-      <div className="catalog-filters mt-7">
+      <div className="catalog-filters mt-4">
         <label className="catalog-search relative">
           <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted" />
           <span className="sr-only">Search titles</span>
@@ -88,6 +88,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
             className="field w-full pl-10"
           />
         </label>
+        <div className="catalog-filter-controls">
         <FormatFilter kind={kind} value={format} onChange={(value) => change(setFormat, value, format)} />
         <label className="filter-genre">
           <span className="sr-only">Genre</span>
@@ -151,9 +152,10 @@ export function Browse({ kind }: { kind: MediaKind }) {
             <option value="newest">Newest</option>
           </select>
         </label>
+        </div>
       </div>
       <div
-        className="catalog-result-note mb-5 mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-zinc-400"
+        className="catalog-result-note mb-4 mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-zinc-400"
         aria-live="polite"
       >
         <span>

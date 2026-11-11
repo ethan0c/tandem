@@ -90,12 +90,12 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
     <>
       <Link
         href={`/${kind}`}
-        className="mb-6 inline-flex items-center gap-2 text-xs text-zinc-400 hover:text-white"
+        className="mb-4 inline-flex items-center gap-2 text-xs text-zinc-400 hover:text-white"
       >
         <ArrowLeft className="size-3.5" />
         Back to {kind}
       </Link>
-      <div className="detail-banner relative isolate -mx-5 mb-[-90px] h-64 overflow-hidden sm:mx-0 sm:rounded-3xl">
+      <div className="detail-banner relative isolate -mx-5 mb-[-48px] h-36 overflow-hidden sm:mx-0 sm:rounded-2xl">
         {media.cover && (
           <Image
             src={media.cover}
@@ -109,22 +109,22 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
         )}
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#111015] via-[#111015]/50 to-transparent" />
       </div>
-      <section className="relative grid gap-7 sm:grid-cols-[180px_1fr] sm:gap-9 sm:px-7">
-        <div className="relative aspect-[0.7] w-32 overflow-hidden rounded-2xl border border-white/15 bg-ink-700 shadow-2xl sm:w-full">
+      <section className="relative grid grid-cols-[96px_minmax(0,1fr)] items-end gap-4 sm:grid-cols-[128px_1fr] sm:gap-6 sm:px-5">
+        <div className="relative aspect-[0.7] w-24 overflow-hidden rounded-xl border border-white/15 bg-ink-700 shadow-2xl sm:w-32">
           {media.poster && (
             <Image
               src={media.poster}
               unoptimized={!canOptimizeArtwork(media.poster)}
               alt={`${media.title} cover`}
               fill
-              sizes="(max-width: 639px) 128px, 180px"
+              sizes="(max-width: 639px) 96px, 128px"
               loading="eager"
               fetchPriority="high"
               className="object-cover"
             />
           )}
         </div>
-        <div className="min-w-0 sm:pt-16">
+        <div className="min-w-0 pb-1">
           <div className="flex flex-wrap gap-2 text-xs text-zinc-400">
             <span className="text-brand-300">{catalogFormatLabel(media)}</span>
             <span>·</span>
@@ -141,13 +141,13 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
               </>
             )}
           </div>
-          <h1 className="mt-3 text-3xl font-medium tracking-[-0.035em] sm:text-4xl">
+          <h1 className="detail-title mt-2 font-medium tracking-[-0.035em]">
             {media.title}
           </h1>
           {media.originalTitle !== media.title && (
             <p className="mt-2 text-sm text-muted">{media.originalTitle}</p>
           )}
-          <div className="mt-5 flex flex-wrap gap-3">
+          <div className="mt-3 flex flex-wrap gap-2">
             <ButtonLink href="#episodes">
               {kind === "anime" ? "Watch" : "Read"}
             </ButtonLink>
@@ -181,15 +181,21 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
           </div>
         </div>
       </section>
-      <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_320px]">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_280px]">
         <div>
-          <p className="mb-5 text-sm leading-7 text-zinc-400">
+          <p className="mb-3 text-xs leading-6 text-zinc-400">
             {media.genres.slice(0, 8).join(" · ")}
           </p>
-          <h2 className="text-lg font-medium">The story</h2>
-          <p className="mt-3 whitespace-pre-line text-sm leading-7 text-zinc-400">
+          <h2 className="text-sm font-medium">The story</h2>
+          <p className="mt-2 line-clamp-2 whitespace-pre-line text-sm leading-6 text-zinc-400">
             {media.synopsis}
           </p>
+          {media.synopsis.length > 180 && (
+            <details className="mt-1 text-sm text-zinc-400">
+              <summary className="w-fit cursor-pointer text-brand-300">Full description</summary>
+              <p className="mt-2 whitespace-pre-line leading-6">{media.synopsis}</p>
+            </details>
+          )}
           <ContentChapters kind={kind} id={id} />
           {media.trailer && (
             <>

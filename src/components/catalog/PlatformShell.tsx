@@ -18,11 +18,11 @@ export function PlatformShell({ children }: { children: ReactNode }) {
   return (
     <div className="platform flex min-h-screen flex-col">
       <PlatformHeader />
-      <main className="platform-main mx-auto w-full site-width flex-1 site-gutter pb-20 pt-8 sm:pt-10">
+      <main className="platform-main mx-auto w-full site-width flex-1 site-gutter pb-12 pt-5 sm:pt-6">
         {children}
       </main>
       <footer className="border-t border-white/8">
-        <div className="mx-auto flex site-width flex-wrap items-center justify-between gap-4 site-gutter py-6 text-xs text-muted">
+        <div className="mx-auto flex site-width flex-wrap items-center justify-between gap-4 site-gutter py-4 text-xs text-muted">
           <span>Shows in sync. Time together.</span>
           <div className="flex flex-wrap gap-x-5 gap-y-3">
             <a
