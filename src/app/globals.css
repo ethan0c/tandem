@@ -530,35 +530,33 @@ html:has(#intro) .hero-preview > figure { animation-delay: 2.3s; }
 .platform a:focus-visible, .platform button:focus-visible, .platform summary:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: 4px; }
 .page-heading { margin-bottom: 20px; }
 .page-heading > p { margin-top: 8px; color: #a1a1aa; font-size: 15px; line-height: 1.5; }
-.eyebrow { color: var(--color-brand-300); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.eyebrow { color: #a1a1aa; font-size: 13px; font-weight: 500; }
 
 /* Full-bleed heroes break out of the centred page column and slide under the header. */
 .bleed { position: relative; width: 100vw; margin-inline: calc(50% - 50vw); }
 .under-header { margin-top: calc(-1 * (var(--header-h) + var(--main-pt))); }
 .hero-inner { position: relative; z-index: 1; height: 100%; margin-inline: auto; }
 
-/* The billboard: one title, full width, artwork fading into the page. */
-.billboard { position: relative; isolation: isolate; display: flex; flex-direction: column; min-height: clamp(520px, 82svh, 800px); padding-top: calc(var(--header-h) + 16px); overflow: hidden; background: #0b0a0f; }
-.billboard-compact { min-height: clamp(440px, 60svh, 560px); }
+/* The billboard: the poster at its true shape, over a blurred wash of the same artwork. */
+.billboard { position: relative; isolation: isolate; display: flex; flex-direction: column; padding-top: calc(var(--header-h) + 16px); overflow: hidden; background: #0b0a0f; }
 .billboard-top { position: relative; z-index: 2; width: 100%; }
-.billboard-art { position: absolute; inset: 0; z-index: -2; }
-.billboard-art img { object-fit: cover; object-position: center 30%; }
+.billboard-art { position: absolute; inset: -10%; z-index: -2; }
+.billboard-art img { object-fit: cover; filter: blur(48px) saturate(1.3); transform: scale(1.1); }
 .billboard-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 900ms ease; }
-.billboard-slide[data-active="true"] { opacity: 1; }
-.billboard-slide[data-active="true"] img { animation: billboard-drift 14s ease-out both; }
-@keyframes billboard-drift { from { transform: scale(1.06); } to { transform: scale(1); } }
+.billboard-slide[data-active="true"] { opacity: 0.55; }
 .billboard-scrim { position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background:
-    linear-gradient(to top, #0b0a0f 0%, rgb(11 10 15 / 0.85) 18%, rgb(11 10 15 / 0.2) 50%, rgb(11 10 15 / 0.55) 100%),
-    linear-gradient(to right, rgb(11 10 15 / 0.96) 0%, rgb(11 10 15 / 0.82) 32%, rgb(11 10 15 / 0.15) 68%, transparent 100%),
-    radial-gradient(70% 60% at 0% 100%, rgb(91 33 182 / 0.35), transparent 70%); }
-.billboard-content { position: relative; width: 100%; margin-top: auto; padding-top: 32px; padding-bottom: clamp(56px, 11svh, 120px); }
-.billboard-copy { max-width: 560px; }
-.billboard-copy[data-switching="true"] { animation: fade-up 700ms ease-out both; }
-.billboard-title { font-size: clamp(2.4rem, 5.6vw, 4.5rem); font-weight: 800; line-height: 0.98; letter-spacing: -0.045em; text-wrap: balance; text-shadow: 0 2px 30px rgb(0 0 0 / 0.5); }
-.billboard-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 16px; color: #d4d2da; font-size: 14px; font-weight: 500; }
+    linear-gradient(to bottom, rgb(11 10 15 / 0.7), rgb(11 10 15 / 0.35) 40%, rgb(11 10 15 / 0.6) 75%, #0b0a0f),
+    linear-gradient(to right, rgb(11 10 15 / 0.75), transparent 70%); }
+.billboard-content { position: relative; width: 100%; padding-block: clamp(28px, 6svh, 64px) clamp(40px, 7svh, 72px); }
+.billboard-layout { display: grid; grid-template-columns: minmax(0, 1fr) clamp(220px, 22vw, 300px); align-items: center; gap: clamp(32px, 6vw, 96px); }
+.billboard-poster { position: relative; grid-column: 2; grid-row: 1; aspect-ratio: 0.7; overflow: hidden; border-radius: 10px; background: var(--color-ink-700); box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1), 0 40px 80px -24px rgb(0 0 0 / 0.9); animation: fade-up 700ms ease-out both; }
+.billboard-copy { grid-column: 1; grid-row: 1; max-width: 600px; }
+.billboard-copy[data-switching="true"] { animation: fade-up 600ms ease-out both; }
+.billboard-title { font-size: clamp(2.2rem, 4.6vw, 3.75rem); font-weight: 800; line-height: 1; letter-spacing: -0.04em; text-wrap: balance; }
+.billboard-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 14px; color: #d4d2da; font-size: 14px; font-weight: 500; }
 .billboard-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: #8f8b99; }
-.billboard-synopsis { margin-top: 14px; color: #dcdae2; font-size: 16px; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 1px 12px rgb(0 0 0 / 0.6); }
+.billboard-synopsis { margin-top: 14px; color: #d4d2da; font-size: 15px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .billboard-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 .billboard-dots { display: flex; gap: 8px; margin-top: 28px; }
 .billboard-dot { position: relative; width: 28px; height: 4px; border-radius: 4px; background: rgb(255 255 255 / 0.25); overflow: hidden; cursor: pointer; }
@@ -572,7 +570,7 @@ html:has(#intro) .hero-preview > figure { animation-delay: 2.3s; }
 
 /* Title page: artwork behind, poster and title in front. */
 .title-hero { position: relative; isolation: isolate; padding-top: calc(var(--header-h) + 8px); padding-bottom: 36px; overflow: hidden; }
-.title-hero-art { z-index: -2; object-fit: cover; object-position: center 25%; opacity: 0.75; }
+.title-hero-art { z-index: -2; object-fit: cover; filter: blur(48px) saturate(1.3); transform: scale(1.2); opacity: 0.5; }
 .title-hero-scrim { position: absolute; inset: 0; z-index: -1; background:
     linear-gradient(to top, #0b0a0f 0%, rgb(11 10 15 / 0.9) 30%, rgb(11 10 15 / 0.55) 70%, rgb(11 10 15 / 0.75) 100%),
     linear-gradient(to right, rgb(11 10 15 / 0.9), rgb(11 10 15 / 0.3) 70%, transparent),
@@ -594,7 +592,6 @@ html:has(#intro) .hero-preview > figure { animation-delay: 2.3s; }
 
 /* Rows: a heading, then posters that scroll sideways with edge arrows. */
 .rows { position: relative; z-index: 2; display: grid; gap: clamp(28px, 4vw, 44px); }
-.billboard + .rows { margin-top: clamp(-72px, -6vw, -32px); }
 .row-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
 .row-heading h2 { font-size: clamp(1.1rem, 1.6vw, 1.35rem); font-weight: 700; letter-spacing: -0.025em; }
 .row-heading a { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; color: var(--color-brand-300); font-size: 13px; font-weight: 600; }
@@ -605,7 +602,7 @@ html:has(#intro) .hero-preview > figure { animation-delay: 2.3s; }
 .row-track { --row-gap: 12px; --row-cols: 6.4; display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - (var(--row-cols) - 1) * var(--row-gap)) / var(--row-cols)); gap: var(--row-gap); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 0; scrollbar-width: none; padding-block: 6px 4px; margin-block: -6px -4px; }
 .row-track::-webkit-scrollbar { display: none; }
 .row-track > * { scroll-snap-align: start; min-width: 0; }
-.row-ranked { --row-cols: 5.2; }
+.row-ranked { --row-cols: 6.4; }
 .row-arrow { position: absolute; top: 6px; bottom: 58px; z-index: 3; display: grid; width: 52px; place-items: center; border: 0; color: #fff; opacity: 0; transition: opacity 200ms ease, background-color 200ms ease; cursor: pointer; }
 .row-arrow svg { width: 30px; height: 30px; transition: transform 150ms ease; filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.6)); }
 .row-arrow:hover svg { transform: scale(1.2); }
@@ -615,19 +612,13 @@ html:has(#intro) .hero-preview > figure { animation-delay: 2.3s; }
 @media (hover: hover) { .row-viewport:hover .row-arrow, .row-arrow:focus-visible { opacity: 1; } }
 .row-arrow:focus-visible { outline: 2px solid var(--color-brand-400); outline-offset: -4px; }
 
-/* Ranked cards: an outlined numeral leaning against the poster. */
-.ranked-card { display: grid; grid-template-columns: 0.6fr 1fr; align-items: end; }
-.ranked-number { position: relative; z-index: 0; font-size: clamp(6rem, 11vw, 10rem); font-weight: 800; line-height: 0.74; letter-spacing: -0.07em; color: #0b0a0f; -webkit-text-stroke: 3px #77718a; text-align: right; margin-right: -0.12em; user-select: none; transition: -webkit-text-stroke-color 200ms ease; }
-.ranked-card > div { z-index: 1; }
-.ranked-copy { margin-left: calc(0.6 / 1.6 * 100%); }
-.media-card:hover .ranked-number { -webkit-text-stroke-color: var(--color-brand-400); }
+/* Ranked rows: a plain rank number beside the title, nothing laid over the artwork. */
+.ranked-copy { display: flex; align-items: flex-start; gap: 10px; }
+.ranked-number { flex-shrink: 0; min-width: 1.1em; margin-top: 6px; font-size: 30px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; color: var(--color-brand-300); font-variant-numeric: tabular-nums; }
 
 /* The watch-together band: the one solid purple moment on the home page. */
-.together-band { position: relative; isolation: isolate; overflow: hidden; border-radius: 16px; padding: clamp(28px, 4vw, 48px); background:
-    radial-gradient(60% 120% at 100% 0%, rgb(217 70 239 / 0.35), transparent 60%),
-    radial-gradient(50% 100% at 0% 100%, rgb(76 29 149 / 0.9), transparent 70%),
-    linear-gradient(120deg, #3b1a78, #5b21b6 55%, #6d28d9); }
-.together-band h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; }
+.together-band { position: relative; overflow: hidden; border-radius: 12px; padding: clamp(24px, 4vw, 40px); background: linear-gradient(100deg, #3b1a78, #5b21b6); }
+.together-band h2 { font-size: clamp(1.4rem, 2.4vw, 1.9rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
 .together-band p { color: #ede9fe; }
 
 .catalog-section { margin-top: 32px; }
@@ -823,7 +814,6 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .platform-mobile-search { display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; color: #d4d2da; }
   .platform-nav { grid-column: 1 / -1; grid-row: 2; align-self: stretch; justify-content: flex-start; gap: 28px; }
   .row-track { --row-cols: 4.3; }
-  .row-ranked { --row-cols: 3.3; }
   .row-arrow { display: none; }
 }
 @media (max-width: 767px) {
@@ -837,18 +827,13 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .platform-account { min-width: 40px; }
   .platform-account > span:not(.platform-avatar) { display: none; }
   .platform-nav { justify-content: space-between; gap: 16px; }
-  .billboard { min-height: clamp(500px, 78svh, 640px); }
-  .billboard-compact { min-height: 0; }
-  .billboard-art img { object-position: center 20%; }
-  .billboard-scrim { background:
-    linear-gradient(to top, #0b0a0f 0%, rgb(11 10 15 / 0.92) 30%, rgb(11 10 15 / 0.35) 62%, rgb(11 10 15 / 0.6) 100%),
-    radial-gradient(90% 50% at 50% 100%, rgb(91 33 182 / 0.35), transparent 70%); }
-  .billboard-content { padding-bottom: 48px; }
-  .billboard-synopsis { font-size: 14px; -webkit-line-clamp: 2; }
+  .billboard-layout { grid-template-columns: minmax(0, 1fr); gap: 22px; text-align: left; }
+  .billboard-poster { grid-column: 1; grid-row: 1; width: min(46vw, 190px); }
+  .billboard-copy { grid-row: 2; }
+  .billboard-content { padding-block: 12px 40px; }
+  .billboard-synopsis { font-size: 14px; -webkit-line-clamp: 3; }
   .billboard-meta { font-size: 13px; }
   .row-track { --row-cols: 3.25; --row-gap: 10px; }
-  .row-ranked { --row-cols: 2.3; }
-  .ranked-number { -webkit-text-stroke-width: 2px; }
   .catalog-filters { display: block; }
   .catalog-search { display: block; }
   .catalog-filter-toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 8px; color: #c4b5fd; font-size: 13px; cursor: pointer; }
@@ -875,7 +860,6 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .platform-nav-link { font-size: 13px; }
   .section-heading h2 { font-size: 19px; }
   .row-track { --row-cols: 2.35; }
-  .row-ranked { --row-cols: 1.7; }
   .billboard-actions .btn3d { flex: 1 1 0; min-width: 0; padding-inline: 12px; }
   .library-row > div:last-child { justify-content: flex-start; }
 }

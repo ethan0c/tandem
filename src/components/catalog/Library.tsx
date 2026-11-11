@@ -3,12 +3,10 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  BookOpen,
   Download,
   Heart,
   Import,
   LayoutGrid,
-  Library as LibraryIcon,
   List,
   RefreshCw,
   Search,
@@ -87,9 +85,6 @@ export function Library() {
       <div className="flex flex-wrap items-end justify-between gap-5 pt-2">
         <div>
           <h1>My library</h1>
-          <p className="mt-2 text-[15px] text-zinc-400">
-            Every story you’re in the middle of. Every one still to come.
-          </p>
         </div>
         <div className="flex gap-3">
           <Button
@@ -107,31 +102,22 @@ export function Library() {
         </div>
       </div>
       <a ref={exportLink} download="tandem-library.json" className="hidden" />
-      <div className="mb-6 mt-6 grid gap-3 sm:grid-cols-[repeat(3,minmax(0,1fr))_minmax(0,1.6fr)]">
-        {([
-          ["Saved", entries.length],
-          ["In progress", entries.filter((e) => e.status === "current").length],
-          ["Completed", entries.filter((e) => e.status === "completed").length],
-        ] as const).map(([label, value]) => (
-          <div key={label} className="rounded-xl border border-white/[0.08] bg-ink-800 px-4 py-3">
-            <p className="text-2xl font-bold tracking-tight tabular-nums">{value}</p>
-            <p className="mt-0.5 text-xs text-zinc-400">{label}</p>
-          </div>
-        ))}
-      <div className="flex items-center gap-3 rounded-xl border border-brand-500/25 bg-brand-950/40 px-4 py-3">
-        <LibraryIcon className="size-5 shrink-0 text-brand-300" />
-        <div className="min-w-0 flex-1">
-          <p className="text-xs leading-5 text-zinc-300">
-            {notice ||
-              (user
-                ? "Your private library syncs across devices."
-                : "Saved in this browser. Sign in for a separate cloud library, or export a backup.")}
-          </p>
-        </div>
+      <div className="mb-6 mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-400">
+        <span>
+          {entries.length} saved · {entries.filter((e) => e.status === "current").length} in progress ·{" "}
+          {entries.filter((e) => e.status === "completed").length} completed
+        </span>
+        <span aria-hidden="true" className="hidden text-zinc-600 sm:inline">|</span>
+        <span>
+          {notice ||
+            (user
+              ? "Synced to your account."
+              : "Saved in this browser.")}
+        </span>
         {user ? (
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
+            type="button"
+            className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-brand-300 hover:text-white disabled:opacity-50"
             disabled={syncing}
             onClick={async () => {
               setSyncing(true);
@@ -139,17 +125,14 @@ export function Library() {
               setSyncing(false);
             }}
           >
-            <RefreshCw
-              className={`size-3.5 ${syncing ? "animate-spin" : ""}`}
-            />
-            Sync
-          </Button>
+            <RefreshCw className={`size-3.5 ${syncing ? "animate-spin" : ""}`} />
+            Sync now
+          </button>
         ) : (
-          <Link href="/account" className="shrink-0 text-xs font-semibold text-brand-300 hover:text-white">
-            Sign in <span aria-hidden>→</span>
+          <Link href="/account" className="inline-flex min-h-11 items-center font-semibold text-brand-300 hover:text-white">
+            Sign in to sync
           </Link>
         )}
-      </div>
       </div>
       <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-white/[0.08] pb-4">
         <div
@@ -164,7 +147,7 @@ export function Library() {
               aria-pressed={kind === k}
               onClick={() => { setKind(k); setFormat(""); }}
             >
-              {k === "all" ? "All stories" : k}
+              {k === "all" ? "All" : k}
             </button>
           ))}
         </div>
@@ -199,10 +182,10 @@ export function Library() {
           <Search className="absolute left-3 top-3 size-4 text-muted" />
           <span className="sr-only">Search library</span>
           <input
-            className="field w-full pl-9 sm:w-48"
+            className="field w-full pl-9 sm:w-44"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Find a story…"
+            placeholder="Search library"
           />
         </label>
         <label>
@@ -217,7 +200,7 @@ export function Library() {
           </select>
         </label>
         <div className="audio-track-control">
-          <span className="audio-track-label">View</span>
+          <span className="sr-only">View</span>
           <div className="audio-track-toggle" role="group" aria-label="Library view">
             <button type="button" className="audio-track-option flex items-center justify-center gap-1.5" aria-label="List view" aria-pressed={view === "list"} onClick={() => changeView("list")}><List className="size-3.5" /> List</button>
             <button type="button" className="audio-track-option flex items-center justify-center gap-1.5" aria-label="Grid view" aria-pressed={view === "grid"} onClick={() => changeView("grid")}><LayoutGrid className="size-3.5" /> Grid</button>
@@ -231,21 +214,20 @@ export function Library() {
         </p>
       ) : !filtered.length ? (
         <div className="empty-state">
-          <BookOpen className="text-brand-400" />
-          <h2>
+                    <h2>
             {entries.length
               ? "No matching stories"
-              : "Your next favorite belongs here."}
+              : "Nothing saved yet"}
           </h2>
           <p>
             {entries.length
               ? "Try another filter or search."
-              : "Save an anime or manga, or bring your existing list along."}
+              : "Save a title from Anime or Manga, or import a list you already keep."}
           </p>
-          <ButtonLink href="/discover">Find your first story</ButtonLink>
+          <ButtonLink href="/discover">Browse titles</ButtonLink>
         </div>
       ) : (
-        <div className={view === "grid" ? "grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5" : "space-y-2"}>
+        <div className={view === "grid" ? "grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" : "space-y-2"}>
           {filtered.map((e) => (
             <article
               key={mediaKey(e.media)}

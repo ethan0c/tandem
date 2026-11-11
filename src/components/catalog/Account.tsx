@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Cloud, LogOut, ShieldCheck } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { Button, ButtonLink } from "@/components/Button";
 import { useLibrary } from "./LibraryProvider";
@@ -54,21 +54,17 @@ export function Account() {
     }
   }
   return (
-    <div className="mx-auto max-w-md py-6 sm:py-12">
-      <span className="mb-6 grid size-14 place-items-center rounded-2xl border border-brand-400/20 bg-brand-500/10 text-brand-300">
-        <Cloud className="size-6" />
-      </span>
-      <p className="eyebrow">Keep your stories with you</p>
-      <h1 className="mt-3 text-3xl font-medium tracking-tight">
-        {user ? "Your corner of Tandem." : "Same library. Any screen."}
+    <div className="mx-auto max-w-sm py-8 sm:py-16">
+      <h1 className="text-3xl font-bold tracking-tight">
+        {user ? "Account" : mode === "signup" ? "Create an account" : mode === "reset" ? "Reset password" : "Sign in"}
       </h1>
-      <p className="mt-4 text-sm leading-7 text-zinc-400">
+      <p className="mt-2 text-sm leading-6 text-zinc-400">
         {user
-          ? "Your anime, manga, and progress are saved to your private account."
-          : "Sign in to sync your library across devices. You can always browse and join rooms as a guest."}
+          ? "Your library and progress sync to this account."
+          : "Sync your library across devices. Browsing and rooms work without an account."}
       </p>
       {!isSupabaseConfigured ? (
-        <div className="mt-7 rounded-2xl border border-white/10 p-6">
+        <div className="mt-8">
           <p className="text-sm text-zinc-300">
             Accounts are not configured on this installation yet.
           </p>
@@ -80,8 +76,9 @@ export function Account() {
           </ButtonLink>
         </div>
       ) : user ? (
-        <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.025] p-6">
-          <p className="break-all text-sm">{user.email}</p>
+        <div className="mt-8 border-t border-white/10 pt-6">
+          <p className="text-xs text-zinc-400">Signed in as</p>
+          <p className="mt-1 break-all text-sm font-semibold">{user.email}</p>
           <p className="mt-3 text-xs text-muted">
             {entries.length} stories · {notice}
           </p>
@@ -102,34 +99,10 @@ export function Account() {
         </div>
       ) : (
         <form
-          className="mt-7 space-y-5 rounded-2xl border border-white/10 bg-white/[0.025] p-6"
+          className="mt-8 space-y-5"
           onSubmit={submit}
         >
-          <div className="flex gap-4 text-sm">
-            <button
-              type="button"
-              aria-pressed={mode === "signin"}
-              className={mode === "signin" ? "text-white" : "text-muted"}
-              onClick={() => {
-                setMode("signin");
-                setMessage("");
-              }}
-            >
-              Sign in
-            </button>
-            <button
-              type="button"
-              aria-pressed={mode === "signup"}
-              className={mode === "signup" ? "text-white" : "text-muted"}
-              onClick={() => {
-                setMode("signup");
-                setMessage("");
-              }}
-            >
-              Create account
-            </button>
-          </div>
-          <label className="block text-xs text-zinc-400">
+          <label className="block text-sm font-medium text-zinc-300">
             Email
             <input
               type="email"
@@ -141,7 +114,7 @@ export function Account() {
             />
           </label>
           {mode !== "reset" && (
-            <label className="block text-xs text-zinc-400">
+            <label className="block text-sm font-medium text-zinc-300">
               Password
               <input
                 type="password"
@@ -155,28 +128,33 @@ export function Account() {
               />
             </label>
           )}
-          <Button className="w-full" type="submit" disabled={busy}>
+          <Button className="w-full" size="lg" type="submit" disabled={busy}>
             {busy
               ? "Connecting…"
               : mode === "signup"
-                ? "Create your account"
+                ? "Create account"
                 : mode === "reset"
                   ? "Send reset link"
                   : "Sign in"}
           </Button>
-          <button
-            type="button"
-            className="text-xs text-muted hover:text-brand-300"
-            onClick={() => {
-              setMode("reset");
-              setMessage("");
-            }}
-          >
-            Forgot your password?
-          </button>
-          <p className="text-xs leading-6 text-muted">
-            Your guest library stays in this browser. Export it before signing
-            in, then import it into your account to bring it along.
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+            {mode === "signin" ? (
+              <>
+                <button type="button" className="min-h-11 text-zinc-400 hover:text-white" onClick={() => { setMode("reset"); setMessage(""); }}>
+                  Forgot password?
+                </button>
+                <button type="button" className="min-h-11 font-semibold text-brand-300 hover:text-white" onClick={() => { setMode("signup"); setMessage(""); }}>
+                  Create an account
+                </button>
+              </>
+            ) : (
+              <button type="button" className="min-h-11 text-zinc-400 hover:text-white" onClick={() => { setMode("signin"); setMessage(""); }}>
+                Already have an account? <span className="font-semibold text-brand-300">Sign in</span>
+              </button>
+            )}
+          </div>
+          <p className="border-t border-white/10 pt-5 text-xs leading-5 text-zinc-400">
+            Your guest library stays in this browser. To bring it along, export it from Library before signing in, then import it.
           </p>
         </form>
       )}
@@ -185,10 +163,6 @@ export function Account() {
           {message}
         </p>
       )}
-      <p className="mt-6 flex items-center gap-2 text-xs text-muted">
-        <ShieldCheck className="size-3.5" />
-        Private by default. Your library is yours.
-      </p>
     </div>
   );
 }
@@ -197,7 +171,7 @@ export function ResetPassword() {
   const [busy, setBusy] = useState(false);
   return (
     <div className="mx-auto max-w-md py-12">
-      <h1 className="text-3xl">A fresh start.</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Choose a new password</h1>
       <form
         className="mt-8 space-y-5"
         onSubmit={async (e) => {

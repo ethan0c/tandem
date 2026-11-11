@@ -47,12 +47,8 @@ export function Reader({ roomId }: { roomId: string }) {
     );
   return (
     <div className="mx-auto max-w-md py-10">
-      <span className="grid size-14 place-items-center rounded-2xl bg-brand-500/10 text-brand-300">
-        <BookOpen />
-      </span>
-      <p className="eyebrow mt-7">The same page. The same moment.</p>
-      <h1 className="mt-3 text-3xl font-medium tracking-tight">
-        Read a little closer.
+      <h1 className="text-3xl font-bold tracking-tight">
+        Reading room
       </h1>
       <p className="mt-4 text-sm leading-7 text-zinc-400">
         Choose your name, join the room, and open your page images. Everyone

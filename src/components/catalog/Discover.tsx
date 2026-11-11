@@ -27,12 +27,7 @@ export function Discover() {
       <h1 className="sr-only">Home</h1>
       <Billboard
         items={featured.length ? featured : titles.filter((t) => t.cover).slice(0, 5)}
-        eyebrow={(media, index) => (
-          <>
-            <span className="pill pill-brand">{media.kind}</span>
-            {index === 0 && <span className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-200">Tonight’s pick</span>}
-          </>
-        )}
+        eyebrow={(media) => <span className="pill pill-brand">{media.kind}</span>}
       />
       <div className="rows">
         {continuing.length > 0 && (
@@ -94,10 +89,9 @@ function TogetherBand() {
     <section className="together-band" aria-labelledby="together-heading">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div className="max-w-xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-200">Tandem rooms</p>
-          <h2 id="together-heading" className="mt-3">Better with your favorite person.</h2>
-          <p className="mt-3 text-[15px] leading-relaxed">
-            Open a private room, send the link, and press play. Your show stays in sync and your call stays on screen. No account needed.
+          <h2 id="together-heading">Watch with someone</h2>
+          <p className="mt-2 text-[15px] leading-relaxed">
+            Create a room and send the link. Playback stays in sync and your video call stays on screen.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">

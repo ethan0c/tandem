@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Info, Play, Star } from "lucide-react";
 import { titleHref, type CatalogTitle } from "@/lib/catalog-types";
 import { ButtonLink } from "@/components/Button";
@@ -11,9 +12,8 @@ import { rememberTitle } from "@/lib/public-catalog-client";
 const INTERVAL = 8000;
 
 /** Full-width hero that slides beneath the header and rotates through a few featured titles. */
-export function Billboard({ items, compact = false, eyebrow, children }: {
+export function Billboard({ items, eyebrow, children }: {
   items: CatalogTitle[];
-  compact?: boolean;
   /** Short label above the title, such as "Tonight’s pick". */
   eyebrow?: (media: CatalogTitle, index: number) => ReactNode;
   /** Extra content pinned to the top of the hero, such as a page heading. */
@@ -41,7 +41,7 @@ export function Billboard({ items, compact = false, eyebrow, children }: {
     <section
       aria-roledescription="carousel"
       aria-label="Featured titles"
-      className={`billboard bleed under-header ${compact ? "billboard-compact" : ""}`}
+      className="billboard bleed under-header"
       data-paused={paused || reduced}
       style={{ ["--billboard-interval" as string]: `${INTERVAL}ms` }}
       onPointerEnter={() => setPaused(true)}
@@ -51,33 +51,26 @@ export function Billboard({ items, compact = false, eyebrow, children }: {
     >
       <div className="billboard-art" aria-hidden="true">
         {items.map((item, i) => {
-          const art = item.cover ? largeArtwork(item.cover) : item.poster;
+          // The wash is blurred, so the artwork's shape never matters; the cover gives a wider colour field.
+          const art = item.cover || item.poster;
           return (
             <div key={`${item.kind}:${item.id}`} className="billboard-slide" data-active={i === index}>
               {art && (
-                <Image
-                  src={art}
-                  alt=""
-                  fill
-                  sizes="100vw"
-                  preload={i === 0}
-                  loading={i === 0 ? undefined : "lazy"}
-                  unoptimized={!canOptimizeArtwork(art)}
-                  className={item.cover ? "" : "scale-110 blur-2xl"}
-                />
+                <Image src={art} alt="" fill sizes="50vw" quality={40} loading={i === 0 ? undefined : "lazy"} preload={i === 0} unoptimized={!canOptimizeArtwork(art)} />
               )}
             </div>
           );
         })}
       </div>
       <div className="billboard-scrim" />
-      {children && (
-        <div className="billboard-top">
-          <div className="hero-inner site-width site-gutter">{children}</div>
-        </div>
-      )}
+      {children && <div className="billboard-top"><div className="hero-inner site-width site-gutter">{children}</div></div>}
       <div className="billboard-content">
-        <div className="hero-inner site-width site-gutter">
+        <div className="hero-inner billboard-layout site-width site-gutter">
+          {media.poster && (
+            <Link href={titleHref(media)} key={`poster:${media.kind}:${media.id}`} className="billboard-poster" tabIndex={-1} aria-hidden="true" onClick={() => rememberTitle(media)}>
+              <Image src={largeArtwork(media.poster)} alt="" fill sizes="(max-width: 767px) 180px, 300px" preload={index === 0} unoptimized={!canOptimizeArtwork(media.poster)} className="object-cover" />
+            </Link>
+          )}
           <div key={`${media.kind}:${media.id}`} className="billboard-copy" data-switching="true" aria-live={paused ? "polite" : "off"}>
             {eyebrow && <div className="mb-3 flex flex-wrap items-center gap-2">{eyebrow(media, index)}</div>}
             <h2 className="billboard-title">{media.title}</h2>

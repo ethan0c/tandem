@@ -88,7 +88,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
     );
   }
   const unit = kind === "anime" ? "episode" : "chapter";
-  const backdrop = media.cover ? largeArtwork(media.cover) : media.poster;
+  const backdrop = media.cover || media.poster;
   const synopsis = media.synopsis.replace(/\s*\(Source:[^)]*\)\s*$/, "");
   return (
     <>
@@ -99,9 +99,10 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
             unoptimized={!canOptimizeArtwork(backdrop)}
             alt=""
             fill
-            sizes="100vw"
+            sizes="50vw"
+            quality={40}
             loading="eager"
-            className={`title-hero-art ${media.cover ? "" : "scale-110 blur-2xl"}`}
+            className="title-hero-art"
           />
         )}
         <div className="title-hero-scrim" aria-hidden="true" />
@@ -117,7 +118,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
             <div className="title-poster">
               {media.poster && (
                 <Image
-                  src={media.poster}
+                  src={largeArtwork(media.poster)}
                   unoptimized={!canOptimizeArtwork(media.poster)}
                   alt={`${media.title} cover`}
                   fill
@@ -276,8 +277,7 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
           </section>
         </div>
         <aside className="h-fit rounded-xl border border-white/[0.08] bg-ink-800 p-6 lg:sticky lg:top-[calc(var(--header-h)+16px)]">
-          <p className="eyebrow">Your place in the story</p>
-          <h2 className="mt-2 text-xl font-bold tracking-tight">Keep it close.</h2>
+          <h2 className="text-lg font-bold tracking-tight">Your progress</h2>
           <p className="mt-2 text-xs leading-6 text-muted">
             {media.total
               ? `${media.total} ${unit}s in the catalog.`

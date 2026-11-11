@@ -149,9 +149,8 @@ export function ImportLibrary() {
         <ArrowLeft className="size-3" />
         Your library
       </Link>
-      <p className="eyebrow">Bring your favorites along</p>
-      <h1 className="mt-2 text-3xl font-medium tracking-tight">
-        A new home for your manga.
+      <h1 className="mt-2 text-3xl font-bold tracking-tight">
+        Import your manga list
       </h1>
       <p className="mt-3 text-sm leading-7 text-zinc-400">
         Paste the text from your Weeb Central subscriptions page, or a list of

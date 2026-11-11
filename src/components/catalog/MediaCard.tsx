@@ -79,14 +79,11 @@ export function MediaCard({ media, eager = false, rank, progress, href, sizes }:
     </div>
   );
   return (
-    <article className={`media-card group min-w-0 ${rank ? "ranked-card-wrap" : ""}`}>
-      {rank ? (
-        <div className="ranked-card">
-          <span className="ranked-number" aria-hidden="true">{rank}</span>
-          {poster}
-        </div>
-      ) : poster}
+    <article className="media-card group min-w-0">
+      {poster}
       <div className={rank ? "ranked-copy" : undefined}>
+        {rank && <span className="ranked-number" aria-label={`Number ${rank}`}>{rank}</span>}
+        <div className="min-w-0">
         <Link
           href={link}
           onPointerEnter={remember}
@@ -113,6 +110,7 @@ export function MediaCard({ media, eager = false, rank, progress, href, sizes }:
             </>
           )}
         </p>
+        </div>
       </div>
     </article>
   );

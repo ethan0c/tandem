@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useClientValue } from "@/hooks/useClientValue";
 import { reloadSession, saveSession } from "@/lib/last-room";
 import Link from "next/link";
-import { ArrowRight, Mic, MicOff, Video, VideoOff } from "lucide-react";
+import { Mic, MicOff, Video, VideoOff } from "lucide-react";
 import { HeaderFrame } from "@/components/HeaderFrame";
 import { Logo } from "@/components/Logo";
 import { StreamVideo } from "./StreamVideo";
@@ -117,7 +117,6 @@ export function JoinCard({
     >
       {!compact && (
         <>
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[40rem] bg-[radial-gradient(50rem_20rem_at_50%_-5%,rgb(124_58_237/0.25),transparent_60%)]" />
           <header className="relative w-full">
             <HeaderFrame>
               <Link href="/" aria-label="Tandem home">
@@ -127,16 +126,16 @@ export function JoinCard({
           </header>
         </>
       )}
-      <div className={compact ? "" : "relative flex w-full flex-1 items-center justify-center px-5 py-10"}>
+      <div className={compact ? "" : "relative flex w-full flex-1 items-center justify-center site-gutter py-10"}>
         <form
           onSubmit={join}
           className={
             compact
               ? "relative w-full overflow-hidden bg-ink"
-              : "relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-ink-800/80 shadow-2xl shadow-black/40 backdrop-blur"
+              : "relative grid w-full max-w-5xl gap-8 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] md:items-center md:gap-12"
           }
         >
-          <div className={`relative bg-ink-700 ${compact ? "aspect-video" : "aspect-[4/3]"}`}>
+          <div className={`relative bg-ink-700 ${compact ? "aspect-video" : "aspect-video overflow-hidden rounded-xl ring-1 ring-white/10"}`}>
             {stream && hasVideo && camOn ? (
               <StreamVideo stream={stream} muted mirror className="h-full w-full object-cover" />
             ) : (
@@ -172,11 +171,18 @@ export function JoinCard({
               </button>
             </div>
           </div>
-          <div className={compact ? "space-y-3 p-4" : "space-y-4 p-5"}>
-            <div>
-              <p className="text-xs font-medium text-muted">Joining room</p>
-              <p className={`font-sans text-white ${compact ? "text-base" : "text-lg"}`}>{roomId}</p>
-            </div>
+          <div className={compact ? "space-y-3 p-4" : "space-y-5"}>
+            {compact ? (
+              <div>
+                <p className="text-xs font-medium text-muted">Joining room</p>
+                <p className="font-sans text-base text-white">{roomId}</p>
+              </div>
+            ) : (
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Ready to join?</h1>
+                <p className="mt-2 text-sm text-zinc-400">Room <span className="font-mono text-zinc-200">{roomId}</span></p>
+              </div>
+            )}
             {mediaError && <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-300">{mediaError}</p>}
             <label className="block">
               <span className="mb-1.5 block text-sm text-zinc-300">Your name</span>
@@ -186,14 +192,14 @@ export function JoinCard({
                 maxLength={32}
                 placeholder="Cash"
                 autoFocus
-                className="h-11 w-full rounded-xl border border-white/10 bg-ink-700 px-3.5 text-sm text-white placeholder:text-muted focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/20"
+                className="field w-full"
               />
             </label>
             <button
               type="submit"
-              className="btn3d btn3d-brand btn3d-md w-full"
+              className={`btn3d btn3d-brand w-full ${compact ? "btn3d-md" : "btn3d-lg"}`}
             >
-              Join room <ArrowRight className="size-4" />
+              Join room
             </button>
           </div>
         </form>
