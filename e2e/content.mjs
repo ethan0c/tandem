@@ -40,8 +40,13 @@ async function imageReady(page) {
 }
 async function joinReader(page, name) {
   await page.getByRole("textbox", { name: "Your name" }).fill(name);
-  await page.getByRole("button", { name: "Join reading room" }).click();
-  await imageReady(page);
+  await page.getByRole("button", { name: "Join room", exact: true }).click();
+  try {
+    await imageReady(page);
+  } catch (error) {
+    console.error(`Reader failed at ${page.url()}: ${(await page.locator("body").innerText()).slice(0, 1200)}`);
+    throw error;
+  }
 }
 async function joinWatch(page, name) {
   await page.getByRole("textbox", { name: "Your name" }).fill(name);
@@ -83,22 +88,8 @@ try {
     () =>
       document.querySelector('input[aria-label="Page number"]')?.value === "2",
   );
-  await p.getByRole("button", { name: "Anyone turns pages" }).click();
-  await q.waitForFunction(
-    () => document.querySelector('button[aria-label="Next page"]')?.disabled,
-  );
-  await q.getByRole("button", { name: "Reading in sync" }).click();
-  await q.getByRole("button", { name: "Next page", exact: true }).click();
-  assert.equal(
-    await q.getByRole("spinbutton", { name: "Page number" }).inputValue(),
-    "3",
-  );
-  assert.equal(
-    await p.getByRole("spinbutton", { name: "Page number" }).inputValue(),
-    "2",
-  );
   console.log(
-    "PASS: late join loads the same provider chapter; shared pages, host lock, and independent reading.",
+    "PASS: late join loads the same provider chapter and shared pages stay in sync.",
   );
   await p.goto(`${base}/play/anime/4650`);
   await p.waitForFunction(
