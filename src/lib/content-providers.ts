@@ -2,7 +2,7 @@ import "server-only";
 import { getExternalCatalogId } from "./catalog";
 import type { CatalogTitle } from "./catalog-types";
 import type { ContentCatalog, ContentPlayback, ContentUnit } from "./content-types";
-import { parseAnivexaEpisodes, parseAnivexaPlayback } from "./anivexa-parsers";
+import { confirmsAnivexaMapping, parseAnivexaEpisodes, parseAnivexaPlayback } from "./anivexa-parsers";
 import { skipWindow } from "./skip-times";
 import {
   parseReAnimeEpisodes,
@@ -50,9 +50,7 @@ async function anivexaId(kitsuId: string, savedId?: string): Promise<string> {
   if (anilist && /^\d{1,10}$/.test(anilist)) return anilist;
   if (savedId && /^\d{1,10}$/.test(savedId)) {
     const response = await sourceRequest<unknown>(`${ANIVEXA}/map/${savedId}`, false, 60 * 60_000);
-    const top = response && typeof response === "object" && !Array.isArray(response) ? response as Record<string, unknown> : {};
-    const mapping = top.mappings && typeof top.mappings === "object" && !Array.isArray(top.mappings) ? top.mappings as Record<string, unknown> : top;
-    if (String(mapping.kitsuId) === kitsuId && String(mapping.aniId ?? mapping.id ?? mapping.anilistId) === savedId) return savedId;
+    if (confirmsAnivexaMapping(response, kitsuId, savedId)) return savedId;
   }
   throw new Error("The title mapping is temporarily unavailable. Try again shortly.");
 }

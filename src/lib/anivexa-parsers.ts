@@ -18,6 +18,12 @@ function httpsUrl(value: unknown): string | null {
   }
 }
 
+export function confirmsAnivexaMapping(value: unknown, kitsuId: string, anilistId: string): boolean {
+  const top = object(value);
+  const mapping = object(top.mappings || top);
+  return String(mapping.kitsuId) === kitsuId && String(mapping.aniId ?? mapping.id ?? mapping.anilistId) === anilistId;
+}
+
 export function parseAnivexaEpisodes(value: unknown): ContentUnit[] {
   const provider = object(object(value).mkissa);
   if (typeof provider.error === "string") throw new Error(`MKissa: ${provider.error}`);

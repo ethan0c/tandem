@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { parseAnivexaEpisodes, parseAnivexaPlayback } from "../src/lib/anivexa-parsers";
+import { confirmsAnivexaMapping, parseAnivexaEpisodes, parseAnivexaPlayback } from "../src/lib/anivexa-parsers";
 
 test("MKissa exposes both audio tracks with stable IDs and skips episode zero", () => {
   const units = parseAnivexaEpisodes({ mkissa: { episodes: { sub: [
@@ -25,4 +25,11 @@ test("MKissa playback uses the extracted HLS URL and rejects unsafe links", () =
 
 test("MKissa provider errors are surfaced", () => {
   assert.throws(() => parseAnivexaEpisodes({ mkissa: { error: "unavailable" } }), /MKissa: unavailable/);
+});
+
+test("a saved AniList mapping cannot point playback at another Kitsu title", () => {
+  const response = { mappings: { id: 16498, kitsuId: 7442 } };
+  assert.equal(confirmsAnivexaMapping(response, "7442", "16498"), true);
+  assert.equal(confirmsAnivexaMapping(response, "7443", "16498"), false);
+  assert.equal(confirmsAnivexaMapping(response, "7442", "16499"), false);
 });
