@@ -125,9 +125,10 @@ async function showHistory(appOrigin) {
     resume.className = "btn btn-dark btn-sm";
     resume.textContent = finished ? "Rewatch" : "Resume";
     resume.addEventListener("click", () => {
-      // Same room as last time, picking up where you stopped. content.js reads both from the hash.
+      // Preserve episode routes in the hash; pass the room in the query string.
       const url = new URL(entry.url);
-      url.hash = `tandem=${entry.roomId}${finished ? "" : `&tandemAt=${Math.floor(entry.time)}`}`;
+      url.searchParams.set("tandem", entry.roomId);
+      if (!finished) url.searchParams.set("tandemAt", String(Math.floor(entry.time)));
       chrome.tabs.create({ url: url.toString() });
       window.close();
     });
@@ -272,7 +273,8 @@ async function main() {
       // The invite page helps a partner without the extension get it first, then opens this episode.
       const invite = new URL(`${status.appOrigin || appOrigin}/join/${status.roomId}`);
       const page = new URL(tab.url);
-      page.hash = "";
+      page.searchParams.delete("tandem");
+      if (page.hash.startsWith("#tandem=")) page.hash = "";
       invite.searchParams.set("to", page.toString());
       if (tab.title) invite.searchParams.set("what", tab.title.slice(0, 120));
       await navigator.clipboard.writeText(invite.toString());

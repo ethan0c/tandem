@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FolderOpen, MonitorPlay, MonitorUp, X } from "lucide-react";
+import { BookOpen, FolderOpen, MonitorPlay, MonitorUp, X } from "lucide-react";
 import { AnimePicker } from "./AnimePicker";
 import type { RoomStory } from "@/lib/reading";
 
@@ -16,7 +16,7 @@ interface Props {
 }
 
 export function SourceDialog({ open, onClose, onFile, onScreen, screenError, onStory }: Props) {
-  const [tab, setTab] = useState<"screen" | "file" | "anime">("screen");
+  const [tab, setTab] = useState<"screen" | "file" | "anime" | "manga">("screen");
   const [sharing, setSharing] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -36,7 +36,7 @@ export function SourceDialog({ open, onClose, onFile, onScreen, screenError, onS
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Choose a video"
+        aria-label="Choose a source"
       >
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-3.5">
           <h2 className="text-sm font-semibold">Choose a video</h2>
@@ -45,7 +45,10 @@ export function SourceDialog({ open, onClose, onFile, onScreen, screenError, onS
           </button>
         </div>
         <div className="flex gap-1 p-2">
-          {onStory && <TabButton active={tab === "anime"} onClick={() => setTab("anime")} icon={<MonitorPlay className="size-4" />}>Anime</TabButton>}
+          {onStory && <>
+            <TabButton active={tab === "anime"} onClick={() => setTab("anime")} icon={<MonitorPlay className="size-4" />}>Anime</TabButton>
+            <TabButton active={tab === "manga"} onClick={() => setTab("manga")} icon={<BookOpen className="size-4" />}>Manga</TabButton>
+          </>}
           <TabButton active={tab === "screen"} onClick={() => setTab("screen")} icon={<MonitorUp className="size-4" />}>
             Share tab
           </TabButton>
@@ -54,7 +57,7 @@ export function SourceDialog({ open, onClose, onFile, onScreen, screenError, onS
           </TabButton>
         </div>
         <div className="px-5 pb-5 pt-2">
-          {tab === "anime" && onStory ? <AnimePicker onPick={story => { onStory(story); setTab("screen"); }} /> : tab === "screen" ? (
+          {(tab === "anime" || tab === "manga") && onStory ? <AnimePicker kind={tab} onPick={story => { onStory(story); setTab("screen"); }} /> : tab === "screen" ? (
             <div className="space-y-3">
               <p className="text-sm text-zinc-400">
                 Let everyone watch what is playing in your browser. Choose the tab with your show and turn on{" "}

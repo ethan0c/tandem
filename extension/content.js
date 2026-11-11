@@ -9,6 +9,7 @@
   const IS_TOP = window === window.top;
   const DEFAULT_ORIGIN = "https://www.ilovemygf.site";
   const SESSION_KEY = "tandem:room";
+  const WIDTH_KEY = "tandem:overlay-width";
 
   const relay = (msg) => chrome.runtime.sendMessage(msg).catch(() => {});
 
@@ -226,7 +227,10 @@
 
   /** The episode this tab is on, for invite links and "our shows". */
   function pageInfo() {
-    return { url: location.href.split("#")[0], title: document.title.trim().slice(0, 120) };
+    const url = new URL(location.href);
+    url.searchParams.delete("tandem");
+    if (url.hash.startsWith("#tandem=")) url.hash = "";
+    return { url: url.toString(), title: document.title.trim().slice(0, 120) };
   }
 
   function sendPage(force) {
@@ -248,6 +252,11 @@
 
     host = document.createElement("div");
     host.id = "tandem-overlay-host";
+    chrome.storage.local.get(WIDTH_KEY).then((saved) => {
+      if (host && Number.isFinite(saved[WIDTH_KEY])) {
+        host.style.width = Math.min(Math.max(saved[WIDTH_KEY], 240), Math.min(640, innerWidth - 16)) + "px";
+      }
+    }).catch(() => {});
 
     const bar = document.createElement("div");
     bar.className = "tandem-bar";
@@ -286,7 +295,15 @@
     resumeAt = 0;
     iframe.allow = "camera; microphone; autoplay; clipboard-write";
 
-    host.append(bar, iframe);
+    const grip = document.createElement("button");
+    grip.className = "tandem-resize-grip";
+    grip.type = "button";
+    grip.title = "Drag to resize the call";
+    grip.setAttribute("aria-label", "Resize call");
+    grip.textContent = "◣";
+    makeResizable(grip, host);
+
+    host.append(bar, iframe, grip);
     document.documentElement.appendChild(host);
     makeDraggable(bar, host);
     clearInterval(pageTimer);
@@ -345,6 +362,32 @@
     };
     handle.addEventListener("pointerup", end);
     handle.addEventListener("pointercancel", end);
+  }
+
+  function makeResizable(grip, el) {
+    let start = null;
+    grip.addEventListener("pointerdown", (e) => {
+      const r = el.getBoundingClientRect();
+      start = { x: e.clientX, width: r.width, right: innerWidth - r.right, bottom: innerHeight - r.bottom };
+      grip.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    grip.addEventListener("pointermove", (e) => {
+      if (!start) return;
+      const width = Math.min(640, Math.max(240, start.width + start.x - e.clientX), innerWidth - 16);
+      el.style.width = width + "px";
+      el.style.left = "auto";
+      el.style.top = "auto";
+      el.style.right = Math.max(8, Math.min(start.right, innerWidth - width - 8)) + "px";
+      el.style.bottom = Math.max(8, start.bottom) + "px";
+    });
+    const finish = () => {
+      if (!start) return;
+      start = null;
+      chrome.storage.local.set({ [WIDTH_KEY]: Math.round(el.getBoundingClientRect().width) }).catch(() => {});
+    };
+    grip.addEventListener("pointerup", finish);
+    grip.addEventListener("pointercancel", finish);
   }
 
   // Messages from the overlay iframe.
@@ -535,10 +578,18 @@
         applyState();
         break;
       case "tandem:probe":
-        if (active) reportPlayer();
+        if (active) {
+          reportPlayer();
+          reportProgress();
+        }
         break;
       case "tandem:pause":
-        if (video && !inAd && !video.paused) video.pause();
+        if (video && !inAd) {
+          state = { playing: false, time: video.currentTime, localUpdatedAt: Date.now() };
+          suppressUntil = Date.now() + 1000;
+          if (!video.paused) video.pause();
+          relay({ to: "top", type: "tandem:event", playing: false, time: video.currentTime, reason: "pause" });
+        }
         break;
       case "tandem:resync":
         // Pause right here and put everyone else on this exact spot.
@@ -549,7 +600,10 @@
         relay({ to: "top", type: "tandem:event", playing: false, time: state.time, reason: "resync" });
         break;
       case "tandem:progress":
-        if (IS_TOP) recordProgress(msg);
+        if (IS_TOP) {
+          recordProgress(msg);
+          if (iframe?.contentWindow) iframe.contentWindow.postMessage(msg, appOrigin);
+        }
         break;
       case "tandem:event":
       case "tandem:status":
@@ -568,12 +622,16 @@
   if (IS_TOP) {
     chrome.storage.sync.get("appOrigin").then(({ appOrigin: saved }) => {
       if (saved) appOrigin = saved;
-      // Invite links can carry the room in the hash: https://site/…#tandem=k3f9-x2qa
+      // Query parameters preserve episode routes kept in a site's hash; old #tandem links still work.
+      const address = new URL(location.href);
       const hash = new URLSearchParams(location.hash.replace(/^#/, ""));
-      const fromHash = hash.get("tandem");
-      resumeAt = Number(hash.get("tandemAt")) || 0;
-      if (fromHash) {
-        history.replaceState(null, "", location.pathname + location.search);
+      const fromHash = address.searchParams.get("tandem") || hash.get("tandem");
+      resumeAt = Number(address.searchParams.get("tandemAt") || hash.get("tandemAt")) || 0;
+      if (fromHash && /^[a-z0-9-]{4,24}$/i.test(fromHash)) {
+        address.searchParams.delete("tandem");
+        address.searchParams.delete("tandemAt");
+        if (address.hash.startsWith("#tandem=")) address.hash = "";
+        history.replaceState(null, "", address.pathname + address.search + address.hash);
         mountOverlay(fromHash.toLowerCase());
         return;
       }

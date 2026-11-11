@@ -20,7 +20,10 @@ import { expectedTime, type PlaybackState, type Source, type SyncReason } from "
 import type { RemotePlayback } from "@/hooks/useRoom";
 import { Loader } from "@/components/Loader";
 import { formatTime } from "@/lib/format";
-import type { ContentPlayback } from "@/lib/content-types";
+import type { ContentCatalog, ContentPlayback } from "@/lib/content-types";
+import type { ReadingState, RoomStory } from "@/lib/reading";
+import { MangaReader } from "@/components/catalog/MangaReader";
+import { useReadingSettings } from "@/components/catalog/useReadingSettings";
 
 interface PlayerProps {
   preview?: { poster: string; time: number; duration: number };
@@ -38,6 +41,10 @@ interface PlayerProps {
   onPlayingChange: (playing: boolean) => void;
   chromeVisible: boolean;
   pickerName: string | null;
+  story: RoomStory | null;
+  reading: ReadingState;
+  hostId: string | null;
+  changeReading: (patch: Partial<ReadingState>) => void;
 }
 
 export function Player({
@@ -56,6 +63,10 @@ export function Player({
   onPlayingChange,
   chromeVisible,
   pickerName,
+  story,
+  reading,
+  hostId,
+  changeReading,
 }: PlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -71,14 +82,21 @@ export function Player({
   const [blocked, setBlocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [catalogVideo, setCatalogVideo] = useState<{ key: string; url: string; type: string } | null>(null);
+  const [mangaCatalog, setMangaCatalog] = useState<ContentCatalog | null>(null);
+  const [mangaPlayback, setMangaPlayback] = useState<ContentPlayback | null>(null);
+  const [mangaCatalogLoading, setMangaCatalogLoading] = useState(false);
+  const [mangaPlaybackLoading, setMangaPlaybackLoading] = useState(false);
+  const [readingSettings, setReadingSettings] = useReadingSettings();
   const catalogMediaId = source?.kind === "catalog" ? source.mediaId : "";
   const catalogUnitId = source?.kind === "catalog" ? source.unitId : "";
   const catalogSourceId = source?.kind === "catalog" ? source.sourceId || "" : "";
   const catalogKey = `${catalogMediaId}:${catalogUnitId}:${catalogSourceId}`;
   const catalogLoading = source?.kind === "catalog" && catalogVideo?.key !== catalogKey && !error;
+  const mangaMode = story?.kind === "manga";
+  const mangaId = mangaMode ? story.id : "";
 
   const needsFile = source?.kind === "file" && !localFile;
-  const hasMedia = !!preview || (!!source && !needsFile);
+  const hasMedia = !!preview || (!!source && !needsFile) || mangaMode;
 
   const stamp = useCallback(
     (p: boolean, t: number) => {
@@ -132,6 +150,77 @@ export function Player({
     return () => controller.abort();
   }, [catalogMediaId, catalogUnitId, catalogSourceId, catalogKey]);
 
+  useEffect(() => {
+    if (!mangaId) {
+      setMangaCatalog(null);
+      setMangaPlayback(null);
+      setMangaCatalogLoading(false);
+      setMangaPlaybackLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    setMangaCatalog(null);
+    setMangaPlayback(null);
+    setMangaCatalogLoading(true);
+    setError(null);
+    void fetch(`/api/content?${new URLSearchParams({ kind: "manga", id: mangaId })}`, {
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const data = await response.json() as ContentCatalog & { error?: string };
+        if (!response.ok) throw new Error(data.error || "This manga is unavailable.");
+        if (controller.signal.aborted) return;
+        setMangaCatalog(data);
+      })
+      .catch((reason: unknown) => {
+        if (!controller.signal.aborted)
+          setError(reason instanceof Error ? reason.message : "This manga is unavailable.");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setMangaCatalogLoading(false);
+      });
+    return () => controller.abort();
+  }, [mangaId]);
+
+  useEffect(() => {
+    if (!mangaId || !mangaCatalog || mangaCatalog.media.id !== mangaId) return;
+    if (!mangaCatalog.units.some((unit) => unit.id === reading.unit) && mangaCatalog.units[0]) {
+      changeReading({
+        unit: mangaCatalog.units[0].id,
+        chapter: Math.max(1, mangaCatalog.units[0].number),
+        page: 0,
+      });
+    }
+  }, [mangaId, mangaCatalog, reading.unit, changeReading]);
+
+  useEffect(() => {
+    if (!mangaId || !reading.unit) {
+      setMangaPlayback(null);
+      setMangaPlaybackLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    setMangaPlayback(null);
+    setMangaPlaybackLoading(true);
+    void fetch(`/api/content?${new URLSearchParams({ kind: "manga", id: mangaId, unit: reading.unit })}`, {
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const data = await response.json() as ContentPlayback & { error?: string };
+        if (!response.ok) throw new Error(data.error || "This chapter is unavailable.");
+        if (!data.pages?.length) throw new Error("This chapter has no readable pages.");
+        if (!controller.signal.aborted) setMangaPlayback(data);
+      })
+      .catch((reason: unknown) => {
+        if (!controller.signal.aborted)
+          setError(reason instanceof Error ? reason.message : "This chapter is unavailable.");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setMangaPlaybackLoading(false);
+      });
+    return () => controller.abort();
+  }, [mangaId, reading.unit]);
+
   // Load the media element whenever the source (or our local file) changes.
   useEffect(() => {
     const v = videoRef.current;
@@ -181,7 +270,10 @@ export function Player({
 
   // Drift correction: nudge playback rate for small drift, hard-seek for large drift.
   useEffect(() => {
-    if (preview) return;
+    if (preview || mangaMode) {
+      if (mangaMode) onDrift(null);
+      return;
+    }
     const id = setInterval(() => {
       const v = videoRef.current;
       const st = stateRef.current;
@@ -207,7 +299,7 @@ export function Player({
       }
     }, 500);
     return () => clearInterval(id);
-  }, [hasMedia, serverNow, onDrift, preview]);
+  }, [hasMedia, serverNow, onDrift, preview, mangaMode]);
 
   const togglePlay = useCallback(() => {
     const v = videoRef.current;
@@ -247,7 +339,7 @@ export function Player({
 
   // Keyboard shortcuts.
   useEffect(() => {
-    if (preview) return;
+    if (preview || mangaMode) return;
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
@@ -280,7 +372,7 @@ export function Player({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [togglePlay, seekTo, toggleMute, onToggleFullscreen, preview]);
+  }, [togglePlay, seekTo, toggleMute, onToggleFullscreen, preview, mangaMode]);
 
   useEffect(() => onPlayingChange(playing), [playing, onPlayingChange]);
 
@@ -288,6 +380,8 @@ export function Player({
   const shownDuration = preview?.duration ?? duration;
   const pct = shownDuration > 0 ? (shown / shownDuration) * 100 : 0;
   const controlsVisible = chromeVisible || !playing;
+  const canChangePage = !reading.hostOnly || selfId === hostId;
+  const mangaLoading = mangaCatalogLoading || mangaPlaybackLoading;
 
   return (
     <div
@@ -299,7 +393,7 @@ export function Player({
         playsInline
         aria-label={preview ? "Haikyu episode preview" : undefined}
         preload="auto"
-        className="absolute inset-0 h-full w-full object-contain object-center"
+        className={`absolute inset-0 h-full w-full object-contain object-center ${mangaMode ? "hidden" : ""}`}
         onClick={togglePlay}
         onLoadedMetadata={(e) => {
           setDuration(e.currentTarget.duration);
@@ -322,13 +416,70 @@ export function Player({
           emitSync(false, d, "ended");
         }}
         onError={() => {
-          if (hasMedia) setError(source?.kind === "catalog" ? "The source video could not be played. Share its tab instead." : "This file could not be played. Try an MP4 or WebM.");
+          if (!mangaMode && hasMedia) setError(source?.kind === "catalog" ? "The source video could not be played. Share its tab instead." : "This file could not be played. Try an MP4 or WebM.");
         }}
       />
       {preview && <Image src={preview.poster} alt="" fill preload sizes="(max-width: 767px) 92vw, (max-height: 800px) 640px, 1080px" className="pointer-events-none object-contain" />}
 
+      {mangaMode && (
+        <div className="absolute inset-0 overflow-y-auto bg-ink-950 px-4 pb-8 pt-16">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="truncate text-base font-semibold">{story.title}</h2>
+                <p className="mt-1 text-xs text-zinc-400">
+                  {mangaPlayback ? `${mangaPlayback.unit.label} · ${mangaPlayback.source}` : "Loading chapter…"}
+                </p>
+              </div>
+              {mangaCatalog?.units.length ? (
+                <label className="flex items-center gap-2 text-xs text-zinc-400">
+                  Chapter
+                  <select
+                    className="field max-w-[min(60vw,20rem)]"
+                    value={reading.unit || ""}
+                    disabled={!canChangePage || mangaCatalogLoading}
+                    onChange={(event) => {
+                      const unit = mangaCatalog.units.find((item) => item.id === event.target.value);
+                      if (unit) changeReading({
+                        unit: unit.id,
+                        chapter: Math.max(1, unit.number),
+                        page: 0,
+                      });
+                    }}
+                  >
+                    {mangaCatalog.units.map((unit) => (
+                      <option key={unit.id} value={unit.id}>
+                        {unit.label}{unit.group ? ` · ${unit.group}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+            </div>
+            {mangaCatalog?.media && mangaPlayback && (
+              <MangaReader
+                key={`${mangaId}:${mangaPlayback.unit.id}`}
+                media={mangaCatalog.media}
+                playback={mangaPlayback}
+                settings={readingSettings}
+                onSettings={setReadingSettings}
+                onFailure={setError}
+                sharedPosition={reading.page}
+                onPositionChange={(page) => changeReading({ page })}
+                canNavigate={canChangePage}
+              />
+            )}
+            {!mangaCatalogLoading && !mangaCatalog?.units.length && !error && (
+              <p className="rounded-xl border border-white/10 bg-white/5 p-5 text-sm text-zinc-300" role="status">
+                No MangaDex chapters are available for this title.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Empty state */}
-      {!source && !preview && (
+      {!source && !preview && !mangaMode && (
         <div className="absolute inset-0 flex items-center justify-center p-6">
           <div className="max-w-sm rounded-2xl border border-white/10 bg-ink-800/70 p-8 text-center backdrop-blur">
             <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-brand-600/20 text-brand-300">
@@ -388,9 +539,9 @@ export function Player({
         </div>
       )}
 
-      {(buffering || catalogLoading) && hasMedia && !blocked && (
+      {(buffering || catalogLoading || mangaLoading) && hasMedia && !blocked && !error && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <Loader label="Loading video…" />
+          <Loader label={mangaMode ? "Loading manga…" : "Loading video…"} />
         </div>
       )}
 
@@ -411,7 +562,7 @@ export function Player({
       )}
 
       {/* Controls */}
-      <div
+      {!mangaMode && <div
         className={`absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-4 pb-3 pt-14 transition-opacity duration-300 ${
           controlsVisible && hasMedia ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
@@ -471,7 +622,7 @@ export function Player({
                 style={{ "--fill": `${(muted ? 0 : volume) * 100}%` } as React.CSSProperties}
                 aria-label="Volume"
               />
-            </div>
+            </div>}
             <IconButton onClick={onOpenSource} label="Change video">
               <Film className="size-4" />
             </IconButton>

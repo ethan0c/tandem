@@ -24,6 +24,7 @@
   right: 16px;
   bottom: 16px;
   width: 320px;
+  max-width: calc(100vw - 16px);
   z-index: 2147483647;
   border-radius: 16px;
   overflow: hidden;
@@ -70,6 +71,24 @@
   background: #0a0a0a;
   transition: height 150ms ease;
 }
+#tandem-overlay-host .tandem-resize-grip {
+  all: unset;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  color: #c4b5fd;
+  background: rgba(20, 20, 20, 0.8);
+  border-radius: 0 8px 0 0;
+  font-size: 16px;
+  cursor: nesw-resize;
+  touch-action: none;
+}
+#tandem-overlay-host .tandem-resize-grip:hover { background: #4c1d95; color: #fff; }
 #tandem-reactions {
   position: fixed;
   inset: 0;

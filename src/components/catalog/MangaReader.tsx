@@ -19,21 +19,27 @@ export interface ReadingSettings {
 }
 const EMPTY_PAGES: string[] = [];
 
-export function MangaReader({ media, playback, settings, onSettings, onFailure, transitioning = false }: {
+export function MangaReader({ media, playback, settings, onSettings, onFailure, transitioning = false, sharedPosition, onPositionChange, canNavigate = true }: {
   media: CatalogTitle;
   playback: ContentPlayback;
   settings: ReadingSettings;
   onSettings: (settings: ReadingSettings) => void;
   onFailure: (message: string) => void;
   transitioning?: boolean;
+  sharedPosition?: number;
+  onPositionChange?: (position: number) => void;
+  canNavigate?: boolean;
 }) {
   const { entries, save } = useLibrary();
   const entry = entries.find((item) => item.media.kind === "manga" && item.media.id === media.id);
   const pages = playback.pages || EMPTY_PAGES;
-  const [position, setPosition] = useState(() => {
+  const [localPosition, setLocalPosition] = useState(() => {
     const saved = entry?.readingPosition;
     return saved?.chapter === playback.unit.number && saved.page < pages.length ? saved.page : 0;
   });
+  const position = pages.length
+    ? Math.max(0, Math.min(sharedPosition ?? localPosition, pages.length - 1))
+    : 0;
   const [message, setMessage] = useState("");
   const [loadedPage, setLoadedPage] = useState("");
   const [pageRatio, setPageRatio] = useState(0.7);
@@ -50,8 +56,13 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
   const label = unitLabel("manga", playback.unit);
   const isExpanded = expanded || nativeFullscreen;
 
+  function setPosition(next: number) {
+    if (sharedPosition === undefined) setLocalPosition(next);
+    else onPositionChange?.(next);
+  }
+
   function go(next: number) {
-    if (!Number.isInteger(next) || next < 0 || next >= pages.length) return;
+    if (!canNavigate || !Number.isInteger(next) || next < 0 || next >= pages.length) return;
     setPosition(next);
     if (settings.mode === "scroll") canvas.current?.querySelector(`[data-page="${next}"]`)?.scrollIntoView({ block: "start", behavior: "instant" });
   }
@@ -125,7 +136,7 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
 
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
-      if (transitioning) return;
+      if (transitioning || !canNavigate) return;
       if (event.altKey || event.ctrlKey || event.metaKey || (event.target as HTMLElement).closest("input,select,textarea,button,[contenteditable]")) return;
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
         event.preventDefault();
@@ -137,7 +148,7 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [pages.length, settings.direction, settings.mode, transitioning]);
+  }, [pages.length, settings.direction, settings.mode, transitioning, canNavigate]);
 
   async function fullscreen() {
     try {
@@ -184,11 +195,11 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
         ))}
       </div>
       <div className="reader-pagination" data-direction={settings.direction}>
-        <Button variant="ghost" size="icon" className="nav-chevron" disabled={position === 0} onClick={() => go(position - 1)} aria-label="Previous page">
+        <Button variant="ghost" size="icon" className="nav-chevron" disabled={!canNavigate || position === 0} onClick={() => go(position - 1)} aria-label="Previous page">
           {settings.direction === "rtl" ? <ChevronRight className="size-5" /> : <ChevronLeft className="size-5" />}
         </Button>
-        <label>Page<input className="field" type="number" aria-label="Page number" min="1" max={pages.length} value={position + 1} onChange={(event) => go(Number(event.target.value) - 1)} /><span>/ {pages.length}</span></label>
-        <Button variant="ghost" size="icon" className="nav-chevron" disabled={position >= pages.length - 1} onClick={() => go(position + 1)} aria-label="Next page">
+        <label>Page<input className="field" type="number" aria-label="Page number" min="1" max={pages.length} value={position + 1} disabled={!canNavigate} onChange={(event) => go(Number(event.target.value) - 1)} /><span>/ {pages.length}</span></label>
+        <Button variant="ghost" size="icon" className="nav-chevron" disabled={!canNavigate || position >= pages.length - 1} onClick={() => go(position + 1)} aria-label="Next page">
           {settings.direction === "rtl" ? <ChevronLeft className="size-5" /> : <ChevronRight className="size-5" />}
         </Button>
       </div>

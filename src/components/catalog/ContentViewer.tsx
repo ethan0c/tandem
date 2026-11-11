@@ -77,7 +77,7 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
   });
   const startTogether = () =>
     router.push(
-      `/${kind === "manga" ? "read" : "room"}/${newRoomId()}?${togetherParams}`,
+      `/room/${newRoomId()}?${togetherParams}`,
     );
   const changingUnit = !failure && !!playback && (loading || playback.unit.id !== unitId);
   if ((!ready || (!catalog.data && catalog.pending) || (unitId && !failure && !catalog.error)) && !playback) return <ViewerSkeleton kind={kind} title={media?.title} />;

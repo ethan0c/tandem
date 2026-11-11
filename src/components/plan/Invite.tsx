@@ -32,7 +32,7 @@ export function Invite({ roomId, from, what, to, at, timeZone }: Props) {
   const upcoming = start && now !== null && start.getTime() > now;
   const who = from ?? "Your partner";
   const roomPath = `/room/${roomId}`;
-  const episode = to ? `${to.split("#")[0]}#tandem=${roomId}` : null;
+  const episode = to ? episodeLink(to, roomId) : null;
 
   const plan: Plan | null = start
     ? {
@@ -103,7 +103,7 @@ export function Invite({ roomId, from, what, to, at, timeZone }: Props) {
             <Step n={1} icon={<Puzzle className="size-4" />} title="Add Tandem to your browser" body="Free, no account. Chrome, Edge or Brave on a computer.">
               <ButtonLink href={EXTENSION_URL} variant="ghost" size="sm">Get the extension</ButtonLink>
             </Step>
-            <Step n={2} icon={<Monitor className="size-4" />} title="Open the episode" body="You’ll join the room with the call beside the show. Already have Tandem? Start here.">
+            <Step n={2} icon={<Monitor className="size-4" />} title="Open the episode" body="Open the same episode. If the call does not appear, click the Tandem extension and choose Enable on this site, then reopen this link.">
               <a href={episode} className="btn3d btn3d-brand btn3d-sm">
                 Open and join <ArrowRight className="size-3.5" />
               </a>
@@ -130,6 +130,17 @@ export function Invite({ roomId, from, what, to, at, timeZone }: Props) {
       </main>
     </div>
   );
+}
+
+function episodeLink(to: string, roomId: string): string | null {
+  try {
+    const url = new URL(to);
+    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+    url.searchParams.set("tandem", roomId);
+    return url.toString();
+  } catch {
+    return null;
+  }
 }
 
 /** A timer only fires while the tab stays open, so this is a nudge on top of the calendar invite. */

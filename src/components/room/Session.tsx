@@ -46,6 +46,7 @@ export function Session({ roomId, name, localStream }: Props) {
   const storyQuery = useClientValue(() => location.search, "");
   const { changeStory } = room;
   const { changeSource } = room;
+  const { changeReading } = room;
   useEffect(() => {
     if (room.status !== "joined" || room.selfId !== room.hostId || room.source) return;
     const params = new URLSearchParams(storyQuery);
@@ -62,8 +63,22 @@ export function Session({ roomId, name, localStream }: Props) {
   useEffect(() => {
     if (room.status !== "joined" || room.selfId !== room.hostId || room.story) return;
     const params = new URLSearchParams(storyQuery);
-    if (params.get("media") && params.get("title")) changeStory({ id: params.get("media")!, title: params.get("title")!, kind: "anime" });
-  }, [storyQuery, room.status, room.selfId, room.hostId, room.story, changeStory]);
+    const id = params.get("media");
+    const title = params.get("title");
+    if (!id || !title) return;
+    const kind = params.get("kind") === "manga" ? "manga" : "anime";
+    changeStory({ id, title, kind });
+    if (kind === "manga") {
+      const unit = params.get("unit");
+      const chapter = Number(params.get("chapter"));
+      changeReading({
+        unit: unit && /^[a-z0-9][a-z0-9_-]{0,79}$/i.test(unit) ? unit : "",
+        chapter: Number.isFinite(chapter) && chapter >= 1 ? chapter : 1,
+        page: 0,
+      });
+      changeSource(null);
+    }
+  }, [storyQuery, room.status, room.selfId, room.hostId, room.story, changeStory, changeReading, changeSource]);
   useEffect(() => {
     nameRef.current = (id) => (id === room.selfId ? "You" : (room.members.find((m) => m.id === id)?.name ?? "Guest"));
   });
@@ -190,7 +205,7 @@ export function Session({ roomId, name, localStream }: Props) {
           chat={{ open: chatOpen, unread, onToggle: toggleChat }}
         />
 
-        {room.story && !room.source && <div className="absolute inset-x-4 top-20 z-20 text-center"><p className="text-xs text-brand-300">Tonight’s pick · {room.story.title}</p><a href={`https://www.crunchyroll.com/search?q=${encodeURIComponent(room.story.title)}`} target="_blank" rel="noreferrer" className="mt-2 inline-block text-[11px] text-zinc-400 hover:text-white">Find on Crunchyroll ↗</a></div>}
+        {room.story?.kind === "anime" && !room.source && <div className="absolute inset-x-4 top-20 z-20 text-center"><p className="text-xs text-brand-300">Tonight’s pick · {room.story.title}</p><a href={`https://www.crunchyroll.com/search?q=${encodeURIComponent(room.story.title)}`} target="_blank" rel="noreferrer" className="mt-2 inline-block text-[11px] text-zinc-400 hover:text-white">Find on Crunchyroll ↗</a></div>}
         {room.source?.kind === "screen" ? (
           <ScreenStage
             isSharer={screen.isSharer}
@@ -222,6 +237,10 @@ export function Session({ roomId, name, localStream }: Props) {
             onPlayingChange={onPlayingChange}
             chromeVisible={chromeVisible}
             pickerName={pickerName}
+            story={room.story}
+            reading={room.reading}
+            hostId={room.hostId}
+            changeReading={room.changeReading}
           />
         )}
 
@@ -255,7 +274,13 @@ export function Session({ roomId, name, localStream }: Props) {
       />
 
       <SourceDialog
-        onStory={room.selfId === room.hostId ? room.changeStory : undefined}
+        onStory={room.selfId === room.hostId ? (story) => {
+          room.changeStory(story);
+          if (story.kind === "manga") {
+            room.changeSource(null);
+            room.changeReading({ unit: "", chapter: 1, page: 0 });
+          }
+        } : undefined}
         open={sourceOpen}
         onClose={() => setSourceOpen(false)}
         onFile={(file) => {

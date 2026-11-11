@@ -66,6 +66,7 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
   /** The remote change our own last action superseded. */
   const [handledSeq, setHandledSeq] = useState(0);
   const resumeChecked = useRef(false);
+  const seededPlayback = useRef(false);
 
   useReleaseStream(localStream);
 
@@ -74,6 +75,9 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
   useEffect(() => {
     const r = remote;
     if (!r || r.from === selfId) return;
+    // A newly created room has no playback position yet. Keep the first viewer's current video
+    // running; the extension reports its position below and seeds the room from that video.
+    if (r.from === "server" && room.members.length === 1 && !r.playback.playing && r.playback.time === 0 && !resumeAt) return;
     // Resuming a show into an empty room: start the room where we left off instead of at 0.
     const first = !resumeChecked.current;
     resumeChecked.current = true;
@@ -87,7 +91,7 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
       type: "tandem:apply",
       state: { playing: r.playback.playing, time: r.playback.time, localUpdatedAt: r.playback.updatedAt - offset },
     });
-  }, [remote, selfId, serverNow, emitSync, resumeAt]);
+  }, [remote, selfId, serverNow, emitSync, resumeAt, room.members.length]);
 
   // Which remote change is current, for the page's next action to supersede.
   const remoteSeq = useRef(0);
@@ -110,6 +114,7 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
         url?: string;
         title?: string;
         resync?: boolean;
+        duration?: number;
       };
       if (!m || typeof m !== "object") return;
       if (m.type === "tandem:event") {
@@ -121,6 +126,12 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
         setCanResync(!!m.resync);
       } else if (m.type === "tandem:status") {
         setHasVideo(!!m.hasVideo);
+      } else if (m.type === "tandem:progress" && !seededPlayback.current &&
+        room.status === "joined" && room.members.length === 1 &&
+        remote?.from === "server" && !remote.playback.playing && remote.playback.time === 0 &&
+        !resumeAt && Number.isFinite(m.time) && Number.isFinite(m.duration)) {
+        seededPlayback.current = true;
+        emitSync(!!m.playing, Number(m.time) || 0, "seek");
       } else if (m.type === "tandem:drift") {
         setDrift(typeof m.drift === "number" ? m.drift : null);
       } else if (m.type === "tandem:ad") {
@@ -133,7 +144,7 @@ export function OverlaySession({ roomId, name, localStream, embedded, layout = "
     window.addEventListener("message", onMessage);
     post({ type: "tandem:ready" });
     return () => window.removeEventListener("message", onMessage);
-  }, [emitSync, setMemberStatus]);
+  }, [emitSync, setMemberStatus, room.status, room.members.length, remote, resumeAt]);
 
   // A partner's Resync pauses us on their spot; say so, or it looks like a glitch. Our own next
   // play, pause or seek moves on from it.
