@@ -610,6 +610,8 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .platform-header-frame { grid-template-columns: auto 1fr; grid-template-rows: 58px 46px; gap: 0 20px; }
   .platform-header-actions { justify-self: end; }
   .platform-quick-search { display: none; }
+  /* Two header rows sit over more of the artwork, so the scrim stays dark all the way down. */
+  .platform-header[data-top="true"] { background: linear-gradient(to bottom, rgb(8 7 12 / 0.94), rgb(8 7 12 / 0.82) 60%, rgb(8 7 12 / 0.6)); }
   .platform-mobile-search { display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; color: #d4d2da; }
   .platform-nav { grid-column: 1 / -1; grid-row: 2; align-self: stretch; justify-content: flex-start; gap: 28px; }
   .row-track { --row-cols: 4.3; }
@@ -674,6 +676,8 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .platform summary { min-height: 44px; padding-block: 12px; }
 }
 .billboard-top .page-heading > p { color: #d4d2da; }
+/* Holds the page open while it loads, so the footer never jumps up into view. */
+.route-loading { min-height: calc(100svh - var(--header-h)); }
 .route-progress { position: fixed; top: var(--header-h); left: 0; right: 0; z-index: 50; height: 2px; overflow: hidden; pointer-events: none; }
 .route-progress::after { content: ""; position: absolute; inset: 0; background: var(--color-brand-500); transform-origin: left; animation: route-progress 1.6s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 @keyframes route-progress { 0% { transform: scaleX(0); } 60% { transform: scaleX(0.7); } 100% { transform: scaleX(0.92); } }

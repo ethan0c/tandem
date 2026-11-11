@@ -33,19 +33,21 @@ import { fetchPublicCatalog } from "@/lib/public-catalog-client";
 import { canOptimizeArtwork, largeArtwork } from "@/lib/artwork";
 import { catalogFormatLabel } from "@/lib/catalog-formats";
 
-/** Where the main button goes: the saved place if there is one, otherwise the first episode or chapter. */
+/** Where the main button goes: the saved place if there is one, otherwise the first episode or chapter.
+    The label never depends on the episode list, so the button doesn't change size when the list arrives. */
 function playTarget(kind: MediaKind, id: string, units: ContentUnit[], entry?: LibraryEntry) {
   const href = (unit: string) => `/play/${kind}/${id}?${new URLSearchParams({ unit, language: "en" })}`;
   const resume = entry && resumeHref(entry);
   if (resume) return { href: resume, label: "Resume" };
   const chapter = kind === "manga" ? entry?.readingPosition?.chapter : undefined;
-  const saved = chapter ? units.find((unit) => unit.number === chapter) : undefined;
-  if (saved) return { href: href(saved.id), label: `Continue ch. ${saved.number}` };
+  if (chapter) {
+    const saved = units.find((unit) => unit.number === chapter);
+    return { href: saved ? href(saved.id) : "#episodes", label: `Continue ch. ${chapter}` };
+  }
   const playable = units.filter((unit) => !unit.group || unit.group === "Sub");
   const first = (playable.length ? playable : units).reduce<ContentUnit | undefined>(
     (lowest, unit) => (!lowest || unit.number < lowest.number ? unit : lowest), undefined);
-  if (first) return { href: href(first.id), label: kind === "anime" ? "Play" : "Read ch. " + first.number };
-  return { href: "#episodes", label: kind === "anime" ? "Episodes" : "Chapters" };
+  return { href: first ? href(first.id) : "#episodes", label: kind === "anime" ? "Play" : "Read" };
 }
 
 const statusLabels: Record<string, string> = { current: "Ongoing", finished: "Finished", upcoming: "Upcoming", tba: "TBA", unreleased: "Unreleased" };
