@@ -75,6 +75,7 @@ export function Player({
   const catalogUnitId = source?.kind === "catalog" ? source.unitId : "";
   const catalogSourceId = source?.kind === "catalog" ? source.sourceId || "" : "";
   const catalogKey = `${catalogMediaId}:${catalogUnitId}:${catalogSourceId}`;
+  const catalogLoading = source?.kind === "catalog" && catalogVideo?.key !== catalogKey && !error;
 
   const needsFile = source?.kind === "file" && !localFile;
   const hasMedia = !!preview || (!!source && !needsFile);
@@ -110,10 +111,8 @@ export function Player({
   }, [remote, selfId, applyState]);
 
   useEffect(() => {
-    setCatalogVideo(null);
     if (!catalogMediaId || !catalogUnitId) return;
     const controller = new AbortController();
-    setBuffering(true);
     const query = new URLSearchParams({ kind: "anime", id: catalogMediaId, unit: catalogUnitId,
       ...(catalogSourceId ? { sourceId: catalogSourceId } : {}) });
     void fetch(`/api/content?${query}`, { signal: controller.signal })
@@ -389,7 +388,7 @@ export function Player({
         </div>
       )}
 
-      {buffering && hasMedia && !blocked && (
+      {(buffering || catalogLoading) && hasMedia && !blocked && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <Loader label="Loading video…" />
         </div>
