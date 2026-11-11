@@ -94,15 +94,18 @@ export async function anivexaPlayback(kitsuId: string, unitId: string, savedId?:
   const match = /^av-mkissa-(sub|dub)-(\d{1,4})$/.exec(unitId);
   if (!match || Number(match[2]) < 1) return null;
   const anilist = await anivexaId(kitsuId, savedId);
-  const [response, mal] = await Promise.all([
+  const [response, mappingResponse] = await Promise.all([
     sourceRequest<unknown>(`${ANIVEXA}/watch/mkissa/${anilist}/${match[1]}/mkissa-${match[2]}`, false, 0),
-    getExternalCatalogId("anime", kitsuId, "myanimelist/anime"),
+    sourceRequest<unknown>(`${ANIVEXA}/map/${anilist}`, false, 60 * 60_000).catch(() => null),
   ]);
   const playback = parseAnivexaPlayback(response);
   const watch = response && typeof response === "object" && !Array.isArray(response) ? response as Record<string, unknown> : {};
   if (watch.anilistId !== Number(anilist) || watch.episode !== Number(match[2]) || watch.audio !== match[1])
     throw new Error("MKissa returned an episode that did not match this title.");
   if (!playback.streams.length) throw new Error("MKissa returned no playable video for this episode.");
+  const mapRoot = mappingResponse && typeof mappingResponse === "object" && !Array.isArray(mappingResponse) ? mappingResponse as Record<string, unknown> : {};
+  const mapping = mapRoot.mappings && typeof mapRoot.mappings === "object" && !Array.isArray(mapRoot.mappings) ? mapRoot.mappings as Record<string, unknown> : {};
+  const mal = confirmsAnivexaMapping(mappingResponse, kitsuId, anilist) ? String(mapping.malId || "") : "";
   const unit: ContentUnit = {
     id: unitId, number: Number(match[2]), label: `Episode ${match[2]}`, title: "",
     language: match[1] === "sub" ? "ja" : "en", group: match[1] === "sub" ? "Sub" : "Dub",
