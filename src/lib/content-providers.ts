@@ -41,16 +41,22 @@ async function sourceRequest<T>(url: string, html = false, ttl = 120_000, header
 
 export const anivexaConfigured = Boolean(ANIVEXA);
 
-async function anivexaEpisodes(media: CatalogTitle): Promise<{ anilist: string; units: ContentUnit[] }> {
+async function anivexaId(media: CatalogTitle): Promise<string> {
   if (!ANIVEXA) throw new Error("Anivexa is not configured.");
   const anilist = await getExternalCatalogId("anime", media.id, "anilist/anime");
   if (!anilist || !/^\d{1,10}$/.test(anilist)) throw new Error("This title has no AniList mapping for MKissa.");
-  const response = await sourceRequest<unknown>(`${ANIVEXA}/episodes/mkissa/${anilist}?map=false`);
-  return { anilist, units: parseAnivexaEpisodes(response) };
+  return anilist;
+}
+
+async function anivexaEpisodes(media: CatalogTitle): Promise<ContentUnit[]> {
+  const anilist = await anivexaId(media);
+  // Anivexa can return a provider error inside HTTP 200; do not cache that response.
+  const response = await sourceRequest<unknown>(`${ANIVEXA}/episodes/mkissa/${anilist}?map=false`, false, 0);
+  return parseAnivexaEpisodes(response);
 }
 
 export async function anivexaCatalog(media: CatalogTitle, offset: number): Promise<ContentCatalog> {
-  const { units } = await anivexaEpisodes(media);
+  const units = await anivexaEpisodes(media);
   return {
     media, source: "MKissa", units: units.slice(offset, offset + 100), total: units.length,
     hasMore: offset + 100 < units.length,
@@ -60,13 +66,18 @@ export async function anivexaCatalog(media: CatalogTitle, offset: number): Promi
 
 export async function anivexaPlayback(media: CatalogTitle, unitId: string): Promise<ContentPlayback | null> {
   const match = /^av-mkissa-(sub|dub)-(\d{1,4})$/.exec(unitId);
-  if (!match) return null;
-  const { anilist, units } = await anivexaEpisodes(media);
-  const unit = units.find((item) => item.id === unitId);
-  if (!unit) return null;
+  if (!match || Number(match[2]) < 1) return null;
+  const anilist = await anivexaId(media);
   const response = await sourceRequest<unknown>(`${ANIVEXA}/watch/mkissa/${anilist}/${match[1]}/mkissa-${match[2]}`, false, 0);
   const playback = parseAnivexaPlayback(response);
+  const watch = response && typeof response === "object" && !Array.isArray(response) ? response as Record<string, unknown> : {};
+  if (watch.anilistId !== Number(anilist) || watch.episode !== Number(match[2]) || watch.audio !== match[1])
+    throw new Error("MKissa returned an episode that did not match this title.");
   if (!playback.streams.length) throw new Error("MKissa returned no playable video for this episode.");
+  const unit: ContentUnit = {
+    id: unitId, number: Number(match[2]), label: `Episode ${match[2]}`, title: "",
+    language: match[1] === "sub" ? "ja" : "en", group: match[1] === "sub" ? "Sub" : "Dub",
+  };
   return {
     source: "MKissa", credit: "Episode supplied by MKissa via Anivexa.",
     sourceUrl: "https://mkissa.to/", unit, streams: playback.streams,
