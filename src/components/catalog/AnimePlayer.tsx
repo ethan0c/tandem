@@ -32,7 +32,8 @@ export function AnimePlayer({ media, playback, onFailure, transitioning = false 
 }) {
   const video = useRef<HTMLVideoElement>(null);
   const frame = useRef<HTMLDivElement>(null);
-  const { entries, save } = useLibrary();
+  const settings = useRef<HTMLDetailsElement>(null);
+  const { entries, ready, save } = useLibrary();
   const entry = entries.find((item) => item.media.kind === "anime" && item.media.id === media.id);
   const liked = entry?.likedEpisodes?.some((item) => item.unit === playback.unit.id) || false;
   const [streamIndex, setStreamIndex] = useState(0);
@@ -54,6 +55,24 @@ export function AnimePlayer({ media, playback, onFailure, transitioning = false 
   const canPiP = useClientValue(() => !!document.pictureInPictureEnabled, false);
   const streams = playback.streams || EMPTY_STREAMS;
 
+  useEffect(() => {
+    if (!ready || entry?.watchPosition?.unit === playback.unit.id) return;
+    save(media, { status: "current", watchPosition: { unit: playback.unit.id, seconds: 0 } });
+  }, [ready, entry?.watchPosition?.unit, playback.unit.id, media, save]);
+  useEffect(() => {
+    const dismiss = (event: PointerEvent) => {
+      if (settings.current && !settings.current.contains(event.target as Node)) settings.current.open = false;
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && settings.current?.open) {
+        settings.current.open = false;
+        settings.current.querySelector("summary")?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", dismiss);
+    document.addEventListener("keydown", escape);
+    return () => { document.removeEventListener("pointerdown", dismiss); document.removeEventListener("keydown", escape); };
+  }, []);
   useEffect(() => { if (transitioning) video.current?.pause(); }, [transitioning]);
   useEffect(() => {
     const element = video.current;
@@ -261,7 +280,7 @@ export function AnimePlayer({ media, playback, onFailure, transitioning = false 
             <label className="custom-player-volume-label"><span className="sr-only">Volume</span><input type="range" aria-label="Volume" min="0" max="1" step="0.05" value={muted ? 0 : volume} onChange={(event) => {
               if (video.current) { video.current.volume = Number(event.target.value); video.current.muted = false; }
             }} /></label>
-            <details className="custom-player-settings">
+            <details className="custom-player-settings" ref={settings}>
               <summary className="custom-player-icon" aria-label="Playback settings" title="Playback settings"><Settings2 className="size-5" /></summary>
               <div className="custom-player-settings-panel">
                 <label>Playback speed<select value={speed} onChange={(event) => { const rate = Number(event.target.value); setSpeed(rate); if (video.current) video.current.playbackRate = rate; }}>

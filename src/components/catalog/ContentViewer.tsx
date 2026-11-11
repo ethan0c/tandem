@@ -14,6 +14,7 @@ import { MangaReader } from "./MangaReader";
 import { useReadingSettings } from "./useReadingSettings";
 import { UnitNavigator } from "./UnitNavigator";
 import { unitLabel } from "@/lib/spoilers";
+import { getTitlePreview } from "@/lib/public-catalog-client";
 import { ViewerSkeleton } from "./LoadingStates";
 
 export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
@@ -30,8 +31,8 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
   const [loading, setLoading] = useState(false);
   const [retry, setRetry] = useState(0);
   const [readingSettings, setReadingSettings] = useReadingSettings();
-  const { ready } = useLibrary();
-  const media = catalog.data?.media;
+  const { ready, entries } = useLibrary();
+  const media = catalog.data?.media || entries.find((entry) => entry.media.kind === kind && entry.media.id === id)?.media || getTitlePreview(kind, id);
   useEffect(() => {
     if (!unitId) return;
     const controller = new AbortController();
@@ -77,7 +78,7 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
       `/${kind === "manga" ? "read" : "room"}/${newRoomId()}?${togetherParams}`,
     );
   const changingUnit = !failure && !!playback && (loading || playback.unit.id !== unitId);
-  if ((!ready || (!catalog.data && catalog.pending) || (unitId && !failure && !catalog.error)) && !playback) return <ViewerSkeleton kind={kind} />;
+  if ((!ready || (!catalog.data && catalog.pending) || (unitId && !failure && !catalog.error)) && !playback) return <ViewerSkeleton kind={kind} title={media?.title} />;
   return (
     <>
       <Link

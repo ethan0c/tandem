@@ -16,6 +16,7 @@ import {
   libraryStatuses,
   mediaKey,
   titleHref,
+  type LibraryEntry,
   type LibraryStatus,
   type MediaKind,
 } from "@/lib/catalog-types";
@@ -25,6 +26,13 @@ import { canOptimizeArtwork } from "@/lib/artwork";
 import { catalogFormatLabel, matchesCatalogFormat } from "@/lib/catalog-formats";
 import { unitLabel } from "@/lib/spoilers";
 import { FormatFilter } from "./FormatFilter";
+
+function resumeHref(entry: LibraryEntry): string | null {
+  const unit = entry.watchPosition?.unit;
+  return entry.media.kind === "anime" && unit && /^(?:film|av-mkissa-(?:sub|dub)-\d{1,4}|ra-\d{1,4})$/.test(unit)
+    ? `/play/anime/${entry.media.id}?${new URLSearchParams({ unit })}`
+    : null;
+}
 
 export function Library() {
   const { entries, ready, save, remove, user, notice, sync } = useLibrary();
@@ -223,7 +231,7 @@ export function Library() {
               className="library-row flex flex-wrap items-center gap-4 rounded-2xl border border-white/8 bg-white/[0.025] p-4"
             >
               <Link
-                href={titleHref(e.media)}
+                href={resumeHref(e) || titleHref(e.media)}
                 className="relative h-20 w-14 shrink-0 overflow-hidden rounded-lg"
               >
                 {e.media.poster && (
@@ -239,7 +247,7 @@ export function Library() {
               </Link>
               <div className="min-w-0 flex-1">
                 <Link
-                  href={titleHref(e.media)}
+                  href={resumeHref(e) || titleHref(e.media)}
                   className="line-clamp-1 text-sm font-medium hover:text-brand-300"
                 >
                   {e.media.title}
@@ -252,6 +260,12 @@ export function Library() {
                   {e.progress}
                   {e.media.total ? ` / ${e.media.total}` : ""}
                 </p>
+                {resumeHref(e) && <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                  <Link href={resumeHref(e)!} className="font-medium text-brand-300 hover:text-white">
+                    {e.watchPosition?.unit === "film" ? "Resume film" : `Resume episode ${e.watchPosition?.unit.match(/-(\d+)$/)?.[1] || ""}`} →
+                  </Link>
+                  <Link href={titleHref(e.media)} className="text-muted hover:text-white">Series details</Link>
+                </div>}
                 {e.media.total && (
                   <div className="mt-2 h-1 max-w-56 rounded-full bg-white/10">
                     <div
