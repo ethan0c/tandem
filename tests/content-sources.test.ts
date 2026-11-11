@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { approvedVideo, directAnime, directManga, safePageBase } from "../src/lib/content-types";
+import { approvedCatalogSource, approvedVideo, directAnime, directManga, safePageBase } from "../src/lib/content-types";
+
+test("rooms accept only catalog episode identities, never shared stream URLs", () => {
+  assert.equal(approvedCatalogSource({ kind: "catalog", mediaId: "7442", unitId: "av-mkissa-sub-1", sourceId: "16498" }), true);
+  assert.equal(approvedCatalogSource({ kind: "catalog", mediaId: "7442", unitId: "av-mkissa-sub-1", sourceId: "wrong" }), false);
+  assert.equal(approvedCatalogSource({ kind: "catalog", mediaId: "7442", unitId: "https://evil.example/video.mp4" }), false);
+});
 import { readingUpdate, initialReading } from "../src/lib/reading";
 test("room video sources accept only exact registered URLs", () => {
   assert.equal(approvedVideo("4650", directAnime["4650"].streams[0].url), true);
