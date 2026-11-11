@@ -84,9 +84,12 @@ async function request(path: string): Promise<Payload> {
       throw new Error(`Catalog provider returned ${response.status}`);
     const value = (await response.json()) as Payload;
     if (cache.size >= 200) cache.delete(cache.keys().next().value!);
-    cache.set(path, { expires: Date.now() + 15 * 60_000, value });
+    cache.set(path, { expires: Date.now() + (path.endsWith("/mappings") ? 24 * 60 * 60_000 : 15 * 60_000), value });
     return value;
-  })();
+  })().catch((error) => {
+    if (found) return found.value;
+    throw error;
+  });
   pending.set(path, promise);
   try {
     return await promise;

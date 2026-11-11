@@ -142,6 +142,7 @@ export async function getContentCatalog(
   offset = 0,
   language = "en",
 ): Promise<ContentCatalog | null> {
+  if (kind === "anime" && anivexaConfigured) void getExternalCatalogId("anime", id, "anilist/anime");
   const media = await getCatalogTitle(kind, id);
   if (!media) return null;
   const manga = kind === "manga" ? directManga[id] : null;
@@ -248,6 +249,7 @@ export async function getContentPlayback(
     const direct = directAnime[id];
     if (direct && unitId === "film") return { ...direct, unit: filmUnit };
     if (!/^(?:ra-\d{1,4}|av-mkissa-(?:sub|dub)-\d{1,4})$/.test(unitId)) return null;
+    if (unitId.startsWith("av-")) void getExternalCatalogId("anime", id, "anilist/anime");
     const media = await getCatalogTitle(kind, id);
     return media ? unitId.startsWith("av-") ? anivexaPlayback(media, unitId) : reanimePlayback(media, unitId) : null;
   }

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import type { MediaKind } from "@/lib/catalog-types";
 import type { ContentCatalog } from "@/lib/content-types";
-import { fetchPublicCatalog } from "@/lib/public-catalog-client";
+import { fetchPublicCatalog, readStoredContentCatalog } from "@/lib/public-catalog-client";
 
 export function useContent(
   kind: MediaKind,
@@ -17,14 +17,14 @@ export function useContent(
   useEffect(() => {
     if (!id) return;
     const controller = new AbortController();
+    const url = `/api/content?${new URLSearchParams({ kind, id, language, offset: String(offset) })}`;
+    const stored = readStoredContentCatalog(url);
+    if (stored) setData(stored);
     const load = async () => {
-      setPending(true);
+      setPending(!stored);
       setError("");
       try {
-        const value = await fetchPublicCatalog<ContentCatalog>(
-          `/api/content?${new URLSearchParams({ kind, id, language, offset: String(offset) })}`,
-          retry > 0,
-        );
+        const value = await fetchPublicCatalog<ContentCatalog>(url, retry > 0 || !!stored);
         if (!controller.signal.aborted) setData(value);
       } catch (e) {
         if (!controller.signal.aborted)

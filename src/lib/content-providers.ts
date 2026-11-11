@@ -19,6 +19,8 @@ const WEEBCENTRAL = (process.env.WEEBCENTRAL_ORIGIN || "https://weebcentral.com"
 const REANIME_BRIDGE = process.env.REANIME_API_URL?.replace(/\/$/, "");
 const ANIVEXA = process.env.ANIVEXA_API_URL?.replace(/\/$/, "");
 const cache = new Map<string, { expires: number; value: unknown }>();
+const episodeCache = new Map<string, { expires: number; units: ContentUnit[] }>();
+const episodePending = new Map<string, Promise<ContentUnit[]>>();
 
 async function sourceRequest<T>(url: string, html = false, ttl = 120_000, headers: Record<string, string> = {}): Promise<T> {
   const saved = cache.get(url);
@@ -51,9 +53,28 @@ async function anivexaId(media: CatalogTitle): Promise<string> {
 
 async function anivexaEpisodes(media: CatalogTitle): Promise<ContentUnit[]> {
   const anilist = await anivexaId(media);
-  // Anivexa can return a provider error inside HTTP 200; do not cache that response.
-  const response = await sourceRequest<unknown>(`${ANIVEXA}/episodes/mkissa/${anilist}?map=false`, false, 0);
-  return parseAnivexaEpisodes(response);
+  const saved = episodeCache.get(anilist);
+  if (saved && saved.expires > Date.now()) return saved.units;
+  const running = episodePending.get(anilist);
+  if (running) return running;
+  const request = (async () => {
+    try {
+      // Anivexa can return a provider error or a short list inside HTTP 200.
+      const response = await sourceRequest<unknown>(`${ANIVEXA}/episodes/mkissa/${anilist}?map=false`, false, 0);
+      const units = parseAnivexaEpisodes(response);
+      const best = saved && saved.units.length > units.length ? saved.units : units;
+      const episodeCount = Math.max(...["Sub", "Dub"].map((track) => new Set(best.filter((unit) => unit.group === track).map((unit) => unit.number)).size));
+      const suspiciouslyShort = best === units && !!media.total && media.total >= 5 && episodeCount < media.total * 0.7;
+      if (best.length) episodeCache.set(anilist, { units: best, expires: Date.now() + (suspiciouslyShort ? 15_000 : 5 * 60_000) });
+      return best;
+    } catch (error) {
+      if (saved?.units.length) return saved.units;
+      throw error;
+    }
+  })();
+  episodePending.set(anilist, request);
+  try { return await request; }
+  finally { if (episodePending.get(anilist) === request) episodePending.delete(anilist); }
 }
 
 export async function anivexaCatalog(media: CatalogTitle, offset: number): Promise<ContentCatalog> {
