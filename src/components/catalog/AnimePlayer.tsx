@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Heart, Maximize, Minimize, Pause, PictureInPicture2, Play,
-  RotateCcw, RotateCw, Settings2, Users, Volume2, VolumeX,
+  RotateCcw, RotateCw, Settings2, Volume2, VolumeX,
 } from "lucide-react";
 import { useClientValue } from "@/hooks/useClientValue";
 import type { CatalogTitle } from "@/lib/catalog-types";
@@ -24,11 +24,10 @@ function clockTime(seconds: number): string {
     : `${minutes}:${String(total % 60).padStart(2, "0")}`;
 }
 
-export function AnimePlayer({ media, playback, onFailure, onWatchTogether, transitioning = false }: {
+export function AnimePlayer({ media, playback, onFailure, transitioning = false }: {
   media: CatalogTitle;
   playback: ContentPlayback;
   onFailure: (message: string) => void;
-  onWatchTogether?: () => void;
   transitioning?: boolean;
 }) {
   const video = useRef<HTMLVideoElement>(null);
@@ -131,9 +130,10 @@ export function AnimePlayer({ media, playback, onFailure, onWatchTogether, trans
   }
   function toggleLike() {
     const previous = entry?.likedEpisodes || [];
+    const group: "Sub" | "Dub" | undefined = playback.unit.group === "Sub" || playback.unit.group === "Dub" ? playback.unit.group : undefined;
     const likedEpisodes = liked
       ? previous.filter((item) => item.unit !== playback.unit.id)
-      : [...previous, { unit: playback.unit.id, number: playback.unit.number, group: playback.unit.group === "Sub" || playback.unit.group === "Dub" ? playback.unit.group : undefined }];
+      : [...previous, { unit: playback.unit.id, number: playback.unit.number, group }];
     save(media, { likedEpisodes, status: entry?.status || "current" });
   }
   async function toggleFullscreen() {
@@ -175,7 +175,6 @@ export function AnimePlayer({ media, playback, onFailure, onWatchTogether, trans
       <button type="button" className="custom-player-pill" aria-label={liked ? "Unlike episode" : "Like episode"} aria-pressed={liked} onClick={toggleLike}>
         <Heart className={`size-4 ${liked ? "fill-brand-400 text-brand-400" : ""}`} />{liked ? "Liked" : "Like"}
       </button>
-      {onWatchTogether && <button type="button" className="custom-player-pill" onClick={onWatchTogether}><Users className="size-4" />Watch together</button>}
     </div>
   );
   if (playback.embedUrl && !streams.length) return (
