@@ -133,7 +133,8 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
         </div>
       ) : (
         <>
-          {(failure || catalog.error) && <div className="viewer-load-error mt-5" role="alert"><p>{failure || catalog.error}</p><Button variant="ghost" size="sm" onClick={() => { setRetry((n) => n + 1); catalog.retry(); }}>Try again</Button></div>}
+          {failure && <div className="viewer-load-error mt-5" role="alert"><p>{failure}</p><Button variant="ghost" size="sm" onClick={() => { setRetry((n) => n + 1); catalog.retry(); }}>Try again</Button></div>}
+          {!failure && catalog.error && <div className="viewer-list-note mt-5" role="status"><p>Your video is ready. Episode choices are temporarily unavailable.</p><Button variant="ghost" size="sm" onClick={catalog.retry}>Refresh episodes</Button></div>}
           <div className="viewer-content" aria-busy={changingUnit}>
             {changingUnit && <div className="viewer-loading-note" role="status">Opening {kind === "anime" ? "episode" : "chapter"}…</div>}
             <div inert={changingUnit} className={changingUnit ? "viewer-content-pending" : undefined}>
@@ -141,7 +142,8 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
               {media && kind === "manga" && playback.pages && <MangaReader key={`${playback.unit.id}:${retry}`} media={media} playback={playback} transitioning={changingUnit} settings={readingSettings} onSettings={setReadingSettings} onFailure={setFailure} />}
             </div>
           </div>
-          {catalog.data && <UnitNavigator kind={kind} catalog={catalog.data} current={playback.unit} onSelect={selectUnit} offset={offset} onOffset={setOffset} disabled={changingUnit || catalog.pending} />}
+          {catalog.data && catalog.data.units.length > 0 && <UnitNavigator kind={kind} catalog={catalog.data} current={playback.unit} onSelect={selectUnit} offset={offset} onOffset={setOffset} disabled={changingUnit || catalog.pending} />}
+          {catalog.data && catalog.data.units.length === 0 && !catalog.error && <p className="viewer-list-note mt-6 text-sm">This episode is available, but the full episode list is temporarily unavailable.</p>}
           {catalog.pending && <p className="mt-3 text-xs text-zinc-400" role="status">Loading {kind === "anime" ? "episode" : "chapter"} choices…</p>}
           <p className="mt-4 text-xs leading-6 text-zinc-400">Unfinished {kind === "anime" ? "episode" : "chapter"} titles are hidden to avoid spoilers. Nothing advances automatically.</p>
           <p className="mt-7 text-xs leading-6 text-zinc-400">

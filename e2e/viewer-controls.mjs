@@ -20,7 +20,8 @@ async function geometry(page, label) {
       const r = e.getBoundingClientRect();
       return r.width && (r.width < 120 || r.left < 0 || r.right > width + 1);
     });
-    return { width, scroll: document.documentElement.scrollWidth, icons: icons.length, fields: fields.length };
+    const beyond = [...document.querySelectorAll('body *')].map(e => ({ e, r: e.getBoundingClientRect() })).filter(({ r }) => r.width && r.right > width + 1).slice(0, 12).map(({ e, r }) => ({ tag: e.tagName, className: e.className?.baseVal || e.className, right: Math.round(r.right), width: Math.round(r.width) }));
+    return { width, scroll: document.documentElement.scrollWidth, icons: icons.length, fields: fields.length, beyond };
   });
   assert.ok(result.scroll <= result.width + 1, `${label}: overflow ${JSON.stringify(result)}`);
   assert.equal(result.icons, 0, `${label}: chevron containment`);
