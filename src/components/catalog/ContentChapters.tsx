@@ -87,7 +87,7 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
           )}
           {content.data?.externalUrl && (
             <ButtonLink href={content.data.externalUrl} variant="ghost" size="sm" className="mt-4">
-              Open {content.data.source} search <ArrowRight className="size-3.5" />
+              {content.data.externalLabel || `Open ${content.data.source} search`} <ArrowRight className="size-3.5" />
             </ButtonLink>
           )}
           {!!content.data?.units.length && (

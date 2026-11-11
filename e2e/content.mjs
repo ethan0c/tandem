@@ -91,6 +91,17 @@ try {
   console.log(
     "PASS: late join loads the same provider chapter and shared pages stay in sync.",
   );
+  await p.goto(`${base}/title/manga/53928`);
+  await p.locator(".chapter-row").first().waitFor({ timeout: 30000 });
+  const blueLockSource = await p.locator(".content-chapters").innerText();
+  assert.match(blueLockSource, /MangaDex|WeebCentral/);
+  if (blueLockSource.includes("MangaDex currently lists")) {
+    assert.equal(await p.getByRole("link", { name: /Official English release/ }).getAttribute("href"), "https://kodansha.us/series/blue-lock/");
+  }
+  await p.locator(".chapter-row").first().getByRole("link", { name: /Read/ }).click();
+  await imageReady(p);
+  assert.ok(await p.locator(".manga-reader a[href*='mangadex.org/chapter/'], .manga-reader a[href*='weebcentral.com/chapters/']").count());
+  console.log("PASS: Blue Lock lists sourced chapters and opens a real chapter image.");
   await p.goto(`${base}/play/anime/4650`);
   await p.waitForFunction(
     () => document.querySelector("video")?.readyState >= 1,

@@ -17,6 +17,7 @@ export interface ContentCatalog {
   hasMore: boolean;
   notice?: string;
   externalUrl?: string;
+  externalLabel?: string;
 }
 export interface ContentPlayback {
   source: string;

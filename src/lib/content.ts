@@ -82,7 +82,7 @@ async function dex<T>(path: string, ttl = 5 * 60_000): Promise<T> {
     inflight.delete(path);
   }
 }
-async function matchManga(media: CatalogTitle): Promise<string | null> {
+async function matchManga(media: CatalogTitle): Promise<DexManga | null> {
   const p = new URLSearchParams({
     title: media.title,
     limit: "100",
@@ -94,12 +94,12 @@ async function matchManga(media: CatalogTitle): Promise<string | null> {
     getExternalCatalogId("manga", media.id, "myanimelist/manga"),
   ]);
   const kitsu = result.data.filter((item) => item.attributes.links?.kt === media.id);
-  if (kitsu.length === 1) return kitsu[0].id;
+  if (kitsu.length === 1) return kitsu[0];
   if (mal) {
     const exact = result.data.filter(
       (item) => item.attributes.links?.mal === mal,
     );
-    if (exact.length === 1) return exact[0].id;
+    if (exact.length === 1) return exact[0];
   }
   const names = new Set(
     [media.title, media.originalTitle, ...media.aliases].map(normalizeName),
@@ -109,11 +109,21 @@ async function matchManga(media: CatalogTitle): Promise<string | null> {
       .concat(...item.attributes.altTitles.map(Object.values))
       .some((title) => names.has(normalizeName(title))),
   );
-  if (matches.length === 1) return matches[0].id;
+  if (matches.length === 1) return matches[0];
   const sameYear = matches.filter(
     (item) => item.attributes.year === media.year,
   );
-  return sameYear.length === 1 ? sameYear[0].id : null;
+  return sameYear.length === 1 ? sameYear[0] : null;
+}
+function officialMangaUrl(raw?: string): string | undefined {
+  if (!raw) return undefined;
+  try {
+    const url = new URL(raw);
+    const hosts = ["kodansha.us", "kmanga.kodansha.com", "mangaplus.shueisha.co.jp", "www.viz.com", "www.webtoons.com", "tapas.io"];
+    return url.protocol === "https:" && !url.username && !url.password && hosts.includes(url.hostname.toLowerCase())
+      ? url.href
+      : undefined;
+  } catch { return undefined; }
 }
 function chapterUnit(chapter: DexChapter): ContentUnit {
   const n = Number(chapter.attributes.chapter);
@@ -188,8 +198,8 @@ export async function getContentCatalog(
   }
   let dexError: unknown;
   try {
-    const mangaId = await matchManga(media);
-    if (mangaId) {
+    const manga = await matchManga(media);
+    if (manga) {
       const p = new URLSearchParams({
         limit: "100",
         offset: String(offset),
@@ -200,7 +210,7 @@ export async function getContentCatalog(
         "includes[]": "scanlation_group",
       });
       const result = await dex<{ data: DexChapter[]; total: number }>(
-        `manga/${mangaId}/feed?${p}`,
+        `manga/${manga.id}/feed?${p}`,
       );
       const units = result.data
         .filter(
@@ -212,6 +222,7 @@ export async function getContentCatalog(
         )
         .map(chapterUnit);
       const sparse = result.total <= 10 || (!!media.total && result.total < media.total * 0.7);
+      const officialUrl = sparse ? officialMangaUrl(manga.attributes.links?.engtl) : undefined;
       if (language === "en" && sparse) {
         try {
           const alternate = await weebCatalog(media, offset, language);
@@ -225,6 +236,9 @@ export async function getContentCatalog(
         units,
         total: result.total,
         hasMore: offset + 100 < result.total,
+        ...(officialUrl
+          ? { externalUrl: officialUrl, externalLabel: "Official English release" }
+          : {}),
         ...(!units.length
           ? { notice: "No readable chapters were found in this language. Try another language or use your own images." }
           : sparse
@@ -285,14 +299,14 @@ async function mangaDexPlayback(id: string, unitId: string): Promise<ContentPlay
   if (!/^[a-f0-9-]{36}$/i.test(unitId)) return null;
   const media = await getCatalogTitle("manga", id);
   if (!media) return null;
-  const mangaId = await matchManga(media);
-  if (!mangaId) return null;
+  const manga = await matchManga(media);
+  if (!manga) return null;
   const { data: chapter } = await dex<{ data: DexChapter }>(
     `chapter/${unitId}?includes[]=scanlation_group`,
   );
   if (
     !chapter.relationships.some(
-      (r) => r.type === "manga" && r.id === mangaId,
+      (r) => r.type === "manga" && r.id === manga.id,
     ) ||
     chapter.attributes.externalUrl ||
     chapter.attributes.isUnavailable ||
