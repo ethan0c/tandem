@@ -249,9 +249,9 @@ export async function getContentPlayback(
     const direct = directAnime[id];
     if (direct && unitId === "film") return { ...direct, unit: filmUnit };
     if (!/^(?:ra-\d{1,4}|av-mkissa-(?:sub|dub)-\d{1,4})$/.test(unitId)) return null;
-    if (unitId.startsWith("av-")) void getExternalCatalogId("anime", id, "anilist/anime");
+    if (unitId.startsWith("av-")) return anivexaPlayback(id, unitId);
     const media = await getCatalogTitle(kind, id);
-    return media ? unitId.startsWith("av-") ? anivexaPlayback(media, unitId) : reanimePlayback(media, unitId) : null;
+    return media ? reanimePlayback(media, unitId) : null;
   }
   if (kind === "manga" && /^wc-[0-9A-HJKMNP-TV-Z]{26}$/i.test(unitId)) {
     const media = await getCatalogTitle(kind, id);

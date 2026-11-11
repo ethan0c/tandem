@@ -44,15 +44,15 @@ async function sourceRequest<T>(url: string, html = false, ttl = 120_000, header
 
 export const anivexaConfigured = Boolean(ANIVEXA);
 
-async function anivexaId(media: CatalogTitle): Promise<string> {
+async function anivexaId(kitsuId: string): Promise<string> {
   if (!ANIVEXA) throw new Error("Anivexa is not configured.");
-  const anilist = await getExternalCatalogId("anime", media.id, "anilist/anime");
+  const anilist = await getExternalCatalogId("anime", kitsuId, "anilist/anime");
   if (!anilist || !/^\d{1,10}$/.test(anilist)) throw new Error("This title has no AniList mapping for MKissa.");
   return anilist;
 }
 
 async function anivexaEpisodes(media: CatalogTitle): Promise<ContentUnit[]> {
-  const anilist = await anivexaId(media);
+  const anilist = await anivexaId(media.id);
   const saved = episodeCache.get(anilist);
   if (saved && saved.expires > Date.now()) return saved.units;
   const running = episodePending.get(anilist);
@@ -86,13 +86,13 @@ export async function anivexaCatalog(media: CatalogTitle, offset: number): Promi
   };
 }
 
-export async function anivexaPlayback(media: CatalogTitle, unitId: string): Promise<ContentPlayback | null> {
+export async function anivexaPlayback(kitsuId: string, unitId: string): Promise<ContentPlayback | null> {
   const match = /^av-mkissa-(sub|dub)-(\d{1,4})$/.exec(unitId);
   if (!match || Number(match[2]) < 1) return null;
-  const anilist = await anivexaId(media);
+  const anilist = await anivexaId(kitsuId);
   const [response, mal] = await Promise.all([
     sourceRequest<unknown>(`${ANIVEXA}/watch/mkissa/${anilist}/${match[1]}/mkissa-${match[2]}`, false, 0),
-    getExternalCatalogId("anime", media.id, "myanimelist/anime"),
+    getExternalCatalogId("anime", kitsuId, "myanimelist/anime"),
   ]);
   const playback = parseAnivexaPlayback(response);
   const watch = response && typeof response === "object" && !Array.isArray(response) ? response as Record<string, unknown> : {};
