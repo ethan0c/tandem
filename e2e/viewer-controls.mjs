@@ -91,6 +91,9 @@ try {
     await page.screenshot({ path: `${output}/${width}-manga.png`, fullPage: true });
     await page.goto(`${base}/play/anime/4650`);
     await page.waitForFunction(() => document.querySelector('video')?.readyState >= 1, null, { timeout: 60000 });
+    await page.getByLabel('Playback settings').click();
+    const settingsPanel = await page.locator('.custom-player-settings-panel').boundingBox();
+    assert.ok(settingsPanel && settingsPanel.x >= 0 && settingsPanel.x + settingsPanel.width <= width, `${width}px: settings menu stays on screen ${JSON.stringify(settingsPanel)}`);
     await page.getByRole("combobox", { name: "Playback speed" }).selectOption("1.5");
     assert.equal(await page.locator('video').evaluate(v => v.playbackRate), 1.5);
     await page.getByRole("button", { name: "Forward 10 seconds" }).click();

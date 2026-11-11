@@ -68,7 +68,10 @@ async function anivexaEpisodes(media: CatalogTitle, anilist: string): Promise<Co
       const best = saved && saved.units.length > units.length ? saved.units : units;
       const episodeCount = Math.max(...["Sub", "Dub"].map((track) => new Set(best.filter((unit) => unit.group === track).map((unit) => unit.number)).size));
       const suspiciouslyShort = best === units && !!media.total && media.total >= 5 && episodeCount < media.total * 0.7;
-      if (best.length) episodeCache.set(anilist, { units: best, expires: Date.now() + (suspiciouslyShort ? 15_000 : 5 * 60_000) });
+      if (best.length) {
+        if (episodeCache.size >= 200) episodeCache.delete(episodeCache.keys().next().value!);
+        episodeCache.set(anilist, { units: best, expires: Date.now() + (suspiciouslyShort ? 15_000 : 5 * 60_000) });
+      }
       return best;
     } catch (error) {
       if (saved?.units.length) return saved.units;

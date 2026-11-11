@@ -10,7 +10,7 @@ const RESPONSE_LIMIT = 24;
 const PREVIEW_LIMIT = 96;
 const CONTENT_PREFIX = "tandem:public-content:v1:";
 const CONTENT_INDEX = `${CONTENT_PREFIX}index`;
-const CONTENT_TTL = 24 * 60 * 60_000;
+const CONTENT_TTL = 7 * 24 * 60 * 60_000;
 
 function contentKey(url: string): string | null {
   if (!url.startsWith("/api/content?")) return null;
@@ -74,10 +74,11 @@ export async function fetchPublicCatalog<T>(url: string, refresh = false): Promi
       const error = value && typeof value === "object" && "error" in value ? String(value.error) : "";
       throw new Error(error || "This source could not be loaded. Try again.");
     }
+    const previous = isContentCatalog(value) && contentKey(url) ? readStoredContentCatalog(url) : null;
     const stable = isContentCatalog(value) && contentKey(url)
-      ? stableContentCatalog(readStoredContentCatalog(url), value)
+      ? stableContentCatalog(previous, value)
       : value;
-    if (isContentCatalog(stable)) storeContentCatalog(url, stable);
+    if (isContentCatalog(stable) && stable.units.length && stable !== previous) storeContentCatalog(url, stable);
     responses.delete(url);
     responses.set(url, { value: stable, expires: Date.now() + 60_000 });
     while (responses.size > RESPONSE_LIMIT) responses.delete(responses.keys().next().value!);
