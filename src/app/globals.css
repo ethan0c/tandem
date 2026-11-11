@@ -712,7 +712,8 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
 @media (max-width: 479px) {
   .custom-player-control-row { flex-wrap: wrap; justify-content: space-between; }
   .custom-player-time { order: -1; flex: 0 0 100%; margin-left: 0; text-align: right; }
-  .custom-player-settings-panel { right: -16px; }
+  .custom-player-settings { position: static; }
+  .custom-player-settings-panel { right: 8px; bottom: 56px; }
   .catalog-filters .filter-genre, .catalog-filters .filter-sort { grid-column: 1 / -1; }
   .media-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; }
   .platform-header-actions { gap: 6px; }
