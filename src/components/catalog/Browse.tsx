@@ -32,7 +32,6 @@ export function Browse({ kind }: { kind: MediaKind }) {
   const [page, setPage] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  useEffect(() => { setQ(queryFromUrl); setPage(1); }, [queryFromUrl]);
   useEffect(() => {
     const controller = new AbortController();
     const timer = setTimeout(async () => {
@@ -72,6 +71,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
     set(value);
     setPage(1);
   }
+  const activeFilterCount = [format, genre, status, year, sort !== "popular" ? sort : ""].filter(Boolean).length;
   return (
     <>
       <div className="page-heading">
@@ -101,9 +101,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
           onClick={() => setFiltersOpen((open) => !open)}
         >
           <SlidersHorizontal className="size-4" />
-          Filters{[format, genre, status, year, sort !== "popular" ? sort : ""].filter(Boolean).length
-            ? ` (${[format, genre, status, year, sort !== "popular" ? sort : ""].filter(Boolean).length})`
-            : ""}
+          Filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
         </button>
         <div id="catalog-filter-controls" className="catalog-filter-controls" data-open={filtersOpen}>
         <FormatFilter kind={kind} value={format} onChange={(value) => change(setFormat, value, format)} />

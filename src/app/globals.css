@@ -722,6 +722,7 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .catalog-filter-toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 8px; color: #c4b5fd; font-size: 13px; cursor: pointer; }
   .catalog-filter-controls { display: none; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding-top: 4px; }
   .catalog-filter-controls[data-open="true"] { display: grid; }
+  .catalog-filters .catalog-filter-controls > * { grid-column: auto; }
   .platform .field { font-size: 16px; }
   .reader-toolbar > label { flex: 1 1 180px; }
   .reader-toolbar select { width: 100%; }
