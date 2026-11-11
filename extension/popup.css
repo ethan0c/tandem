@@ -1,58 +1,60 @@
-/* Mirrors the web app's theme (src/app/globals.css): near-black surfaces, brand violet, Plus Jakarta Sans. */
+/* Mirrors the web app's theme (src/app/globals.css): purple-black surfaces, flat buttons, brand violet, Plus Jakarta Sans. */
 @font-face { font-family: "Plus Jakarta Sans"; src: url("fonts/plus-jakarta-sans.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
 
 :root {
-  --ink: #0a0a0a; --ink-800: #141414; --ink-700: #1f1f1f;
-  --brand-300: #c4b5fd; --brand-400: #a78bfa; --brand-500: #8b5cf6; --brand-600: #7c3aed; --brand-800: #5b21b6;
-  --line: rgb(255 255 255 / 0.1);
+  --ink: #0b0a0f; --ink-800: #15131b; --ink-700: #1e1b26; --ink-600: #2a2634;
+  --brand-300: #c4b5fd; --brand-400: #a78bfa; --brand-500: #8b5cf6; --brand-600: #7c3aed;
+  --line: rgb(255 255 255 / 0.08);
   --sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-body {
-  width: 300px; margin: 0; padding: 14px; font: 13px/1.45 var(--sans); color: #fff; -webkit-font-smoothing: antialiased;
-  background: radial-gradient(90% 60% at 50% 0%, rgb(139 92 246 / 0.14), transparent 70%), linear-gradient(to bottom, #0c0b10, #15131a);
-}
-header { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; }
+body { width: 300px; margin: 0; padding: 16px; font: 13px/1.45 var(--sans); color: #fff; background: var(--ink); -webkit-font-smoothing: antialiased; }
+header { display: flex; align-items: center; gap: 7px; margin-bottom: 16px; }
 header span { font-weight: 500; font-size: 19px; line-height: 1; letter-spacing: -0.045em; }
 section { display: flex; flex-direction: column; gap: 10px; }
-.label { margin: 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #71717a; }
-.muted { margin: 0; color: #a1a1aa; }
-.error { margin: 0; color: #f87171; font-size: 12px; }
+h2 { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: -0.02em; }
+.muted { margin: 0; color: #a1a1aa; font-size: 12px; }
+.error { margin: 0; color: #fca5a5; font-size: 12px; }
 .row { display: flex; gap: 8px; align-items: center; margin: 0; }
-code { flex: 1; font-family: var(--sans); font-size: 13px; font-weight: 500; background: rgb(255 255 255 / 0.05); border: 1px solid var(--line); color: #e4e4e7; padding: 7px 10px; border-radius: 10px; }
-input { width: 100%; height: 38px; padding: 0 10px; border: 1px solid rgb(255 255 255 / 0.15); border-radius: 10px; background: rgb(255 255 255 / 0.05); color: #fff; font: inherit; outline: none; transition: border-color 200ms ease, box-shadow 200ms ease; }
-input::placeholder { color: #71717a; }
-input:focus { border-color: rgb(255 255 255 / 0.3); box-shadow: 0 0 0 4px rgb(255 255 255 / 0.08); }
+code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; background: var(--ink-800); border: 1px solid var(--line); color: #e4e4e7; padding: 8px 10px; border-radius: 8px; }
+input { width: 100%; height: 38px; padding: 0 11px; border: 1px solid #5f5a6b; border-radius: 8px; background: rgb(255 255 255 / 0.04); color: #fff; font: inherit; outline: none; transition: border-color 150ms ease, box-shadow 150ms ease; }
+input::placeholder { color: #8f8b99; }
+input:focus { border-color: var(--brand-500); box-shadow: 0 0 0 3px rgb(139 92 246 / 0.18); }
 form input { flex: 1; min-width: 0; }
-.or { display: flex; align-items: center; gap: 8px; color: #71717a; font-size: 11px; }
+.or { display: flex; align-items: center; gap: 8px; color: #8f8b99; font-size: 11px; }
 .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
-/* Same as .btn3d in the web app: flat, except the brand button keeps a 3D press. */
-.btn { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 14px; font-family: var(--sans); font-weight: 500; letter-spacing: -0.01em; line-height: 1; cursor: pointer; border: 2px solid transparent; box-shadow: 0 var(--lift, 0px) 0 var(--sh, transparent); transition: transform 90ms ease, box-shadow 90ms ease, filter 150ms ease; white-space: nowrap; }
-.btn:hover { filter: brightness(1.08); }
-.btn:focus-visible { outline: 3px solid rgb(255 255 255 / 0.5); outline-offset: 2px; }
-.btn-sm { height: 34px; padding: 0 12px; border-radius: 11px; font-size: 12px; }
-.btn-brand { background: var(--brand-600); color: #fff; --sh: var(--brand-800); --lift: 4px; margin-bottom: 4px; }
-.btn-brand:active { transform: translateY(4px); box-shadow: 0 0 0 var(--sh); }
-.btn-dark { background: var(--ink-700); color: #fff; }
+/* Same as .btn3d in the web app: flat, a slight press, no lift. */
+.btn { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 14px; border: 1px solid transparent; border-radius: 8px; font-family: var(--sans); font-weight: 600; letter-spacing: -0.005em; line-height: 1; white-space: nowrap; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease, transform 120ms ease; }
+.btn:active { transform: scale(0.97); }
+.btn:focus-visible { outline: 2px solid var(--brand-400); outline-offset: 2px; }
+.btn-sm { height: 34px; padding: 0 12px; border-radius: 7px; font-size: 12px; }
+.btn-brand { background: var(--brand-600); color: #fff; }
+.btn-brand:hover { background: var(--brand-500); }
+.btn-ghost { background: rgb(255 255 255 / 0.1); border-color: rgb(255 255 255 / 0.12); color: #fff; }
+.btn-ghost:hover { background: rgb(255 255 255 / 0.18); }
 .btn-light { background: #fff; color: var(--ink); }
-.btn-danger { background: #ef4444; color: #fff; }
+.btn-light:hover { background: #e4e2ea; }
+.btn-danger { background: #dc2626; color: #fff; }
+.btn-danger:hover { background: #ef4444; }
 
-details { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+details { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 10px; }
 summary { cursor: pointer; color: #a1a1aa; font-size: 12px; }
-summary:hover { color: #d4d4d8; }
+summary:hover { color: #fff; }
 details label { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; font-size: 12px; color: #a1a1aa; }
 
-#ours { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); gap: 8px; }
+#ours { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); gap: 8px; }
 .stats { margin: 0; font-size: 12px; color: var(--brand-300); }
-#shows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-#shows li { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: rgb(255 255 255 / 0.03); }
+#shows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 10px; background: var(--ink-800); }
+#shows:empty { display: none; }
+#shows li { display: flex; align-items: center; gap: 10px; padding: 9px 10px; }
+#shows li + li { border-top: 1px solid var(--line); }
 #shows .show { flex: 1; min-width: 0; }
-#shows .title { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
-#shows .meta { display: block; font-size: 11px; color: #71717a; }
-#shows .bar { display: block; height: 3px; margin-top: 5px; border-radius: 2px; background: var(--line); overflow: hidden; }
+#shows .title { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+#shows .meta { display: block; font-size: 11px; color: #a1a1aa; }
+#shows .bar { display: block; height: 3px; margin-top: 6px; border-radius: 3px; background: rgb(255 255 255 / 0.12); overflow: hidden; }
 #shows .bar i { display: block; height: 100%; background: var(--brand-500); }
-.link { all: unset; display: block; margin-top: 12px; font-size: 12px; color: var(--brand-300); cursor: pointer; }
+.link { all: unset; display: block; margin-top: 12px; font-size: 12px; font-weight: 600; color: var(--brand-300); cursor: pointer; }
 .link:hover { color: #fff; }
-.link:focus-visible { outline: 2px solid rgb(255 255 255 / 0.5); outline-offset: 2px; border-radius: 4px; }
+.link:focus-visible { outline: 2px solid var(--brand-400); outline-offset: 2px; border-radius: 4px; }

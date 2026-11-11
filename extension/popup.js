@@ -122,7 +122,7 @@ async function showHistory(appOrigin) {
     bar.append(fill);
     info.append(title, meta, bar);
     const resume = document.createElement("button");
-    resume.className = "btn btn-dark btn-sm";
+    resume.className = "btn btn-ghost btn-sm";
     resume.textContent = finished ? "Rewatch" : "Resume";
     resume.addEventListener("click", () => {
       // Preserve episode routes in the hash; pass the room in the query string.

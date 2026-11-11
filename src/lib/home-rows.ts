@@ -1,4 +1,5 @@
 import { cacheLife } from "next/cache";
+import seed from "@/content/catalog.json";
 import { browseCatalog } from "./catalog";
 import type { CatalogTitle, MediaKind } from "./catalog-types";
 
@@ -26,4 +27,20 @@ export async function getHomeRows(): Promise<HomeRows> {
     row("anime", "popular", "action"),
   ]);
   return { trending, topAnime, manga, romance, topManga, action };
+}
+
+/** The saved selection, shown at once if the live rows are still loading. */
+export function savedHomeRows(): HomeRows {
+  const titles = (seed as CatalogTitle[]).filter((t) => t.poster);
+  const of = (kind: MediaKind) => titles.filter((t) => t.kind === kind);
+  const byRating = (list: CatalogTitle[]) => [...list].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  const genre = (kind: MediaKind, name: string) => of(kind).filter((t) => t.genres.some((g) => g.toLowerCase() === name));
+  return {
+    trending: of("anime"),
+    topAnime: byRating(of("anime")),
+    manga: of("manga"),
+    romance: genre("anime", "romance"),
+    topManga: byRating(of("manga")),
+    action: genre("anime", "action"),
+  };
 }

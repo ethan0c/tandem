@@ -28,6 +28,9 @@ Since 0.3:
   (`tandem:history`) and minutes watched together per day (`tandem:days`). The popup lists them with **Resume**, which
   opens the episode with `tandem=<room>&tandemAt=<seconds>` in the query. Into an empty room that starts playback at that second.
 
+Since 0.5, the popup and floating call window follow the redesigned web app: purple-black surfaces and flat
+buttons.
+
 Since 0.4, invite links preserve episode URLs that use hash routing, the floating call has a resize grip,
 and the first viewer's current playback position seeds an empty room. The extension still accepts old
 `#tandem=<room>` links.
