@@ -186,56 +186,57 @@ export async function getContentCatalog(
         : {}),
     };
   }
+  let dexError: unknown;
+  try {
+    const mangaId = await matchManga(media);
+    if (mangaId) {
+      const p = new URLSearchParams({
+        limit: "100",
+        offset: String(offset),
+        "translatedLanguage[]": language,
+        "order[chapter]": "asc",
+        includeEmptyPages: "0",
+        includeExternalUrl: "0",
+        "includes[]": "scanlation_group",
+      });
+      const result = await dex<{ data: DexChapter[]; total: number }>(
+        `manga/${mangaId}/feed?${p}`,
+      );
+      const units = result.data
+        .filter(
+          (c) =>
+            !c.attributes.externalUrl &&
+            !c.attributes.isUnavailable &&
+            c.attributes.pages > 0 &&
+            Date.parse(c.attributes.readableAt) <= Date.now(),
+        )
+        .map(chapterUnit);
+      return {
+        media,
+        source: "MangaDex",
+        units,
+        total: result.total,
+        hasMore: offset + 100 < result.total,
+        ...(!units.length
+          ? { notice: "No readable chapters were found in this language. Try another language or use your own images." }
+          : {}),
+      };
+    }
+  } catch (error) {
+    dexError = error;
+  }
   try {
     const connected = await weebCatalog(media, offset, language);
     if (connected) return connected;
-  } catch {
-    // Keep the existing MangaDex source available when WeebCentral blocks a request.
-  }
-  const mangaId = await matchManga(media);
-  if (!mangaId)
-    return {
-      media,
-      source: "MangaDex",
-      units: [],
-      total: 0,
-      hasMore: false,
-      notice:
-        "No unambiguous match was found at the chapter source. You can still use your own page images in a reading room.",
-    };
-  const p = new URLSearchParams({
-    limit: "100",
-    offset: String(offset),
-    "translatedLanguage[]": language,
-    "order[chapter]": "asc",
-    includeEmptyPages: "0",
-    includeExternalUrl: "0",
-    "includes[]": "scanlation_group",
-  });
-  const result = await dex<{ data: DexChapter[]; total: number }>(
-    `manga/${mangaId}/feed?${p}`,
-  );
-  const units = result.data
-    .filter(
-      (c) =>
-        !c.attributes.externalUrl &&
-        !c.attributes.isUnavailable &&
-        c.attributes.pages > 0 &&
-        Date.parse(c.attributes.readableAt) <= Date.now(),
-    )
-    .map(chapterUnit);
+  } catch { /* The structured source's error is more useful to show. */ }
+  if (dexError) throw dexError;
   return {
     media,
     source: "MangaDex",
-    units,
-    total: result.total,
-    hasMore: offset + 100 < result.total,
-    ...(!units.length
-      ? {
-          notice:
-            "No readable chapters were found in this language. Try another language or use your own images.",
-        }
-      : {}),
+    units: [],
+    total: 0,
+    hasMore: false,
+    notice: "No unambiguous match was found at the chapter source. You can still use your own page images in a reading room.",
   };
 }
 export async function getContentPlayback(
@@ -258,8 +259,21 @@ export async function getContentPlayback(
     const media = await getCatalogTitle(kind, id);
     return media ? weebPlayback(media, unitId) : null;
   }
+  const playback = await mangaDexPlayback(id, unitId);
+  return playback?.pages
+    ? { ...playback, pages: playback.pages.map((_, page) => `/api/content/page?${new URLSearchParams({ id, unit: unitId, page: String(page) })}`) }
+    : playback;
+}
+
+export async function mangaDexPageUrl(id: string, unitId: string, page: number): Promise<string | null> {
+  if (!Number.isInteger(page) || page < 0 || page >= 500) return null;
+  const playback = await mangaDexPlayback(id, unitId);
+  return playback?.pages?.[page] || null;
+}
+
+async function mangaDexPlayback(id: string, unitId: string): Promise<ContentPlayback | null> {
   if (!/^[a-f0-9-]{36}$/i.test(unitId)) return null;
-  const media = await getCatalogTitle(kind, id);
+  const media = await getCatalogTitle("manga", id);
   if (!media) return null;
   const mangaId = await matchManga(media);
   if (!mangaId) return null;

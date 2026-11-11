@@ -218,6 +218,10 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
         </Button>
       </div>
       <p className="mt-4 text-center text-xs leading-6 text-zinc-400">{settings.mode === "page" ? "Swipe or use the arrow keys to turn pages. Pinch to zoom on mobile." : "Your place saves as you scroll. Chapters change only when you choose."}</p>
+      <p className="mt-3 text-center text-xs leading-6 text-zinc-400">
+        Pages: <a href={playback.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{playback.source}</a>
+        {playback.credit ? ` · ${playback.credit}` : ""}
+      </p>
       {message && <p className="mt-3 text-sm text-zinc-400" role="status">{message}</p>}
     </section>
   );

@@ -1,25 +1,36 @@
 import { getCatalogTitle } from "@/lib/catalog";
 import { weebPageUrl } from "@/lib/content-providers";
+import { mangaDexPageUrl } from "@/lib/content";
 
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   const id = params.get("id") || "";
   const unit = params.get("unit") || "";
   const page = Number(params.get("page"));
-  if (!/^\d{1,10}$/.test(id) || !/^wc-[0-9A-HJKMNP-TV-Z]{26}$/i.test(unit) || !Number.isInteger(page) || page < 0 || page >= 500)
+  const weeb = /^wc-[0-9A-HJKMNP-TV-Z]{26}$/i.test(unit);
+  const mangaDex = /^[a-f0-9-]{36}$/i.test(unit);
+  if (!/^\d{1,10}$/.test(id) || (!weeb && !mangaDex) || !Number.isInteger(page) || page < 0 || page >= 500)
     return new Response("Invalid page.", { status: 400 });
   try {
     const media = await getCatalogTitle("manga", id);
     if (!media) return new Response("Title not found.", { status: 404 });
-    const source = await weebPageUrl(media, unit, page);
+    const source = weeb ? await weebPageUrl(media, unit, page) : await mangaDexPageUrl(id, unit, page);
     if (!source) return new Response("Page not found.", { status: 404 });
     const url = new URL(source);
-    const allowedHosts = (process.env.WEEBCENTRAL_IMAGE_HOSTS || "official.lowee.us,temp.compsci88.com")
-      .split(",").map((host) => host.trim().toLowerCase()).filter(Boolean);
-    if (url.protocol !== "https:" || url.username || url.password || !allowedHosts.includes(url.hostname.toLowerCase()))
+    const allowedHosts = weeb
+      ? (process.env.WEEBCENTRAL_IMAGE_HOSTS || "official.lowee.us,temp.compsci88.com")
+          .split(",").map((host) => host.trim().toLowerCase()).filter(Boolean)
+      : [];
+    const allowed = weeb
+      ? allowedHosts.includes(url.hostname.toLowerCase())
+      : url.hostname === "uploads.mangadex.org" || url.hostname.endsWith(".mangadex.network");
+    if (url.protocol !== "https:" || url.username || url.password || !allowed)
       return new Response("Unsupported page source.", { status: 502 });
     const image = await fetch(url, {
-      headers: { Accept: "image/avif,image/webp,image/png,image/jpeg,image/gif", Referer: `${process.env.WEEBCENTRAL_ORIGIN || "https://weebcentral.com"}/` },
+      headers: {
+        Accept: "image/avif,image/webp,image/png,image/jpeg,image/gif",
+        ...(weeb ? { Referer: `${process.env.WEEBCENTRAL_ORIGIN || "https://weebcentral.com"}/` } : {}),
+      },
       redirect: "error",
       signal: AbortSignal.timeout(15_000),
       cache: "no-store",

@@ -76,6 +76,8 @@ async function launch(name) {
   await worker.evaluate((origin) => chrome.storage.sync.set({ appOrigin: origin }), base);
   const page = context.pages()[0] ?? await context.newPage();
   page.on('pageerror', (e) => console.log(`[${name}] pageerror`, e.message));
+  page.on('requestfailed', (r) => console.log(`[${name}] failed`, r.url(), r.failure()?.errorText));
+  page.on('response', (r) => { if (r.status() >= 400 && r.url().startsWith(base)) console.log(`[${name}] HTTP ${r.status()}`, r.url()); });
   return { name, context, worker, page };
 }
 
@@ -123,6 +125,8 @@ async function joinPanel(p) {
   }, null, { timeout: STEP_MS });
   await f.getByLabel('Your name').fill(p.name);
   await f.getByRole('button', { name: 'Join room' }).click();
+  await until(`${p.name} joins the room`, async () =>
+    (await overlay(p).locator('body').innerText()).includes('Resync'));
 }
 
 const room = `ext-${Date.now().toString(36)}`;

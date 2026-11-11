@@ -84,6 +84,7 @@ export function Player({
   const [catalogVideo, setCatalogVideo] = useState<{ key: string; url: string; type: string } | null>(null);
   const [mangaCatalog, setMangaCatalog] = useState<ContentCatalog | null>(null);
   const [mangaPlayback, setMangaPlayback] = useState<ContentPlayback | null>(null);
+  const [mangaPage, setMangaPage] = useState({ id: "", offset: 0 });
   const [mangaCatalogLoading, setMangaCatalogLoading] = useState(false);
   const [mangaPlaybackLoading, setMangaPlaybackLoading] = useState(false);
   const [readingSettings, setReadingSettings] = useReadingSettings();
@@ -94,6 +95,7 @@ export function Player({
   const catalogLoading = source?.kind === "catalog" && catalogVideo?.key !== catalogKey && !error;
   const mangaMode = story?.kind === "manga";
   const mangaId = mangaMode ? story.id : "";
+  const mangaOffset = mangaPage.id === mangaId ? mangaPage.offset : 0;
 
   const needsFile = source?.kind === "file" && !localFile;
   const hasMedia = !!preview || (!!source && !needsFile) || mangaMode;
@@ -168,7 +170,7 @@ export function Player({
       setMangaCatalogLoading(true);
       setError(null);
     });
-    void fetch(`/api/content?${new URLSearchParams({ kind: "manga", id: mangaId })}`, {
+    void fetch(`/api/content?${new URLSearchParams({ kind: "manga", id: mangaId, offset: String(mangaOffset) })}`, {
       signal: controller.signal,
     })
       .then(async (response) => {
@@ -185,11 +187,11 @@ export function Player({
         if (!controller.signal.aborted) setMangaCatalogLoading(false);
       });
     return () => controller.abort();
-  }, [mangaId]);
+  }, [mangaId, mangaOffset]);
 
   useEffect(() => {
     if (!mangaId || !mangaCatalog || mangaCatalog.media.id !== mangaId) return;
-    if (!mangaCatalog.units.some((unit) => unit.id === reading.unit) && mangaCatalog.units[0]) {
+    if (!reading.unit && mangaCatalog.units[0]) {
       changeReading({
         unit: mangaCatalog.units[0].id,
         chapter: Math.max(1, mangaCatalog.units[0].number),
@@ -457,6 +459,9 @@ export function Player({
                       });
                     }}
                   >
+                    {reading.unit && !mangaCatalog.units.some((unit) => unit.id === reading.unit) && mangaPlayback?.unit.id === reading.unit && (
+                      <option value={reading.unit}>{mangaPlayback.unit.label} · Current chapter</option>
+                    )}
                     {mangaCatalog.units.map((unit) => (
                       <option key={unit.id} value={unit.id}>
                         {unit.label}{unit.group ? ` · ${unit.group}` : ""}
@@ -466,6 +471,12 @@ export function Player({
                 </label>
               ) : null}
             </div>
+            {mangaCatalog && (mangaOffset > 0 || mangaCatalog.hasMore) && (
+              <div className="mb-4 flex justify-end gap-2">
+                <button className="rounded-lg border border-white/20 px-3 py-2 text-xs text-zinc-200 disabled:opacity-40" disabled={mangaCatalogLoading || mangaOffset === 0} onClick={() => setMangaPage({ id: mangaId, offset: Math.max(0, mangaOffset - 100) })}>Previous chapters</button>
+                <button className="rounded-lg border border-white/20 px-3 py-2 text-xs text-zinc-200 disabled:opacity-40" disabled={mangaCatalogLoading || !mangaCatalog.hasMore} onClick={() => setMangaPage({ id: mangaId, offset: mangaOffset + 100 })}>More chapters</button>
+              </div>
+            )}
             {mangaCatalog?.media && mangaPlayback && (
               <MangaReader
                 key={`${mangaId}:${mangaPlayback.unit.id}`}
