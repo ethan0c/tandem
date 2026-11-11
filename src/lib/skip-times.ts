@@ -21,11 +21,14 @@ export function aniSkipWindows(value: unknown, duration: number): { intro?: Skip
       if (!types.includes(String(item.skipType))) return [];
       const interval = item.interval && typeof item.interval === "object" ? item.interval as Record<string, unknown> : {};
       const window = skipWindow({ start: interval.startTime, end: interval.endTime });
-      if (!window || window.end > duration + 10) return [];
-      return [{ window, difference: Math.abs(Number(item.episodeLength) - duration), rank: types.indexOf(String(item.skipType)) }];
+      const difference = Math.abs(Number(item.episodeLength) - duration);
+      if (!window || window.end > duration + 10 || !Number.isFinite(difference) || difference > 30) return [];
+      return [{ window, difference, rank: types.indexOf(String(item.skipType)) }];
     });
     matches.sort((a, b) => a.difference - b.difference || a.rank - b.rank);
     return matches[0]?.window;
   };
-  return { intro: choose(["op", "mixed-op"]), outro: choose(["ed", "mixed-ed"]) };
+  const intro = choose(["op", "mixed-op"]);
+  const outro = choose(["ed", "mixed-ed"]);
+  return { ...(intro && { intro }), ...(outro && { outro }) };
 }

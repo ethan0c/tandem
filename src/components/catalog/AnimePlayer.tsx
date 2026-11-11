@@ -270,6 +270,7 @@ export function AnimePlayer({ media, playback, onFailure, transitioning = false 
                 <label>Video format<select value={streamIndex} disabled={streams.length < 2} onChange={(event) => changeStream(Number(event.target.value))}>
                   {streams.map((stream, index) => <option key={stream.url} value={index}>{stream.label} · {stream.type === "application/vnd.apple.mpegurl" ? "HLS" : stream.type.replace("video/", "").toUpperCase()}</option>)}
                 </select></label>
+                <p className="custom-player-shortcuts">Space or K: play/pause · J/L: skip 10s · ←/→: skip 5s · M: mute</p>
               </div>
             </details>
             {canPiP && <button type="button" className="custom-player-icon" onClick={pictureInPicture} aria-label="Picture in picture"><PictureInPicture2 className="size-5" /></button>}
@@ -278,7 +279,6 @@ export function AnimePlayer({ media, playback, onFailure, transitioning = false 
         </div>
       </div>
       {message && <p className="mt-3 text-sm text-zinc-400" role="status">{message}</p>}
-      <p className="mt-3 text-xs text-zinc-500">Space or K: play and pause · ← / →: seek 5 seconds · J / L: seek 10 seconds · M: mute</p>
     </section>
   );
 }

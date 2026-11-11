@@ -584,6 +584,7 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
 .custom-player-settings-panel { position: absolute; right: 0; bottom: calc(100% + 10px); display: grid; width: min(280px, calc(100vw - 36px)); gap: 14px; padding: 16px; border: 1px solid rgb(255 255 255 / 0.18); border-radius: 13px; background: rgb(25 20 35 / 0.98); box-shadow: 0 14px 45px rgb(0 0 0 / 0.5); }
 .custom-player-settings-panel label { display: grid; gap: 7px; color: #ddd6fe; font-size: 12px; }
 .custom-player-settings-panel select { width: 100%; min-height: 36px; padding: 6px 8px; border: 1px solid rgb(255 255 255 / 0.18); border-radius: 8px; background: #211b2d; color: #fff; font-size: 13px; }
+.custom-player-shortcuts { padding-top: 10px; border-top: 1px solid rgb(255 255 255 / 0.12); color: #bcb8c8; font-size: 11px; line-height: 1.5; }
 .custom-player-frame :is(button, summary, input, select):focus-visible { outline: 2px solid #c4b5fd; outline-offset: 2px; }
 .reader-page { width: 100%; max-width: 850px; margin-inline: auto; }
 .reading-session { overflow-x: clip; min-width: 0; }

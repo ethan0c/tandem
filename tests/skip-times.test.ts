@@ -15,4 +15,5 @@ test("AniSkip chooses intervals closest to the actual duration", () => {
     { skipType: "ed", episodeLength: 1447, interval: { startTime: 1343, endTime: 1431 } },
   ] };
   assert.deepEqual(aniSkipWindows(data, 1444), { intro: { start: 128, end: 218 }, outro: { start: 1343, end: 1431 } });
+  assert.deepEqual(aniSkipWindows(data, 1540), {});
 });
