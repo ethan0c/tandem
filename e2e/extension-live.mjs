@@ -30,7 +30,7 @@ if (!existsSync(clipPath)) {
     '-c:v', 'libvpx', '-b:v', '150k', '-g', '15', clipPath]);
 }
 const clip = readFileSync(clipPath);
-const EPISODE = 'https://www.youtube.com/watch?v=tandem-e2e';
+const EPISODE = 'https://www.youtube.com/watch?v=tandem-e2e#/watch/episode-1';
 const PAGE = `<!doctype html><title>Tandem e2e episode</title><body style="margin:0;background:#000">
   <div class="html5-video-player" style="width:960px;height:540px"><video src="/tandem-e2e/clip.webm" preload="auto" style="width:100%;height:100%"></video></div>`;
 
@@ -109,7 +109,12 @@ async function inSync(label, playing) {
 }
 
 async function joinPanel(p) {
-  await p.page.goto(`${EPISODE}#tandem=${room}`);
+  const invite = `${base}/join/${room}?to=${encodeURIComponent(EPISODE)}`;
+  await p.page.goto(invite);
+  const episodeLink = await p.page.getByRole('link', { name: /Open and join/ }).getAttribute('href');
+  assert.equal(new URL(episodeLink).hash, '#/watch/episode-1', 'invite preserves the episode hash route');
+  assert.equal(new URL(episodeLink).searchParams.get('tandem'), room, 'invite passes the room to the extension');
+  await p.page.goto(episodeLink);
   await until(`${p.name} panel mounts`, async () => !!overlay(p));
   const f = overlay(p);
   await f.waitForFunction(() => {
@@ -129,7 +134,8 @@ try {
 
   await joinPanel(alice);
   await joinPanel(bob);
-  assert.equal(new URL(alice.page.url()).hash, '', 'invite hash is removed from the address bar');
+  assert.equal(new URL(alice.page.url()).hash, '#/watch/episode-1', 'episode hash route stays in the address bar');
+  assert.equal(new URL(alice.page.url()).searchParams.has('tandem'), false, 'room code is removed from the address bar');
   for (const p of [alice, bob]) {
     await until(`${p.name} panel sees the partner and the video`, async () => {
       const text = await overlay(p).locator('body').innerText();

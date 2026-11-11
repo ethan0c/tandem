@@ -152,17 +152,22 @@ export function Player({
 
   useEffect(() => {
     if (!mangaId) {
-      setMangaCatalog(null);
-      setMangaPlayback(null);
-      setMangaCatalogLoading(false);
-      setMangaPlaybackLoading(false);
+      queueMicrotask(() => {
+        setMangaCatalog(null);
+        setMangaPlayback(null);
+        setMangaCatalogLoading(false);
+        setMangaPlaybackLoading(false);
+      });
       return;
     }
     const controller = new AbortController();
-    setMangaCatalog(null);
-    setMangaPlayback(null);
-    setMangaCatalogLoading(true);
-    setError(null);
+    queueMicrotask(() => {
+      if (controller.signal.aborted) return;
+      setMangaCatalog(null);
+      setMangaPlayback(null);
+      setMangaCatalogLoading(true);
+      setError(null);
+    });
     void fetch(`/api/content?${new URLSearchParams({ kind: "manga", id: mangaId })}`, {
       signal: controller.signal,
     })
@@ -195,13 +200,18 @@ export function Player({
 
   useEffect(() => {
     if (!mangaId || !reading.unit) {
-      setMangaPlayback(null);
-      setMangaPlaybackLoading(false);
+      queueMicrotask(() => {
+        setMangaPlayback(null);
+        setMangaPlaybackLoading(false);
+      });
       return;
     }
     const controller = new AbortController();
-    setMangaPlayback(null);
-    setMangaPlaybackLoading(true);
+    queueMicrotask(() => {
+      if (controller.signal.aborted) return;
+      setMangaPlayback(null);
+      setMangaPlaybackLoading(true);
+    });
     void fetch(`/api/content?${new URLSearchParams({ kind: "manga", id: mangaId, unit: reading.unit })}`, {
       signal: controller.signal,
     })
