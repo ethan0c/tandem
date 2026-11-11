@@ -6,15 +6,23 @@ import { useContent } from "./useContent";
 import { Button, ButtonLink } from "@/components/Button";
 import { useLibrary } from "./LibraryProvider";
 import { isUnitCompleted, unitLabel } from "@/lib/spoilers";
+import { AudioTrackToggle, availableAudioTracks, type AudioTrack } from "./AudioTrackToggle";
+import { EpisodeGrid } from "./EpisodeGrid";
 
 export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
   const [language, setLanguage] = useState("en");
   const [offset, setOffset] = useState(0);
   const [revealedFor, setRevealedFor] = useState("");
+  const [selectedTrack, setSelectedTrack] = useState<AudioTrack>("Sub");
   const { entries } = useLibrary();
   const progress = entries.find((entry) => entry.media.kind === kind && entry.media.id === id)?.progress || 0;
   const showTitles = revealedFor === `${kind}:${id}`;
   const content = useContent(kind, id, language, offset);
+  const tracks = kind === "anime" ? availableAudioTracks(content.data?.units || []) : [];
+  const activeTrack = tracks.includes(selectedTrack) ? selectedTrack : tracks[0] || "Sub";
+  const visibleUnits = kind === "anime" && tracks.length
+    ? content.data?.units.filter((unit) => unit.group === activeTrack) || []
+    : content.data?.units || [];
   return (
     <section
       className="content-chapters mt-10 border-t border-white/10 pt-7"
@@ -47,6 +55,7 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
             </select>
           </label>
         )}
+        {kind === "anime" && <AudioTrackToggle tracks={tracks} active={activeTrack} onChange={setSelectedTrack} disabled={content.pending} />}
       </div>
       {content.pending && !content.data ? (
         <div role="status" aria-busy="true" aria-label="Loading available content">
@@ -87,8 +96,17 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
               Show unfinished {kind === "anime" ? "episode" : "chapter"} titles (may contain spoilers)
             </label>
           )}
-          <div className="chapter-list" inert={content.pending} aria-busy={content.pending}>
-            {content.data?.units.map((unit) => (
+          {kind === "anime" ? (
+            <div inert={content.pending} aria-busy={content.pending}>
+              <EpisodeGrid
+                units={visibleUnits}
+                disabled={content.pending}
+                hrefFor={(unit) => `/play/anime/${id}?${new URLSearchParams({ unit: unit.id, language })}`}
+                titleFor={(unit) => unit.title && (showTitles || isUnitCompleted(unit.number, progress)) ? unit.title : undefined}
+              />
+            </div>
+          ) : <div className="chapter-list" inert={content.pending} aria-busy={content.pending}>
+            {visibleUnits.map((unit) => (
               <div key={unit.id} className="chapter-row">
                 <div className="min-w-0">
                   <h3 className="text-sm">{unitLabel(kind, unit)}</h3>
@@ -105,17 +123,17 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
                   )}
                 </div>
                 <ButtonLink
-                  aria-label={`${kind === "anime" ? "Watch" : "Read"} ${unitLabel(kind, unit).toLowerCase()}`}
+                  aria-label={`Read ${unitLabel(kind, unit).toLowerCase()}`}
                   href={`/play/${kind}/${id}?${new URLSearchParams({ unit: unit.id, language })}`}
                   variant="ghost"
                   size="sm"
                 >
-                  {kind === "anime" ? "Watch" : "Read"}
+                  Read
                   <ArrowRight className="size-3.5" />
                 </ButtonLink>
               </div>
             ))}
-          </div>
+          </div>}
           {(offset > 0 || content.data?.hasMore) && (
             <div className="mt-5 flex items-center justify-between gap-4">
               <Button
@@ -124,7 +142,7 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
                 disabled={content.pending || offset === 0}
                 onClick={() => setOffset((n) => Math.max(0, n - 100))}
               >
-                Previous chapters
+                Previous {kind === "anime" ? "episodes" : "chapters"}
               </Button>
               <Button
                 variant="ghost"
@@ -132,7 +150,7 @@ export function ContentChapters({ kind, id }: { kind: MediaKind; id: string }) {
                 disabled={content.pending || !content.data?.hasMore}
                 onClick={() => setOffset((n) => n + 100)}
               >
-                More chapters
+                More {kind === "anime" ? "episodes" : "chapters"}
               </Button>
             </div>
           )}

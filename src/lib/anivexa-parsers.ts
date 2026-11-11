@@ -24,24 +24,26 @@ export function parseAnivexaEpisodes(value: unknown): ContentUnit[] {
   const episodes = object(provider.episodes);
   const sub = Array.isArray(episodes.sub) ? episodes.sub : [];
   const dub = Array.isArray(episodes.dub) ? episodes.dub : [];
-  const selected = sub.length ? sub : dub;
-  const audio = sub.length ? "sub" : "dub";
-  const units = new Map<number, ContentUnit>();
-  for (const entry of selected) {
-    const episode = object(entry);
-    const number = episode.number;
-    if (!Number.isInteger(number) || (number as number) < 1 || (number as number) > 10000) continue;
-    // The episode number and audio track form our own stable ID; the AniList ID is resolved server-side.
-    if (typeof episode.id !== "string" || !episode.id.endsWith(`/${audio}/mkissa-${number}`)) continue;
-    units.set(number as number, {
-      id: `av-mkissa-${audio}-${number}`,
-      number: number as number,
-      label: `Episode ${number}`,
-      title: typeof episode.title === "string" ? episode.title : "",
-      language: audio === "sub" ? "ja" : "en",
-    });
+  const units = new Map<string, ContentUnit>();
+  for (const [audio, entries] of [["sub", sub], ["dub", dub]] as const) {
+    for (const entry of entries) {
+      const episode = object(entry);
+      const number = episode.number;
+      if (!Number.isInteger(number) || (number as number) < 1 || (number as number) > 10000) continue;
+      // The episode number and audio track form our own stable ID; the AniList ID is resolved server-side.
+      if (typeof episode.id !== "string" || !episode.id.endsWith(`/${audio}/mkissa-${number}`)) continue;
+      const id = `av-mkissa-${audio}-${number}`;
+      units.set(id, {
+        id,
+        number: number as number,
+        label: `Episode ${number}`,
+        title: typeof episode.title === "string" ? episode.title : "",
+        language: audio === "sub" ? "ja" : "en",
+        group: audio === "sub" ? "Sub" : "Dub",
+      });
+    }
   }
-  return [...units.values()].sort((a, b) => a.number - b.number);
+  return [...units.values()].sort((a, b) => a.number - b.number || (a.group === "Sub" ? -1 : 1));
 }
 
 export function parseAnivexaPlayback(value: unknown): { streams: { url: string; type: string; label: string }[]; embedUrl?: string } {

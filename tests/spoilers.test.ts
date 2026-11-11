@@ -11,6 +11,7 @@ test("starting a chapter never reveals its title; only completed progress does",
   assert.equal(isUnitCompleted(NaN, 12), false);
   assert.equal(isUnitCompleted(12, Infinity), false);
   assert.equal(unitLabel("anime", { number: 4 }), "Episode 4");
+  assert.equal(unitLabel("anime", { number: 4, group: "Dub" }), "Episode 4 · Dub");
   assert.equal(unitLabel("manga", { number: 12.5 }), "Chapter 12.5");
 });
 

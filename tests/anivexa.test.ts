@@ -2,12 +2,17 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { parseAnivexaEpisodes, parseAnivexaPlayback } from "../src/lib/anivexa-parsers";
 
-test("MKissa episodes use stable playable IDs and skip episode zero", () => {
+test("MKissa exposes both audio tracks with stable IDs and skips episode zero", () => {
   const units = parseAnivexaEpisodes({ mkissa: { episodes: { sub: [
     { id: "watch/mkissa/16498/sub/mkissa-0", number: 0 },
     { id: "watch/mkissa/16498/sub/mkissa-1", number: 1, title: "First episode" },
+  ], dub: [
+    { id: "watch/mkissa/16498/dub/mkissa-1", number: 1, title: "First episode" },
   ] } } });
-  assert.deepEqual(units, [{ id: "av-mkissa-sub-1", number: 1, label: "Episode 1", title: "First episode", language: "ja" }]);
+  assert.deepEqual(units, [
+    { id: "av-mkissa-sub-1", number: 1, label: "Episode 1", title: "First episode", language: "ja", group: "Sub" },
+    { id: "av-mkissa-dub-1", number: 1, label: "Episode 1", title: "First episode", language: "en", group: "Dub" },
+  ]);
 });
 
 test("MKissa playback uses the extracted HLS URL and rejects unsafe links", () => {
