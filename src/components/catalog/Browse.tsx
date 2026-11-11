@@ -16,6 +16,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
   const [sort, setSort] = useState("popular");
   const [status, setStatus] = useState("");
   const [year, setYear] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [result, setResult] = useState<{
     items: CatalogTitle[];
     source: string;
@@ -88,7 +89,19 @@ export function Browse({ kind }: { kind: MediaKind }) {
             className="field w-full pl-10"
           />
         </label>
-        <div className="catalog-filter-controls">
+        <button
+          type="button"
+          className="catalog-filter-toggle"
+          aria-expanded={filtersOpen}
+          aria-controls="catalog-filter-controls"
+          onClick={() => setFiltersOpen((open) => !open)}
+        >
+          <SlidersHorizontal className="size-4" />
+          Filters{[format, genre, status, year, sort !== "popular" ? sort : ""].filter(Boolean).length
+            ? ` (${[format, genre, status, year, sort !== "popular" ? sort : ""].filter(Boolean).length})`
+            : ""}
+        </button>
+        <div id="catalog-filter-controls" className="catalog-filter-controls" data-open={filtersOpen}>
         <FormatFilter kind={kind} value={format} onChange={(value) => change(setFormat, value, format)} />
         <label className="filter-genre">
           <span className="sr-only">Genre</span>
