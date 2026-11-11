@@ -22,7 +22,6 @@ export function TitleSkeleton() {
     <div aria-hidden="true">
       <div className="title-hero bleed under-header">
         <div className="hero-inner site-width site-gutter">
-          <div className="loading-shape h-5 w-32" />
           <div className="title-hero-grid">
             <div className="title-poster loading-shape" />
             <div className="min-w-0 space-y-3"><div className="loading-shape h-5 w-40" /><div className="loading-shape h-12 w-4/5" /><div className="loading-shape h-4 w-48" /></div>

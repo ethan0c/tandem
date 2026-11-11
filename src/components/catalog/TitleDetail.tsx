@@ -107,24 +107,24 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
     );
   }
   const unit = kind === "anime" ? "episode" : "chapter";
-  const backdrop = media.cover || media.poster;
+  const backdrop = media.cover ? largeArtwork(media.cover) : media.poster;
   const synopsis = media.synopsis.replace(/\s*\(Source:[^)]*\)\s*$/, "");
   return (
     <>
       <section className="title-hero bleed under-header">
-        {backdrop && (
-          <Image
-            src={backdrop}
-            unoptimized={!canOptimizeArtwork(backdrop)}
-            alt=""
-            fill
-            sizes="50vw"
-            quality={40}
-            loading="eager"
-            className="title-hero-art"
-          />
-        )}
-        <div className="title-hero-scrim" aria-hidden="true" />
+        <div className="title-banner" aria-hidden="true">
+          {backdrop && (
+            <Image
+              src={backdrop}
+              unoptimized={!canOptimizeArtwork(backdrop)}
+              alt=""
+              fill
+              sizes="100vw"
+              preload
+              className={media.cover ? "title-banner-art" : "title-banner-wash"}
+            />
+          )}
+        </div>
         <div className="hero-inner site-width site-gutter">
           <div className="title-hero-grid">
             <div className="title-poster">

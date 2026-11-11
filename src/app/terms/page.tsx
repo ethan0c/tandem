@@ -12,12 +12,6 @@ export const metadata: Metadata = {
 
 const sections = [
   {
-    title: "The short version",
-    body: [
-      "Tandem is free to use and needs no account. Use it to watch things you are allowed to watch, be decent to the people in your room, and understand that it is provided as it is, without guarantees.",
-    ],
-  },
-  {
     title: "Using Tandem",
     body: [
       "These terms cover the Tandem website, the Tandem browser extension and the Tandem Discord app. By using any of them you agree to these terms. If you do not agree, please do not use Tandem.",

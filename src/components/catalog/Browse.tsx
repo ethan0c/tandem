@@ -96,9 +96,8 @@ export function Browse({ kind }: { kind: MediaKind }) {
       {queryFromUrl ? heading : (
         <Billboard
           items={spotlight(kind)}
-          eyebrow={(media) => <span className="pill pill-brand">{media.rating ? `Top rated ${kind}` : kind}</span>}
         >
-          {heading}
+          <div className="page-heading"><h1>{kind === "anime" ? "Anime" : "Manga"}</h1></div>
         </Billboard>
       )}
       <div className={`section-heading ${queryFromUrl ? "" : "mt-10"}`}>

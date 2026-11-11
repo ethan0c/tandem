@@ -30,7 +30,6 @@ export function Discover({ rows }: { rows: HomeRows }) {
       <h1 className="sr-only">Home</h1>
       <Billboard
         items={featured.length ? featured : titles.filter((t) => t.cover).slice(0, 5)}
-        eyebrow={(media) => <span className="pill pill-brand">{media.kind}</span>}
       />
       <div className="rows">
         {continuing.length > 0 && (

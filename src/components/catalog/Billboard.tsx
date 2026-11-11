@@ -14,10 +14,8 @@ import { rememberTitle } from "@/lib/public-catalog-client";
 const INTERVAL = 8000;
 
 /** Full-width hero that slides beneath the header and rotates through a few featured titles. */
-export function Billboard({ items, eyebrow, children }: {
+export function Billboard({ items, children }: {
   items: CatalogTitle[];
-  /** Short label above the title, such as "Tonight’s pick". */
-  eyebrow?: (media: CatalogTitle, index: number) => ReactNode;
   /** Extra content pinned to the top of the hero, such as a page heading. */
   children?: ReactNode;
 }) {
@@ -45,6 +43,7 @@ export function Billboard({ items, eyebrow, children }: {
       aria-roledescription="carousel"
       aria-label="Featured titles"
       className="billboard bleed under-header"
+      data-banner={!!media.cover}
       data-paused={paused || reduced}
       style={{ ["--billboard-interval" as string]: `${INTERVAL}ms` }}
       onPointerEnter={() => setPaused(true)}
@@ -54,12 +53,16 @@ export function Billboard({ items, eyebrow, children }: {
     >
       <div className="billboard-art" aria-hidden="true">
         {items.map((item, i) => {
-          // The wash is blurred, so the artwork's shape never matters; the cover gives a wider colour field.
-          const art = item.cover || item.poster;
+          // Wide screens show the landscape banner itself; phones (and titles without one) get a blurred wash.
+          const wash = item.cover || item.poster;
+          const banner = item.cover ? largeArtwork(item.cover) : "";
           return (
             <div key={`${item.kind}:${item.id}`} className="billboard-slide" data-active={i === index}>
-              {art && (
-                <Image src={art} alt="" fill sizes="50vw" quality={40} loading={i === 0 ? undefined : "lazy"} preload={i === 0} unoptimized={!canOptimizeArtwork(art)} />
+              {banner && (
+                <Image className="billboard-banner" src={banner} alt="" fill sizes="100vw" loading={i === 0 ? undefined : "lazy"} preload={i === 0} unoptimized={!canOptimizeArtwork(banner)} />
+              )}
+              {wash && (
+                <Image className="billboard-wash" src={wash} alt="" fill sizes="50vw" loading="lazy" unoptimized={!canOptimizeArtwork(wash)} />
               )}
             </div>
           );
@@ -75,7 +78,6 @@ export function Billboard({ items, eyebrow, children }: {
             </Link>
           )}
           <div key={`${media.kind}:${media.id}`} className="billboard-copy" data-switching="true" aria-live={paused ? "polite" : "off"}>
-            {eyebrow && <div className="mb-3 flex flex-wrap items-center gap-2">{eyebrow(media, index)}</div>}
             <h2 className="billboard-title">{media.title}</h2>
             <div className="billboard-meta">
               {media.rating && (
@@ -105,21 +107,21 @@ export function Billboard({ items, eyebrow, children }: {
                 More info
               </ButtonLink>
             </div>
-            {items.length > 1 && (
-              <div className="billboard-dots" role="group" aria-label="Choose a featured title">
-                {items.map((item, i) => (
-                  <button
-                    key={`${item.kind}:${item.id}`}
-                    type="button"
-                    className="billboard-dot"
-                    aria-label={`Show ${item.title}`}
-                    aria-current={i === index}
-                    onClick={() => setIndex(i)}
-                  />
-                ))}
-              </div>
-            )}
           </div>
+          {items.length > 1 && (
+            <div className="billboard-dots" role="group" aria-label="Choose a featured title">
+              {items.map((item, i) => (
+                <button
+                  key={`${item.kind}:${item.id}`}
+                  type="button"
+                  className="billboard-dot"
+                  aria-label={`Show ${item.title}`}
+                  aria-current={i === index}
+                  onClick={() => setIndex(i)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

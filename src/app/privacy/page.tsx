@@ -11,19 +11,19 @@ export const metadata: Metadata = {
 
 const sections = [
   {
-    title: "Your privacy at a glance",
-    body: [
-      "You do not need an account. Tandem has no ads. We do not record your call or the video you watch. Room details are deleted 10 minutes after everyone leaves.",
-      "The website counts page visits with privacy-friendly analytics, so we know which pages are useful and which sites send people here. It uses no cookies and builds no profile of you. Before anything is counted, room codes, invite details (names, what you are watching, links) and story-card numbers are removed from the address, and the extension’s call window is not counted at all.",
-    ],
-  },
-  {
     title: "What your room remembers",
     body: [
       "While your room is open, Tandem keeps its code, the names people choose, which video is shared, and whether the video is playing or paused and where you are in it. People in the room can see each other’s names and the shared video details.",
       "Tandem helps your browsers connect for the call. Your camera, microphone, and shared video are not recorded or stored by Tandem.",
+      "Room details are deleted 10 minutes after everyone leaves.",
       "Chat messages go to everyone in the room. Tandem keeps the most recent hundred while the room is open, so someone who joins late or reconnects can read them, and deletes them with the room.",
       "Reactions, and whether someone has stepped away or is watching an ad, are passed to the others in the room as they happen. Tandem does not keep them.",
+    ],
+  },
+  {
+    title: "Site analytics",
+    body: [
+      "The website counts page visits with privacy-friendly analytics, so we know which pages are useful and which sites send people here. It uses no cookies and builds no profile of you. Before anything is counted, room codes, invite details (names, what you are watching, links) and story-card numbers are removed from the address, and the extension’s call window is not counted at all.",
     ],
   },
   {
