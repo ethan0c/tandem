@@ -45,6 +45,15 @@ try {
   await q.waitForTimeout(500);
   assert.ok(await q.locator('.reader-page img').count()<12);
   assert.ok(loaded.size<14,`Initial scroll mode fetched ${loaded.size} / 120 pages`);
+  await q.waitForFunction(()=>document.querySelector('[data-page="1"] img')?.naturalWidth>0);
+  const scrollSpot=await q.evaluate(()=>{
+    const second=document.querySelector('[data-page="1"]');
+    const top=second.getBoundingClientRect().top+window.scrollY;
+    window.scrollTo(0,top+150);
+    return window.scrollY;
+  });
+  await q.waitForTimeout(600);
+  assert.ok(Math.abs((await q.evaluate(()=>window.scrollY))-scrollSpot)<35,'Vertical scrolling should not snap to a page top');
   await q.getByRole('spinbutton',{name:'Page number'}).fill('60');
   await q.waitForFunction(()=>document.querySelector('[data-page="59"] img')?.naturalWidth>0);
   assert.ok(await q.locator('.reader-page img').count()<12,'Far-away page images should leave the DOM');

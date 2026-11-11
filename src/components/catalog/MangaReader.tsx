@@ -49,6 +49,7 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
   const canvas = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLElement>(null);
   const currentPage = useRef(position);
+  const lastScrolledPage = useRef(position);
   const positionControl = useRef({ sharedPosition, onPositionChange });
   const touch = useRef<{ x: number; y: number } | null>(null);
   const preloader = useRef<ReturnType<typeof createPagePreloader> | null>(null);
@@ -69,7 +70,10 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
   function go(next: number) {
     if (!canNavigate || !Number.isInteger(next) || next < 0 || next >= pages.length) return;
     setPosition(next);
-    if (settings.mode === "scroll") canvas.current?.querySelector(`[data-page="${next}"]`)?.scrollIntoView({ block: "start", behavior: "instant" });
+    if (settings.mode === "scroll") {
+      lastScrolledPage.current = next;
+      canvas.current?.querySelector(`[data-page="${next}"]`)?.scrollIntoView({ block: "start", behavior: "instant" });
+    }
   }
   useEffect(() => {
     const loader = createPagePreloader();
@@ -110,15 +114,25 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
         if (item.isIntersecting) visible.add(page);
         else visible.delete(page);
       }
-      if (visible.size) setPosition(Math.min(...visible));
+      if (visible.size) {
+        const next = Math.min(...visible);
+        if (next !== currentPage.current) {
+          currentPage.current = next;
+          lastScrolledPage.current = next;
+          setPosition(next);
+        }
+      }
     }, { rootMargin: `${-Math.round(window.innerHeight * 0.15)}px 0px ${-Math.round(window.innerHeight * 0.65)}px 0px`, threshold: 0 });
     canvas.current.querySelectorAll("[data-page]").forEach((element) => { observer.observe(element); pageLoader.observe(element); });
     return () => { observer.disconnect(); pageLoader.disconnect(); };
-  }, [settings.mode, isExpanded, setPosition]);
+  }, [settings.mode, isExpanded, pages, setPosition]);
   useEffect(() => {
-    if (settings.mode === "scroll")
-      canvas.current?.querySelector(`[data-page="${position}"]`)?.scrollIntoView({ block: "start", behavior: "instant" });
-  }, [position, settings.mode]);
+    // Follow an explicit page change from another room member. Updates caused by our own scrolling
+    // must not snap the page back to its top while the reader is in the middle of it.
+    if (settings.mode !== "scroll" || sharedPosition === undefined || sharedPosition === lastScrolledPage.current) return;
+    lastScrolledPage.current = sharedPosition;
+    canvas.current?.querySelector(`[data-page="${sharedPosition}"]`)?.scrollIntoView({ block: "start", behavior: "instant" });
+  }, [sharedPosition, settings.mode]);
 
   useEffect(() => {
     const changed = () => setNativeFullscreen(document.fullscreenElement === root.current);
@@ -152,7 +166,10 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
         const next = currentPage.current + ((event.key === "ArrowRight") === (settings.direction === "ltr") ? 1 : -1);
         if (next < 0 || next >= pages.length) return;
         setPosition(next);
-        if (settings.mode === "scroll") canvas.current?.querySelector(`[data-page="${next}"]`)?.scrollIntoView({ block: "start", behavior: "instant" });
+        if (settings.mode === "scroll") {
+          lastScrolledPage.current = next;
+          canvas.current?.querySelector(`[data-page="${next}"]`)?.scrollIntoView({ block: "start", behavior: "instant" });
+        }
       }
     };
     window.addEventListener("keydown", key);

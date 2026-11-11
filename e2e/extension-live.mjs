@@ -76,10 +76,6 @@ async function launch(name) {
   await worker.evaluate((origin) => chrome.storage.sync.set({ appOrigin: origin }), base);
   const page = context.pages()[0] ?? await context.newPage();
   page.on('pageerror', (e) => console.log(`[${name}] pageerror`, e.message));
-  page.on('console', (m) => { if (m.type() === 'error') console.log(`[${name}] console`, m.text()); });
-  page.on('framenavigated', (f) => { if (f.url().includes('/overlay/')) console.log(`[${name}] overlay navigated`, f.url()); });
-  page.on('requestfailed', (r) => console.log(`[${name}] failed`, r.url(), r.failure()?.errorText));
-  page.on('response', (r) => { if (r.status() >= 400 && r.url().startsWith(base)) console.log(`[${name}] HTTP ${r.status()}`, r.url()); });
   return { name, context, worker, page };
 }
 
