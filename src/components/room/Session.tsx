@@ -48,7 +48,14 @@ export function Session({ roomId, name, localStream }: Props) {
   const { changeSource } = room;
   useEffect(() => {
     if (room.status !== "joined" || room.selfId !== room.hostId || room.source) return;
-    const id = new URLSearchParams(storyQuery).get("media");
+    const params = new URLSearchParams(storyQuery);
+    const id = params.get("media");
+    const unitId = params.get("unit");
+    const sourceId = params.get("sourceId");
+    if (id && /^\d{1,10}$/.test(id) && unitId && /^av-mkissa-(?:sub|dub)-\d{1,4}$/.test(unitId)) {
+      changeSource({ kind: "catalog", mediaId: id, unitId, ...(sourceId && /^\d{1,10}$/.test(sourceId) ? { sourceId } : {}) });
+      return;
+    }
     const direct = id ? directAnime[id] : null;
     if (id && direct) changeSource({ kind: "remote", mediaId: id, name: direct.title, url: direct.streams[0].url });
   }, [storyQuery, room.status, room.selfId, room.hostId, room.source, changeSource]);

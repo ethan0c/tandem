@@ -72,7 +72,7 @@ export function ContentViewer({ kind, id }: { kind: MediaKind; id: string }) {
     kind,
     title: media?.title || "Our story",
     ...(playback
-      ? { unit: playback.unit.id, chapter: String(playback.unit.number) }
+      ? { unit: playback.unit.id, chapter: String(playback.unit.number), ...(playback.sourceId ? { sourceId: playback.sourceId } : {}) }
       : {}),
   });
   const startTogether = () =>

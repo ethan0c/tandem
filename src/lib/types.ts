@@ -3,6 +3,7 @@ import type { ReadingState, RoomStory } from "./reading";
 
 export type Source =
   | { kind: "remote"; mediaId: string; name: string; url: string }
+  | { kind: "catalog"; mediaId: string; unitId: string; sourceId?: string }
   | { kind: "file"; name: string }
   /** Live screen/tab capture streamed over WebRTC from `sharerId`; the server fills in `sharerId`. */
   | { kind: "screen"; sharerId: string; label: string };

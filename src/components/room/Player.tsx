@@ -20,6 +20,7 @@ import { expectedTime, type PlaybackState, type Source, type SyncReason } from "
 import type { RemotePlayback } from "@/hooks/useRoom";
 import { Loader } from "@/components/Loader";
 import { formatTime } from "@/lib/format";
+import type { ContentPlayback } from "@/lib/content-types";
 
 interface PlayerProps {
   preview?: { poster: string; time: number; duration: number };
@@ -69,6 +70,11 @@ export function Player({
   const [buffering, setBuffering] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [catalogVideo, setCatalogVideo] = useState<{ key: string; url: string; type: string } | null>(null);
+  const catalogMediaId = source?.kind === "catalog" ? source.mediaId : "";
+  const catalogUnitId = source?.kind === "catalog" ? source.unitId : "";
+  const catalogSourceId = source?.kind === "catalog" ? source.sourceId || "" : "";
+  const catalogKey = `${catalogMediaId}:${catalogUnitId}:${catalogSourceId}`;
 
   const needsFile = source?.kind === "file" && !localFile;
   const hasMedia = !!preview || (!!source && !needsFile);
@@ -103,6 +109,30 @@ export function Player({
     applyState();
   }, [remote, selfId, applyState]);
 
+  useEffect(() => {
+    setCatalogVideo(null);
+    if (!catalogMediaId || !catalogUnitId) return;
+    const controller = new AbortController();
+    setBuffering(true);
+    const query = new URLSearchParams({ kind: "anime", id: catalogMediaId, unit: catalogUnitId,
+      ...(catalogSourceId ? { sourceId: catalogSourceId } : {}) });
+    void fetch(`/api/content?${query}`, { signal: controller.signal })
+      .then(async (response) => {
+        const data = await response.json() as ContentPlayback & { error?: string };
+        if (!response.ok) throw new Error(data.error || "This episode is unavailable.");
+        const stream = data.streams?.[0];
+        if (!stream) throw new Error("This episode has no video the room can play. Share its tab instead.");
+        if (!controller.signal.aborted) setCatalogVideo({ key: catalogKey, url: stream.url, type: stream.type });
+      })
+      .catch((reason: unknown) => {
+        if (!controller.signal.aborted) {
+          setBuffering(false);
+          setError(reason instanceof Error ? reason.message : "This episode is unavailable.");
+        }
+      });
+    return () => controller.abort();
+  }, [catalogMediaId, catalogUnitId, catalogSourceId, catalogKey]);
+
   // Load the media element whenever the source (or our local file) changes.
   useEffect(() => {
     const v = videoRef.current;
@@ -112,6 +142,29 @@ export function Player({
     setCurrentTime(0);
     setBlocked(false);
 
+    if (source?.kind === "catalog") {
+      const selected = catalogVideo?.key === catalogKey ? catalogVideo : null;
+      if (!selected) { v.removeAttribute("src"); v.load(); return; }
+      if (selected.type !== "application/vnd.apple.mpegurl" || v.canPlayType(selected.type)) {
+        v.src = selected.url;
+        v.load();
+        return;
+      }
+      let disposed = false;
+      let destroy: (() => void) | undefined;
+      void import("hls.js").then(({ default: Hls }) => {
+        if (disposed) return;
+        if (!Hls.isSupported()) { setError("This browser cannot play this episode's HLS video."); setBuffering(false); return; }
+        const hls = new Hls();
+        hls.loadSource(selected.url);
+        hls.attachMedia(v);
+        hls.on(Hls.Events.ERROR, (_, data) => {
+          if (data.fatal) { setError("The source video could not be loaded. Share its tab instead."); setBuffering(false); }
+        });
+        destroy = () => hls.destroy();
+      }).catch(() => { if (!disposed) { setError("The HLS player could not be loaded."); setBuffering(false); } });
+      return () => { disposed = true; destroy?.(); v.removeAttribute("src"); v.load(); };
+    }
     if (source?.kind === "remote") {
       v.src = source.url;
       v.load();
@@ -125,7 +178,7 @@ export function Player({
     const objectUrl = URL.createObjectURL(localFile);
     v.src = objectUrl;
     return () => URL.revokeObjectURL(objectUrl);
-  }, [source, localFile]);
+  }, [source, localFile, catalogVideo, catalogKey]);
 
   // Drift correction: nudge playback rate for small drift, hard-seek for large drift.
   useEffect(() => {
@@ -270,7 +323,7 @@ export function Player({
           emitSync(false, d, "ended");
         }}
         onError={() => {
-          if (hasMedia) setError("This file could not be played. Try an MP4 or WebM.");
+          if (hasMedia) setError(source?.kind === "catalog" ? "The source video could not be played. Share its tab instead." : "This file could not be played. Try an MP4 or WebM.");
         }}
       />
       {preview && <Image src={preview.poster} alt="" fill preload sizes="(max-width: 767px) 92vw, (max-height: 800px) 640px, 1080px" className="pointer-events-none object-contain" />}

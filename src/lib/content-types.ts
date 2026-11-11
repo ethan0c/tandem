@@ -75,6 +75,15 @@ export function approvedVideo(mediaId: string, url: string) {
     directAnime[mediaId]?.streams.some((stream) => stream.url === url) === true
   );
 }
+/** A room shares catalog identity, never a client-supplied stream URL. */
+export function approvedCatalogSource(source: unknown): source is { kind: "catalog"; mediaId: string; unitId: string; sourceId?: string } {
+  if (!source || typeof source !== "object") return false;
+  const value = source as Record<string, unknown>;
+  return value.kind === "catalog" &&
+    typeof value.mediaId === "string" && /^\d{1,10}$/.test(value.mediaId) &&
+    typeof value.unitId === "string" && /^av-mkissa-(?:sub|dub)-\d{1,4}$/.test(value.unitId) &&
+    (value.sourceId === undefined || (typeof value.sourceId === "string" && /^\d{1,10}$/.test(value.sourceId)));
+}
 export const directManga: Record<string, ContentPlayback> = {
   "24249": {
     source: "Ubunchu! translation project",
