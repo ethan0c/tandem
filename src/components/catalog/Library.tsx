@@ -23,6 +23,7 @@ import { useLibrary } from "./LibraryProvider";
 import { Button, ButtonLink } from "@/components/Button";
 import { canOptimizeArtwork } from "@/lib/artwork";
 import { catalogFormatLabel, matchesCatalogFormat } from "@/lib/catalog-formats";
+import { unitLabel } from "@/lib/spoilers";
 import { FormatFilter } from "./FormatFilter";
 
 export function Library() {
@@ -338,6 +339,22 @@ export function Library() {
                   </button>
                 )}
               </div>
+              {e.media.kind === "anime" && !!e.likedEpisodes?.length && (
+                <details className="w-full border-t border-white/10 pt-3">
+                  <summary className="cursor-pointer text-sm text-brand-300">Liked episodes ({e.likedEpisodes.length})</summary>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {e.likedEpisodes.map((episode) => (
+                      <Link
+                        key={episode.unit}
+                        href={`/play/anime/${e.media.id}?${new URLSearchParams({ unit: episode.unit })}`}
+                        className="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs text-zinc-200 hover:border-brand-400 hover:text-white"
+                      >
+                        {unitLabel("anime", { number: episode.number, group: episode.group })}
+                      </Link>
+                    ))}
+                  </div>
+                </details>
+              )}
             </article>
           ))}
         </div>

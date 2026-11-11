@@ -25,6 +25,9 @@ export interface ContentPlayback {
   streams?: { url: string; type: string; label: string }[];
   embedUrl?: string;
   pages?: string[];
+  intro?: { start: number; end: number };
+  outro?: { start: number; end: number };
+  malId?: number;
 }
 
 /** Exact, public-domain video URLs. Room participants cannot supply arbitrary media URLs. */

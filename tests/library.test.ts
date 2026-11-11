@@ -53,3 +53,8 @@ test("backup validates every row and rejects invalid progress or media", () => {
   );
   assert.throws(() => parseBackup('{"entries":[]}'));
 });
+test("liked episodes survive library export and reject invalid links", () => {
+  const liked = { ...entry, likedEpisodes: [{ unit: "av-mkissa-sub-1", number: 1, group: "Sub" as const }] };
+  assert.deepEqual(parseBackup(JSON.stringify([liked])), [liked]);
+  assert.throws(() => parseBackup(JSON.stringify([{ ...liked, likedEpisodes: [{ unit: "../outside", number: 1 }] }])));
+});

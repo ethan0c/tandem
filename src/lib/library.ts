@@ -135,6 +135,17 @@ export function isLibraryEntry(value: unknown): value is LibraryEntry {
         Number.isFinite(e.watchPosition.seconds) &&
         e.watchPosition.seconds >= 0 &&
         e.watchPosition.seconds < 1_000_000)) &&
+    (!e.likedEpisodes ||
+      (m.kind === "anime" &&
+        Array.isArray(e.likedEpisodes) &&
+        e.likedEpisodes.length <= 1000 &&
+        e.likedEpisodes.every((episode) =>
+          !!episode &&
+          typeof episode.unit === "string" &&
+          /^[a-z0-9][a-z0-9_-]{0,79}$/i.test(episode.unit) &&
+          Number.isInteger(episode.number) &&
+          episode.number > 0 && episode.number <= 10000 &&
+          (episode.group === undefined || episode.group === "Sub" || episode.group === "Dub")))) &&
     typeof e.updatedAt === "number" &&
     Number.isFinite(e.updatedAt) &&
     typeof e.favorite === "boolean" &&

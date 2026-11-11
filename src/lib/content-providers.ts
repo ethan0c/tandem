@@ -3,6 +3,7 @@ import { getExternalCatalogId } from "./catalog";
 import type { CatalogTitle } from "./catalog-types";
 import type { ContentCatalog, ContentPlayback, ContentUnit } from "./content-types";
 import { parseAnivexaEpisodes, parseAnivexaPlayback } from "./anivexa-parsers";
+import { skipWindow } from "./skip-times";
 import {
   parseReAnimeEpisodes,
   parseReAnimeSearch,
@@ -68,7 +69,10 @@ export async function anivexaPlayback(media: CatalogTitle, unitId: string): Prom
   const match = /^av-mkissa-(sub|dub)-(\d{1,4})$/.exec(unitId);
   if (!match || Number(match[2]) < 1) return null;
   const anilist = await anivexaId(media);
-  const response = await sourceRequest<unknown>(`${ANIVEXA}/watch/mkissa/${anilist}/${match[1]}/mkissa-${match[2]}`, false, 0);
+  const [response, mal] = await Promise.all([
+    sourceRequest<unknown>(`${ANIVEXA}/watch/mkissa/${anilist}/${match[1]}/mkissa-${match[2]}`, false, 0),
+    getExternalCatalogId("anime", media.id, "myanimelist/anime"),
+  ]);
   const playback = parseAnivexaPlayback(response);
   const watch = response && typeof response === "object" && !Array.isArray(response) ? response as Record<string, unknown> : {};
   if (watch.anilistId !== Number(anilist) || watch.episode !== Number(match[2]) || watch.audio !== match[1])
@@ -81,6 +85,8 @@ export async function anivexaPlayback(media: CatalogTitle, unitId: string): Prom
   return {
     source: "MKissa", credit: "Episode supplied by MKissa via Anivexa.",
     sourceUrl: "https://mkissa.to/", unit, streams: playback.streams,
+    intro: skipWindow(watch.intro), outro: skipWindow(watch.outro),
+    malId: mal && /^\d{1,10}$/.test(mal) ? Number(mal) : undefined,
   };
 }
 
