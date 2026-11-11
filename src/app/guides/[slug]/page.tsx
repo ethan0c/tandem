@@ -72,7 +72,7 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
         <h2 className="font-display text-xl font-medium">Watch together on Tandem</h2>
         <p className="mt-2 text-sm leading-relaxed text-zinc-400">Free, no account. Your call sits beside the show, and playback stays in sync.</p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <ButtonLink href="/#start" size="md">Create a room</ButtonLink>
+          <ButtonLink href="/rooms" size="md">Create a room</ButtonLink>
           <ButtonLink href="/plan" variant="ghost" size="md">Plan a watch night</ButtonLink>
         </div>
       </section>

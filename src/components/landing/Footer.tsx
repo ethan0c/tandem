@@ -6,14 +6,14 @@ const columns = [
   {
     title: "Tandem",
     links: [
-      { label: "Discover anime & manga", href: "/discover" },
+      { label: "Browse anime & manga", href: "/" },
       { label: "Your library", href: "/library" },
       { label: "Watch & read together", href: "/rooms" },
-      { label: "Start a room", href: "/#start" },
+      { label: "Start a room", href: "/rooms" },
       { label: "Plan a watch night", href: "/plan" },
       { label: "Guides", href: "/guides" },
-      { label: "How it works", href: "/#sync" },
-      { label: "Questions", href: "/#faq" },
+      { label: "How it works", href: "/about" },
+      { label: "Questions", href: "/about#faq" },
       { label: "Privacy", href: "/privacy" },
       { label: "Terms", href: "/terms" },
     ],
@@ -22,7 +22,7 @@ const columns = [
     title: "Extension",
     links: [
       { label: "Chrome · Edge · Brave", href: EXTENSION_URL, external: true },
-      { label: "Supported sites", href: "/#sources" },
+      { label: "Supported sites", href: "/about#sources" },
     ],
   },
 ];

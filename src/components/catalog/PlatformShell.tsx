@@ -9,14 +9,14 @@ import { useLibrary } from "./LibraryProvider";
 import { ButtonLink } from "@/components/Button";
 
 const links = [
-  { href: "/discover", label: "Home" },
+  { href: "/", label: "Home" },
   { href: "/anime", label: "Anime" },
   { href: "/manga", label: "Manga" },
   { href: "/library", label: "Library" },
 ];
 const footerColumns: [string, [string, string][]][] = [
-  ["Browse", [["Home", "/discover"], ["Anime", "/anime"], ["Manga", "/manga"], ["Your library", "/library"]]],
-  ["Together", [["Create a room", "/rooms"], ["Plan a watch night", "/plan"], ["How Tandem works", "/"], ["Guides", "/guides"]]],
+  ["Browse", [["Home", "/"], ["Anime", "/anime"], ["Manga", "/manga"], ["Your library", "/library"]]],
+  ["Together", [["Create a room", "/rooms"], ["Plan a watch night", "/plan"], ["How Tandem works", "/about"], ["Guides", "/guides"]]],
   ["About", [["Privacy", "/privacy"], ["Terms", "/terms"], ["Catalog & artwork by Kitsu", "https://kitsu.app"]]],
 ];
 
@@ -125,7 +125,7 @@ export function PlatformHeader() {
   return (
     <header className="platform-header sticky top-0 z-40" data-top={top}>
       <HeaderFrame className="platform-header-frame">
-        <Link href="/discover" aria-label="Tandem home" className="platform-brand">
+        <Link href="/" aria-label="Tandem home" className="platform-brand">
           <Logo size={24} />
         </Link>
         <Suspense fallback={<Navigation pathname="" />}>

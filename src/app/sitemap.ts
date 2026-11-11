@@ -6,7 +6,7 @@ import { SITE_URL } from "@/lib/links";
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: SITE_URL, changeFrequency: "weekly", priority: 1 },
-    ...["discover", "anime", "manga", "rooms"].map(path => ({ url: `${SITE_URL}/${path}`, changeFrequency: "weekly" as const, priority: 0.8 })),
+    ...["anime", "manga", "rooms", "about"].map(path => ({ url: `${SITE_URL}/${path}`, changeFrequency: "weekly" as const, priority: 0.8 })),
     { url: `${SITE_URL}/plan`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/guides`, changeFrequency: "monthly", priority: 0.6 },
     ...guides.map((g) => ({ url: `${SITE_URL}/guides/${g.slug}`, lastModified: g.updated, changeFrequency: "monthly" as const, priority: 0.6 })),

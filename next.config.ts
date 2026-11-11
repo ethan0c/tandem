@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "media.kitsu.io" },
     ],
   },
+  async redirects() {
+    // Home used to live at /discover; / is the browse home now.
+    return [{ source: "/discover", destination: "/", permanent: true }];
+  },
   async headers() {
     return [{
       source: "/reader/ubunchu/:path*",

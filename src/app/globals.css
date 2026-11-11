@@ -184,34 +184,15 @@ input[type="range"].tandem-range:hover::-webkit-slider-thumb {
 
 /* Motion stays brief and tied to entering content or direct interaction. */
 html { scroll-behavior: smooth; }
-.hero-intro { animation: fade-up 650ms ease-out both; }
-.hero-preview > figure { animation: fade-up 750ms 120ms ease-out both; }
 [data-reveal] {
   transition: opacity 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 [data-visible="false"] { opacity: 0; transform: translateY(20px); }
 [data-visible="true"] { opacity: 1; transform: translateY(0); }
-.room-preview > div {
-  transition: border-color 250ms ease, box-shadow 250ms ease;
-}
 .room-link-field { transition: border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease; }
 .room-link-field:focus-within { box-shadow: 0 0 0 4px rgb(255 255 255 / 0.08); }
 .btn3d svg { display: block; flex-shrink: 0; transition: transform 180ms ease; }
 .form-error { animation: fade-up 180ms ease-out both; }
-.landing nav:not(.hero-nav):not(.platform-nav) a { position: relative; }
-.landing nav:not(.hero-nav):not(.platform-nav) a::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -5px;
-  height: 2px;
-  background: #fff;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 200ms ease;
-}
-.landing nav:not(.hero-nav):not(.platform-nav) a:focus-visible::after { transform: scaleX(1); }
 details.faq { transition: background-color 200ms ease; }
 details.faq > summary { transition: color 200ms ease; }
 details.faq > summary:focus-visible { outline: 2px solid rgb(255 255 255 / 0.5); outline-offset: 3px; border-radius: 4px; }
@@ -226,8 +207,6 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
   details.faq[open]::details-content { block-size: auto; }
 }
 @media (hover: hover) {
-  .room-preview:hover > div { border-color: rgb(255 255 255 / 0.2); }
-  .landing nav:not(.hero-nav):not(.platform-nav) a:hover::after { transform: scaleX(1); }
   details.faq > summary:hover { color: #d4d4d8; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -248,130 +227,12 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
 }
 
 
-.hero-shell {
-  display: flex;
-  flex-direction: column;
-  min-height: 100svh;
-  /* Clip sideways only (the planet is wider than the page); the preview's shadow may fall into the next section. */
-  overflow-x: clip;
-  overflow-y: visible;
-  /* A quiet lift, like a dark room lit from above: darkest at the top edge, a few percent
-     brighter through the middle, back to black by the bottom. Barely tinted toward the brand. */
-  background:
-    radial-gradient(90% 60% at 50% 0%, rgb(139 92 246 / 0.14), transparent 70%),
-    linear-gradient(to bottom, #0c0b10 0%, #19161f 42%, rgb(16 14 20 / 0.6) 72%, transparent 100%);
-}
-/* The extension section is the one solid purple surface on the page. */
-.extension-shell {
-  background:
-    radial-gradient(60% 80% at 100% 100%, rgb(217 70 239 / 0.35), transparent 70%),
-    radial-gradient(50% 70% at 0% 0%, rgb(99 102 241 / 0.45), transparent 70%),
-    linear-gradient(135deg, var(--color-brand-700), var(--color-brand-900));
-}
-.extension-shell .btn3d-ghost { background: rgb(255 255 255 / 0.12); border-color: rgb(255 255 255 / 0.2); }
-.cta-shell {
-  background: radial-gradient(70% 90% at 50% 120%, rgb(124 58 237 / 0.35), transparent 70%);
-}
-/* A curved horizon under the hero: the top sliver of a wide ellipse, faded at both ends. */
-.hero-horizon {
-  --line: 150px; /* distance from the hero's bottom edge up to the planet's edge */
-  position: absolute;
-  inset: auto 0 0;
-  height: 320px;
-  overflow: hidden;
-  mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
-  pointer-events: none;
-}
-/* Atmosphere centred on the line itself, so it fades out in every direction before the band's edges. */
-.hero-horizon::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(55% var(--line) at 50% calc(100% - var(--line)), rgb(139 92 246 / 0.28), transparent 100%);
-}
-/* The planet edge: the top of a wide ellipse. The haze inside reaches pure black exactly at the hero's bottom. */
-.hero-horizon::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: calc(100% - var(--line));
-  width: 160vw;
-  height: 800px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  border-top: 2px solid rgb(167 139 250 / 0.9);
-  box-shadow: 0 -16px 40px -8px rgb(139 92 246 / 0.5);
-  background: linear-gradient(to bottom, rgb(139 92 246 / 0.16), rgb(139 92 246 / 0.04) 50%, transparent 100%);
-  background-size: 100% var(--line);
-  background-repeat: no-repeat;
-}
 .site-header { min-height: 72px; flex-shrink: 0; }
-.hero-body { gap: clamp(24px, 4vh, 40px); padding-top: clamp(16px, 4vh, 40px); padding-bottom: clamp(24px, 4vh, 40px); min-height: 0; }
-.hero-intro { flex-shrink: 0; }
-.hero-title { font-size: clamp(2.5rem, 5vw, 4.25rem); line-height: 1; }
-/* Keep the preview in normal flow so the hero grows when the rejoin card appears. */
-.hero-preview { flex: 1; min-height: 0; max-width: 1080px; display: flex; align-items: flex-end; justify-content: center; }
-.hero-preview > figure { width: min(100%, max(560px, calc((100svh - 440px) * 16 / 9))); flex-shrink: 0; }
-.hero-nav a { padding: 8px 12px; border-radius: 8px; transition: color 180ms ease; }
-.hero-nav a:hover, .hero-nav a:focus-visible { color: white; }
-.hero-nav a:focus-visible { outline: 2px solid rgb(255 255 255 / 0.5); outline-offset: 2px; }
-@media (max-width: 767px) {
-  .hero-shell { min-height: 0; }
-  /* On phones the preview is full width, so the line goes under it instead of behind it. */
-  .hero-horizon { --line: 72px; height: 180px; }
-  .hero-horizon::before { width: 280vw; }
-  .hero-preview { flex: none; min-height: 0; container-type: normal; display: block; }
-  .hero-preview > figure { width: 100%; min-width: 0; }
-  .site-header { min-height: 64px; }
-  .hero-body { gap: 28px; padding-top: 24px; padding-bottom: 112px; }
-  .hero-title { font-size: clamp(2.4rem, 11vw, 3rem); }
-  .hero-body .btn3d-lg, .hero-body .room-link-field { height: 48px; }
-  .hero-body .btn3d-lg { font-size: 0.95rem; }
-  .hero-preview header > div:last-child { display: none; }
-}
+@media (max-width: 767px) { .site-header { min-height: 64px; } }
 
 /* Shared fluid gutters keep every section aligned at any window width. */
 .site-width { width: 100%; max-width: 1280px; }
 .site-gutter { padding-inline: clamp(20px, 4vw, 48px); }
-
-/* The rotating headline. The word slot hugs the current word and tweens its width to the next,
-   so "Watch <word> together." always reads with ordinary word spacing. */
-.rotating-phrase { display: inline-flex; align-items: baseline; gap: 0.25em; white-space: nowrap; }
-.rotating-word {
-  display: inline-grid;
-  /* The track is exactly the slot's width, never the widest word in it, so during a handover both
-     words stay centred and any overflow is split evenly on both sides. */
-  grid-template-columns: minmax(0, 1fr);
-  justify-items: center;
-  position: relative;
-  overflow: hidden;
-  vertical-align: bottom;
-  color: var(--color-brand-400);
-  line-height: 1.25;
-  margin-block: -0.125em;
-  transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.rotating-word > span { grid-area: 1 / 1; min-width: 0; white-space: nowrap; }
-/* Hidden copies of every word, used only for measuring; absolute so they never affect the slot's size. */
-.rotating-word > .rotating-measure { position: absolute; visibility: hidden; pointer-events: none; display: flex; }
-.rotating-incoming { animation: hero-word-arrive 650ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-.rotating-outgoing { animation: hero-word-depart 450ms cubic-bezier(0.4, 0, 1, 1) both; }
-@keyframes hero-word-arrive {
-  from { opacity: 0; transform: translateY(75%); filter: blur(6px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
-}
-@keyframes hero-word-depart {
-  from { opacity: 1; transform: translateY(0); filter: blur(0); }
-  to { opacity: 0; transform: translateY(-75%); filter: blur(6px); }
-}
-@media (max-width: 767px) {
-  .rotating-ending { display: block; margin-top: 0.05em; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .rotating-word { transition: none; }
-  .rotating-incoming { animation: none; }
-  .rotating-outgoing { display: none; }
-}
 
 /* Reactions pop in, then sway up over the video and fade out. Every few vary in speed, size and
    sway, so a burst of hearts looks like a burst and not a column. */
@@ -419,80 +280,6 @@ details.faq[open] > p { animation: fade-up 220ms ease-out; }
     100% { opacity: 0; transform: translateY(-40px); }
   }
 }
-
-/* The hero's side cards: a match and a series, fanned out behind the anime preview. Dimmed and
-   tilted so they read as depth, not as competition; the one the headline names lifts a little. */
-.hero-side {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  border-radius: 0.75rem;
-  border: 1px solid rgb(255 255 255 / 0.1);
-  box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.8);
-  filter: brightness(0.62) saturate(0.9);
-  pointer-events: none;
-  transition: transform 800ms cubic-bezier(0.22, 1, 0.36, 1), filter 800ms ease;
-}
-.hero-side-left { transform-origin: 100% 100%; transform: translateX(-44%) translateY(-9%) rotate(-6deg) scale(0.72); }
-.hero-side-right { transform-origin: 0% 100%; transform: translateX(44%) translateY(-9%) rotate(6deg) scale(0.72); }
-.hero-side-left[data-active] { transform: translateX(-46%) translateY(-13%) rotate(-7deg) scale(0.74); filter: brightness(0.92) saturate(1); }
-.hero-side-right[data-active] { transform: translateX(46%) translateY(-13%) rotate(7deg) scale(0.74); filter: brightness(0.92) saturate(1); }
-/* Only where there is room beside the preview. */
-@media (max-width: 1023px) { .hero-side { display: none; } }
-@media (prefers-reduced-motion: reduce) { .hero-side { transition: none; } }
-
-/* The homepage intro (IntroLoader): a tiny inline script adds #intro to <body> on the first visit of
-   a session. Two frames slide together, the name fades in,
-   a line fills for 2 s, then it fades away and the hero's own entrance plays. */
-#intro {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: grid;
-  place-items: center;
-  background: radial-gradient(60% 50% at 50% 45%, rgb(139 92 246 / 0.16), transparent 70%), #0c0b10;
-  animation: intro-out 400ms ease 2s forwards;
-}
-html:has(#intro) { overflow: hidden; }
-.intro-mark { display: flex; align-items: center; gap: 14px; }
-.intro-frame-a { animation: intro-frame-a 900ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-.intro-frame-b { animation: intro-frame-b 900ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-.intro-word {
-  font-family: var(--font-display);
-  font-size: 44px;
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  color: #fff;
-  animation: intro-word 600ms ease 500ms both;
-}
-.intro-bar {
-  position: absolute;
-  left: 50%;
-  top: calc(50% + 62px);
-  width: 180px;
-  height: 2px;
-  margin-left: -90px;
-  border-radius: 2px;
-  background: rgb(255 255 255 / 0.1);
-  overflow: hidden;
-}
-.intro-bar::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: #8b5cf6;
-  transform-origin: left;
-  animation: intro-bar 1.9s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-/* The hero waits for the intro, so its own entrance is not wasted behind it. */
-html:has(#intro) .hero-intro { animation-delay: 2.15s; }
-html:has(#intro) .hero-preview > figure { animation-delay: 2.3s; }
-@keyframes intro-frame-a { from { transform: translate(-6px, -6px); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes intro-frame-b { from { transform: translate(6px, 6px); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes intro-word { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
-@keyframes intro-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-@keyframes intro-out { to { opacity: 0; visibility: hidden; } }
 
 /* ---------- Platform: a streaming-service shell around the catalog. ---------- */
 .platform { background: var(--color-ink); min-width: 0; overflow-x: clip; }
@@ -860,6 +647,7 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .section-heading h2 { font-size: 19px; }
   .row-track { --row-cols: 2.35; }
   .billboard-actions .btn3d { flex: 1 1 0; min-width: 0; padding-inline: 12px; }
+  .billboard-actions .btn3d:first-child { flex-basis: 100%; }
   .library-row > div:last-child { justify-content: flex-start; }
 }
 @media (pointer: coarse), (max-width: 767px) {

@@ -224,7 +224,7 @@ export function Library() {
               ? "Try another filter or search."
               : "Save a title from Anime or Manga, or import a list you already keep."}
           </p>
-          <ButtonLink href="/discover">Browse titles</ButtonLink>
+          <ButtonLink href="/">Browse titles</ButtonLink>
         </div>
       ) : (
         <div className={view === "grid" ? "grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" : "divide-y divide-white/[0.06] rounded-xl border border-white/[0.07] bg-ink-800"}>

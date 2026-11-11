@@ -3,7 +3,10 @@ import { CalendarHeart, Users } from "lucide-react";
 import seed from "@/content/catalog.json";
 import type { CatalogTitle } from "@/lib/catalog-types";
 import type { HomeRows } from "@/lib/home-rows";
-import { ButtonLink } from "@/components/Button";
+import { useLayoutEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button, ButtonLink } from "@/components/Button";
+import { newRoomId } from "@/lib/room-id";
 import { MediaCard } from "./MediaCard";
 import { MediaRow } from "./MediaRow";
 import { Billboard } from "./Billboard";
@@ -82,6 +85,10 @@ function CatalogRow({ items, title, href, ranked = false, eager = false }: {
 }
 
 function TogetherBand() {
+  const router = useRouter();
+  const [creating, setCreating] = useState(false);
+  // The home page is kept alive between visits; reset when it is hidden so the button works again.
+  useLayoutEffect(() => () => setCreating(false), []);
   return (
     <section className="together-band" aria-labelledby="together-heading">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -92,10 +99,10 @@ function TogetherBand() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <ButtonLink href="/rooms" variant="light" size="lg">
+          <Button variant="light" size="lg" disabled={creating} onClick={() => { setCreating(true); router.push(`/room/${newRoomId()}`); }}>
             <Users className="size-5" aria-hidden="true" />
-            Create a room
-          </ButtonLink>
+            {creating ? "Creating…" : "Create a room"}
+          </Button>
           <ButtonLink href="/plan" variant="ghost" size="lg">
             <CalendarHeart className="size-5" aria-hidden="true" />
             Plan a night
