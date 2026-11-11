@@ -57,6 +57,13 @@ for(const width of (process.env.TEST_WIDTHS||'320,390,768,1024,1440').split(',')
   assert.equal(await format.inputValue(),'','Anime must not retain a reading-format filter');
   await format.selectOption('movie');await settled(page);assert.equal(await page.locator('.media-card:visible').count(),1);
   await page.goto(`${base}/library`);await page.getByRole('link',{name:'Manhwa Alpha',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Grid view'}).click();
+  assert.equal(await page.getByRole('button',{name:'Grid view'}).getAttribute('aria-pressed'),'true');
+  assert.ok((await page.locator('.library-row').first().getAttribute('class')).includes('flex-col'));
+  await geometry(page,`${width} library grid`);
+  await page.reload();await page.getByRole('link',{name:'Manhwa Alpha',exact:true}).waitFor();
+  await page.waitForFunction(()=>document.querySelector('button[aria-label="Grid view"]')?.getAttribute('aria-pressed')==='true');
+  await page.getByRole('button',{name:'List view'}).click();
   const savedFormat=page.getByRole('combobox',{name:'Format',exact:true});await savedFormat.selectOption('manhwa');
   assert.equal(await page.locator('.library-row:visible').count(),2);
   await page.getByRole('combobox',{name:'Filter by status',exact:true}).selectOption('current');

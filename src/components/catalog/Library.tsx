@@ -7,7 +7,9 @@ import {
   Download,
   Heart,
   Import,
+  LayoutGrid,
   Library as LibraryIcon,
+  List,
   RefreshCw,
   Search,
   Trash2,
@@ -26,6 +28,7 @@ import { canOptimizeArtwork } from "@/lib/artwork";
 import { catalogFormatLabel, matchesCatalogFormat } from "@/lib/catalog-formats";
 import { unitLabel } from "@/lib/spoilers";
 import { FormatFilter } from "./FormatFilter";
+import { useClientValue } from "@/hooks/useClientValue";
 
 function resumeHref(entry: LibraryEntry): string | null {
   const unit = entry.watchPosition?.unit;
@@ -41,6 +44,11 @@ export function Library() {
   const [status, setStatus] = useState("all");
   const [q, setQ] = useState("");
   const [sort, setSort] = useState("recent");
+  const savedView = useClientValue(() => {
+    try { return localStorage.getItem("tandem:library-view"); } catch { return null; }
+  }, null);
+  const [chosenView, setChosenView] = useState<"list" | "grid" | null>(null);
+  const view = chosenView ?? (savedView === "grid" ? "grid" : "list");
   const [favorites, setFavorites] = useState(false);
   const [pendingRemove, setPendingRemove] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
@@ -69,6 +77,10 @@ export function Library() {
     a.href = url;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function changeView(next: "list" | "grid") {
+    setChosenView(next);
+    try { localStorage.setItem("tandem:library-view", next); } catch {}
   }
   return (
     <>
@@ -202,6 +214,13 @@ export function Library() {
             <option value="title">Title A–Z</option>
           </select>
         </label>
+        <div className="audio-track-control">
+          <span className="audio-track-label">View</span>
+          <div className="audio-track-toggle" role="group" aria-label="Library view">
+            <button type="button" className="audio-track-option flex items-center justify-center gap-1.5" aria-label="List view" aria-pressed={view === "list"} onClick={() => changeView("list")}><List className="size-3.5" /> List</button>
+            <button type="button" className="audio-track-option flex items-center justify-center gap-1.5" aria-label="Grid view" aria-pressed={view === "grid"} onClick={() => changeView("grid")}><LayoutGrid className="size-3.5" /> Grid</button>
+          </div>
+        </div>
       </div>
       {ready && <p className="mb-5 text-xs text-muted" role="status">{filtered.length} of {entries.length} titles shown</p>}
       {!ready ? (
@@ -224,31 +243,31 @@ export function Library() {
           <ButtonLink href="/discover">Find your first story</ButtonLink>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className={view === "grid" ? "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" : "space-y-3"}>
           {filtered.map((e) => (
             <article
               key={mediaKey(e.media)}
-              className="library-row flex flex-wrap items-center gap-4 rounded-2xl border border-white/8 bg-white/[0.025] p-4"
+              className={`library-row flex gap-4 rounded-2xl border border-white/8 bg-white/[0.025] p-4 ${view === "grid" ? "min-w-0 flex-col items-stretch" : "flex-wrap items-center"}`}
             >
               <Link
                 href={resumeHref(e) || titleHref(e.media)}
-                className="relative h-20 w-14 shrink-0 overflow-hidden rounded-lg"
+                className={`relative shrink-0 overflow-hidden rounded-lg ${view === "grid" ? "aspect-[2/3] w-full" : "h-20 w-14"}`}
               >
                 {e.media.poster && (
                   <Image
                     src={e.media.poster}
                     alt=""
                     fill
-                    sizes="56px"
+                    sizes={view === "grid" ? "(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 25vw" : "56px"}
                     unoptimized={!canOptimizeArtwork(e.media.poster)}
                     className="object-cover"
                   />
                 )}
               </Link>
-              <div className="min-w-0 flex-1">
+              <div className={`min-w-0 ${view === "grid" ? "w-full" : "flex-1"}`}>
                 <Link
                   href={resumeHref(e) || titleHref(e.media)}
-                  className="line-clamp-1 text-sm font-medium hover:text-brand-300"
+                  className={`${view === "grid" ? "line-clamp-2" : "line-clamp-1"} text-sm font-medium hover:text-brand-300`}
                 >
                   {e.media.title}
                 </Link>
@@ -277,7 +296,7 @@ export function Library() {
                   </div>
                 )}
               </div>
-              <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
+              <div className={`flex w-full flex-wrap items-center gap-2 ${view === "grid" ? "mt-auto justify-start" : "justify-end sm:w-auto"}`}>
                 <label>
                   <span className="sr-only">Status for {e.media.title}</span>
                   <select
