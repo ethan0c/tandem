@@ -5,6 +5,7 @@ import { HEADLINE_EVENT } from "./RotatingHeadline";
 import Image from "next/image";
 import { TopBar } from "@/components/room/TopBar";
 import { Player } from "@/components/room/Player";
+import { initialReading } from "@/lib/reading";
 
 const noop = () => {};
 const preview = { poster: "/haikyu.png", time: 531, duration: 1420 };
@@ -63,6 +64,10 @@ export function Preview() {
           onPlayingChange={noop}
           chromeVisible
           pickerName={null}
+          story={null}
+          reading={initialReading}
+          hostId={null}
+          changeReading={noop}
         />
         {/* The call as it looks mid-watch: small, in the corner, never covering the show. A still
             illustration rather than the real FloatingCall, which is sized for a full-screen room. */}

@@ -622,7 +622,7 @@ export function Player({
                 style={{ "--fill": `${(muted ? 0 : volume) * 100}%` } as React.CSSProperties}
                 aria-label="Volume"
               />
-            </div>}
+            </div>
             <IconButton onClick={onOpenSource} label="Change video">
               <Film className="size-4" />
             </IconButton>
@@ -631,7 +631,7 @@ export function Player({
             </IconButton>
           </div>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }

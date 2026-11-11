@@ -1,7 +1,7 @@
 "use client";
 /* Pages retain their source dimensions; chapter artwork is not cropped. */
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Maximize, Minimize } from "lucide-react";
 import { Button } from "@/components/Button";
 import { useClientValue } from "@/hooks/useClientValue";
@@ -49,6 +49,7 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
   const canvas = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLElement>(null);
   const currentPage = useRef(position);
+  const positionControl = useRef({ sharedPosition, onPositionChange });
   const touch = useRef<{ x: number; y: number } | null>(null);
   const preloader = useRef<ReturnType<typeof createPagePreloader> | null>(null);
   const canFullscreen = useClientValue(() => !!document.fullscreenEnabled, false);
@@ -56,10 +57,14 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
   const label = unitLabel("manga", playback.unit);
   const isExpanded = expanded || nativeFullscreen;
 
-  function setPosition(next: number) {
-    if (sharedPosition === undefined) setLocalPosition(next);
-    else onPositionChange?.(next);
-  }
+  useEffect(() => {
+    positionControl.current = { sharedPosition, onPositionChange };
+  }, [sharedPosition, onPositionChange]);
+
+  const setPosition = useCallback((next: number) => {
+    if (positionControl.current.sharedPosition === undefined) setLocalPosition(next);
+    else positionControl.current.onPositionChange?.(next);
+  }, []);
 
   function go(next: number) {
     if (!canNavigate || !Number.isInteger(next) || next < 0 || next >= pages.length) return;
@@ -109,7 +114,11 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
     }, { rootMargin: `${-Math.round(window.innerHeight * 0.15)}px 0px ${-Math.round(window.innerHeight * 0.65)}px 0px`, threshold: 0 });
     canvas.current.querySelectorAll("[data-page]").forEach((element) => { observer.observe(element); pageLoader.observe(element); });
     return () => { observer.disconnect(); pageLoader.disconnect(); };
-  }, [settings.mode, isExpanded]);
+  }, [settings.mode, isExpanded, setPosition]);
+  useEffect(() => {
+    if (settings.mode === "scroll")
+      canvas.current?.querySelector(`[data-page="${position}"]`)?.scrollIntoView({ block: "start", behavior: "instant" });
+  }, [position, settings.mode]);
 
   useEffect(() => {
     const changed = () => setNativeFullscreen(document.fullscreenElement === root.current);
@@ -148,7 +157,7 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [pages.length, settings.direction, settings.mode, transitioning, canNavigate]);
+  }, [pages.length, settings.direction, settings.mode, transitioning, canNavigate, setPosition]);
 
   async function fullscreen() {
     try {
