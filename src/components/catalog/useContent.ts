@@ -19,10 +19,10 @@ export function useContent(
     const controller = new AbortController();
     const url = `/api/content?${new URLSearchParams({ kind, id, language, offset: String(offset) })}`;
     const stored = readStoredContentCatalog(url);
-    if (stored) setData(stored);
     const load = async () => {
       setPending(!stored);
       setError("");
+      if (stored) setData(stored);
       try {
         const value = await fetchPublicCatalog<ContentCatalog>(url, retry > 0 || !!stored);
         if (!controller.signal.aborted) setData(value);

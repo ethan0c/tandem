@@ -80,7 +80,7 @@ export async function fetchPublicCatalog<T>(url: string, refresh = false): Promi
     responses.delete(url);
     responses.set(url, { value: stable, expires: Date.now() + 60_000 });
     while (responses.size > RESPONSE_LIMIT) responses.delete(responses.keys().next().value!);
-    return stable;
+    return stable as T;
   })();
   requests.set(url, request);
   try { return await request; }

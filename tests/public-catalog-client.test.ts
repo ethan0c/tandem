@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { fetchPublicCatalog } from "../src/lib/public-catalog-client";
+import { fetchPublicCatalog, readStoredContentCatalog } from "../src/lib/public-catalog-client";
 
 test("public metadata shares concurrent requests, caches success, and can refresh", async () => {
   const original = globalThis.fetch;
@@ -34,4 +34,31 @@ test("playback and private endpoints never enter the public cache; errors are re
     assert.deepEqual(await fetchPublicCatalog(url), { items: [] });
     assert.equal(calls, 2);
   } finally { globalThis.fetch = original; }
+});
+
+test("a hard refresh can reuse a complete episode list when a provider briefly returns fewer episodes", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const values = new Map<string, string>();
+  Object.defineProperty(globalThis, "localStorage", { configurable: true, value: {
+    getItem: (key: string) => values.get(key) || null,
+    setItem: (key: string, value: string) => { values.set(key, value); },
+    removeItem: (key: string) => { values.delete(key); },
+  } });
+  const url = "/api/content?kind=anime&id=7442&language=en&offset=0";
+  const media = { kind: "anime", id: "7442", title: "Attack on Titan" };
+  const unit = (number: number) => ({ id: `av-mkissa-sub-${number}`, number, label: `Episode ${number}` });
+  let calls = 0;
+  globalThis.fetch = async () => Response.json({ media, source: "MKissa", units: ++calls === 1 ? [unit(1), unit(2)] : [unit(1)], total: calls === 1 ? 2 : 1, hasMore: false });
+  try {
+    assert.equal((await fetchPublicCatalog(url)).units.length, 2);
+    assert.equal(readStoredContentCatalog(url)?.units.length, 2);
+    assert.equal((await fetchPublicCatalog(url, true)).units.length, 2);
+    assert.equal(readStoredContentCatalog(url)?.units.length, 2);
+    assert.equal(readStoredContentCatalog(`${url}&unit=av-mkissa-sub-1`), null);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalStorage) Object.defineProperty(globalThis, "localStorage", originalStorage);
+    else Reflect.deleteProperty(globalThis, "localStorage");
+  }
 });
