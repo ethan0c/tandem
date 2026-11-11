@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -8,6 +8,7 @@ import {
   Import,
   LayoutGrid,
   List,
+  Check,
   RefreshCw,
   Search,
   Trash2,
@@ -49,7 +50,17 @@ export function Library() {
   const view = chosenView ?? (savedView === "grid" ? "grid" : "list");
   const [favorites, setFavorites] = useState(false);
   const [pendingRemove, setPendingRemove] = useState<string | null>(null);
-  const [syncing, setSyncing] = useState(false);
+  const [syncState, setSyncState] = useState<"idle" | "syncing" | "done">("idle");
+  const syncTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  async function syncNow() {
+    clearTimeout(syncTimer.current);
+    setSyncState("syncing");
+    // A fast sync still shows the spinner briefly, so the press visibly did something.
+    await Promise.all([sync(), new Promise((resolve) => setTimeout(resolve, 700))]);
+    setSyncState("done");
+    syncTimer.current = setTimeout(() => setSyncState("idle"), 2500);
+  }
+  useEffect(() => () => clearTimeout(syncTimer.current), []);
   const exportLink = useRef<HTMLAnchorElement>(null);
   const filtered = entries
     .filter(
@@ -117,16 +128,14 @@ export function Library() {
         {user ? (
           <button
             type="button"
-            className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-brand-300 hover:text-white disabled:opacity-50"
-            disabled={syncing}
-            onClick={async () => {
-              setSyncing(true);
-              await sync();
-              setSyncing(false);
-            }}
+            className="sync-button inline-flex min-h-11 items-center gap-1.5 font-semibold text-brand-300 hover:text-white"
+            data-state={syncState}
+            aria-busy={syncState === "syncing"}
+            disabled={syncState === "syncing"}
+            onClick={syncNow}
           >
-            <RefreshCw className={`size-3.5 ${syncing ? "animate-spin" : ""}`} />
-            Sync now
+            {syncState === "done" ? <Check className="size-3.5" aria-hidden="true" /> : <RefreshCw className="size-3.5" aria-hidden="true" />}
+            <span aria-live="polite">{syncState === "syncing" ? "Syncing…" : syncState === "done" ? "Synced" : "Sync now"}</span>
           </button>
         ) : (
           <Link href="/account" className="inline-flex min-h-11 items-center font-semibold text-brand-300 hover:text-white">

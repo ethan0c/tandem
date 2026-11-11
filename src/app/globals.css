@@ -682,3 +682,13 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
 .route-progress::after { content: ""; position: absolute; inset: 0; background: var(--color-brand-500); transform-origin: left; animation: route-progress 1.6s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
 @keyframes route-progress { 0% { transform: scaleX(0); } 60% { transform: scaleX(0.7); } 100% { transform: scaleX(0.92); } }
 .account-screen { min-height: calc(100svh - var(--header-h) - var(--main-pt) - 48px); padding-block: 24px; }
+.sync-button svg { transition: transform 300ms ease; }
+.sync-button[data-state="syncing"] { color: #d4d2da; cursor: progress; }
+.sync-button[data-state="syncing"] svg { animation: sync-spin 0.8s linear infinite; }
+.sync-button[data-state="done"] { color: #86efac; }
+.sync-button[data-state="done"] svg { animation: sync-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes sync-spin { to { transform: rotate(360deg); } }
+@keyframes sync-pop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+/* Old results dim while a new search or filter loads, instead of looking frozen. */
+.media-grid { transition: opacity 200ms ease; }
+.media-grid[data-refreshing="true"] { opacity: 0.45; pointer-events: none; }

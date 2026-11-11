@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import seed from "@/content/catalog.json";
 import type { CatalogTitle, MediaKind } from "@/lib/catalog-types";
 import { MediaCard } from "./MediaCard";
@@ -28,6 +28,22 @@ export function Browse({ kind }: { kind: MediaKind }) {
   const [status, setStatus] = useState("");
   const [year, setYear] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  // A fetch always runs on mount, so the saved selection is shown as pending until it lands.
+  const [busy, setBusy] = useState(true);
+  // Arriving with a search (from the header) skips the hero so results are on screen; typing here keeps the layout still.
+  const [heroHidden, setHeroHidden] = useState(!!queryFromUrl);
+  const [urlQuery, setUrlQuery] = useState(queryFromUrl);
+  if (queryFromUrl !== urlQuery) {
+    setUrlQuery(queryFromUrl);
+    // A change we didn't write ourselves is a new search from the header.
+    if (queryFromUrl !== q) {
+      setQ(queryFromUrl);
+      setPage(1);
+      setBusy(true);
+      setHeroHidden(!!queryFromUrl);
+    }
+  }
   const [result, setResult] = useState<{
     items: CatalogTitle[];
     source: string;
@@ -37,9 +53,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
     source: "selection",
     hasMore: false,
   });
-  const [page, setPage] = useState(1);
-  // A fetch always runs on mount, so the saved selection is shown as pending until it lands.
-  const [busy, setBusy] = useState(true);
+
   const [error, setError] = useState("");
   useEffect(() => {
     const controller = new AbortController();
@@ -74,6 +88,16 @@ export function Browse({ kind }: { kind: MediaKind }) {
       controller.abort();
     };
   }, [kind, q, genre, format, sort, status, year, page]);
+  // Keep the search in the address, so refresh and Back return to it.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const url = new URL(window.location.href);
+      if ((url.searchParams.get("q") || "") === q) return;
+      if (q) url.searchParams.set("q", q); else url.searchParams.delete("q");
+      window.history.replaceState(window.history.state, "", url);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [q]);
   function change(set: (value: string) => void, value: string, current: string) {
     if (value === current) return;
     setBusy(true);
@@ -93,14 +117,14 @@ export function Browse({ kind }: { kind: MediaKind }) {
   const activeFilterCount = [format, genre, status, year, sort !== "popular" ? sort : ""].filter(Boolean).length;
   return (
     <>
-      {queryFromUrl ? heading : (
+      {heroHidden ? heading : (
         <Billboard
           items={spotlight(kind)}
         >
           <div className="page-heading"><h1>{kind === "anime" ? "Anime" : "Manga"}</h1></div>
         </Billboard>
       )}
-      <div className={`section-heading ${queryFromUrl ? "" : "mt-10"}`}>
+      <div className={`section-heading ${heroHidden ? "" : "mt-10"}`}>
         <h2>{q ? `Results for “${q}”` : `Browse all ${kind}`}</h2>
       </div>
       <div className="catalog-filters">
@@ -110,9 +134,16 @@ export function Browse({ kind }: { kind: MediaKind }) {
           <input
             value={q}
             onChange={(e) => change(setQ, e.target.value, q)}
-            placeholder="Search titles…"
-            className="field w-full pl-10"
+            onKeyDown={(e) => { if (e.key === "Escape" && q) change(setQ, "", q); }}
+            placeholder="Search titles"
+            enterKeyHint="search"
+            className="field w-full pl-10 pr-11"
           />
+          {q && (
+            <button type="button" aria-label="Clear search" className="absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-md text-zinc-400 hover:text-white" onClick={() => change(setQ, "", q)}>
+              <X className="size-4" />
+            </button>
+          )}
         </label>
         <button
           type="button"
@@ -195,9 +226,9 @@ export function Browse({ kind }: { kind: MediaKind }) {
         aria-live="polite"
       >
         <span>
-          {busy
-            ? "Finding your next favorite…"
-            : `${result.items.length} titles${result.hasMore ? " · more to explore" : ""}`}
+          {busy && page === 1
+            ? q ? "Searching…" : "Loading…"
+            : `${result.items.length} titles`}
         </span>
         <span>
           {result.source === "cached"
@@ -216,9 +247,17 @@ export function Browse({ kind }: { kind: MediaKind }) {
         <div
           className="media-grid"
           aria-busy={busy}
+          data-refreshing={busy && page === 1}
         >
           {result.items.map((media, index) => (
             <MediaCard key={media.id} media={media} eager={index < 2} />
+          ))}
+          {busy && page > 1 && Array.from({ length: 6 }, (_, index) => (
+            <div key={`more-${index}`} aria-hidden="true" className="min-w-0">
+              <div className="loading-shape aspect-[0.7] rounded-lg" />
+              <div className="loading-shape mt-3 h-3.5 w-4/5" />
+              <div className="loading-shape mt-2 h-3 w-1/2" />
+            </div>
           ))}
         </div>
       ) : busy ? (
@@ -253,7 +292,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
             disabled={busy}
             onClick={() => { setBusy(true); setPage((p) => p + 1); }}
           >
-            {busy ? "Loading…" : "Explore more"}
+            {busy && page > 1 ? "Loading more…" : "Explore more"}
           </Button>
         </div>
       )}

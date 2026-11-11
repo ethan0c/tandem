@@ -22,12 +22,12 @@ const cache = new Map<string, { expires: number; value: unknown }>();
 const episodeCache = new Map<string, { expires: number; units: ContentUnit[] }>();
 const episodePending = new Map<string, Promise<ContentUnit[]>>();
 
-async function sourceRequest<T>(url: string, html = false, ttl = 120_000, headers: Record<string, string> = {}): Promise<T> {
+async function sourceRequest<T>(url: string, html = false, ttl = 120_000, headers: Record<string, string> = {}, timeout = 12_000): Promise<T> {
   const saved = cache.get(url);
   if (ttl && saved && saved.expires > Date.now()) return saved.value as T;
   const response = await fetch(url, {
     headers: { Accept: html ? "text/html" : "application/json", ...headers },
-    signal: AbortSignal.timeout(12_000),
+    signal: AbortSignal.timeout(timeout),
     cache: "no-store",
   });
   if (!response.ok) {
@@ -43,6 +43,26 @@ async function sourceRequest<T>(url: string, html = false, ttl = 120_000, header
 }
 
 export const anivexaConfigured = Boolean(ANIVEXA);
+
+/** MKissa lookups are slow the first time (scraping takes ~10 s) and its upstream sometimes fails an episode it does
+    have, then serves it on the next try. A quick failure is retried once; a slow first lookup gets more time. */
+async function anivexaWatch(url: string): Promise<unknown> {
+  for (let attempt = 1; ; attempt++) {
+    const started = Date.now();
+    try {
+      return await sourceRequest<unknown>(url, false, 0, {}, 25_000);
+    } catch (error) {
+      const upstream = error instanceof Error && /HTTP 5\d\d/.test(error.message);
+      // One retry, and only after a quick failure: a slow one means the source is struggling, not flaky.
+      if (!upstream || attempt >= 2 || Date.now() - started > 5_000) {
+        if (error instanceof Error && error.name === "TimeoutError") throw new Error("MKissa took too long to answer. Try again in a moment.");
+        if (upstream) throw new Error("MKissa couldn't find this episode right now. Try again, or pick another episode.");
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 700));
+    }
+  }
+}
 
 async function anivexaId(kitsuId: string, savedId?: string): Promise<string> {
   if (!ANIVEXA) throw new Error("Anivexa is not configured.");
@@ -98,7 +118,7 @@ export async function anivexaPlayback(kitsuId: string, unitId: string, savedId?:
   if (!match || Number(match[2]) < 1) return null;
   const anilist = await anivexaId(kitsuId, savedId);
   const [response, mappingResponse] = await Promise.all([
-    sourceRequest<unknown>(`${ANIVEXA}/watch/mkissa/${anilist}/${match[1]}/mkissa-${match[2]}`, false, 0),
+    anivexaWatch(`${ANIVEXA}/watch/mkissa/${anilist}/${match[1]}/mkissa-${match[2]}`),
     sourceRequest<unknown>(`${ANIVEXA}/map/${anilist}`, false, 60 * 60_000).catch(() => null),
   ]);
   const playback = parseAnivexaPlayback(response);
