@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserRound } from "lucide-react";
+import { Search, UserRound } from "lucide-react";
 import { Suspense, type ReactNode } from "react";
 import { HeaderFrame } from "@/components/HeaderFrame";
 import { Logo } from "@/components/Logo";
@@ -44,6 +44,23 @@ export function PlatformShell({ children }: { children: ReactNode }) {
 function ActiveNavigation() {
   return <Navigation pathname={usePathname()} />;
 }
+function HeaderSearch() {
+  const pathname = usePathname();
+  const target = pathname.startsWith("/anime") || pathname.startsWith("/title/anime/")
+    ? "/anime" : "/manga";
+  return (
+    <>
+      <form action={target} className="platform-quick-search relative" role="search">
+        <label htmlFor="platform-search" className="sr-only">Search {target === "/anime" ? "anime" : "manga"}</label>
+        <input id="platform-search" name="q" type="search" placeholder={`Search ${target === "/anime" ? "anime" : "manga"}…`} className="field w-full pr-9" />
+        <button type="submit" aria-label="Search titles" className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center text-muted hover:text-white">
+          <Search className="size-4" />
+        </button>
+      </form>
+      <Link href={target} aria-label="Search titles" className="platform-mobile-search" ><Search className="size-4" /></Link>
+    </>
+  );
+}
 function Navigation({ pathname }: { pathname: string }) {
   return (
     <nav aria-label="Main navigation" className="platform-nav">
@@ -79,6 +96,7 @@ export function PlatformHeader() {
           <ActiveNavigation />
         </Suspense>
         <div className="platform-header-actions">
+          <Suspense fallback={null}><HeaderSearch /></Suspense>
           <Link
             href="/account"
             aria-label={user ? "My account" : "Sign in"}

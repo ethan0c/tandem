@@ -36,6 +36,7 @@ for(const width of (process.env.TEST_WIDTHS||'320,390,768,1024,1440').split(',')
   });
   const page=await context.newPage();
   await page.goto(`${base}/manga`);await page.getByRole('link',{name:'Manhwa Alpha',exact:true}).waitFor();await settled(page);
+  if(width<768) await page.getByRole('button',{name:/^Filters/}).click();
   const format=page.getByRole('combobox',{name:'Format',exact:true});
   await format.selectOption('manhwa');await settled(page);assert.equal(await page.locator('.media-card:visible').count(),1);
   await page.getByRole('button',{name:'Explore more',exact:true}).click();await settled(page);assert.equal(await page.locator('.media-card:visible').count(),2);
@@ -54,8 +55,17 @@ for(const width of (process.env.TEST_WIDTHS||'320,390,768,1024,1440').split(',')
   await format.selectOption('manhwa');await settled(page);
   await page.getByRole('navigation',{name:'Main navigation',exact:true}).getByRole('link',{name:'Anime',exact:true}).click();
   await page.getByRole('heading',{name:'Anime',exact:true}).waitFor();await settled(page);
+  if(width<768) await page.getByRole('button',{name:/^Filters/}).click();
   assert.equal(await format.inputValue(),'','Anime must not retain a reading-format filter');
   await format.selectOption('movie');await settled(page);assert.equal(await page.locator('.media-card:visible').count(),1);
+  if(width>=1024){
+    await page.getByRole('searchbox',{name:'Search anime'}).fill('Movie sample');
+    await page.getByRole('button',{name:'Search titles'}).click();
+    await page.waitForURL(/\/anime\?q=Movie\+sample/);
+    await settled(page);
+    assert.equal(await page.locator('.media-card:visible').count(),1);
+    assert.equal(await page.getByRole('textbox',{name:'Search titles',exact:true}).inputValue(),'Movie sample');
+  }
   await page.goto(`${base}/library`);await page.getByRole('link',{name:'Manhwa Alpha',exact:true}).waitFor();
   await page.getByRole('button',{name:'Grid view'}).click();
   assert.equal(await page.getByRole('button',{name:'Grid view'}).getAttribute('aria-pressed'),'true');

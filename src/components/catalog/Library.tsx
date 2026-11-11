@@ -251,7 +251,7 @@ export function Library() {
             >
               <Link
                 href={resumeHref(e) || titleHref(e.media)}
-                className={`relative shrink-0 overflow-hidden rounded-lg ${view === "grid" ? "aspect-[2/3] w-full" : "h-16 w-11"}`}
+                className={`relative shrink-0 overflow-hidden rounded-lg ${view === "grid" ? "aspect-[0.7] w-full" : "h-16 w-11"}`}
               >
                 {e.media.poster && (
                   <Image

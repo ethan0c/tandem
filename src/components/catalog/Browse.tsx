@@ -6,11 +6,14 @@ import type { CatalogTitle, MediaKind } from "@/lib/catalog-types";
 import { MediaCard } from "./MediaCard";
 import { Button } from "@/components/Button";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { fetchPublicCatalog } from "@/lib/public-catalog-client";
 import { FormatFilter } from "./FormatFilter";
 
 export function Browse({ kind }: { kind: MediaKind }) {
-  const [q, setQ] = useState("");
+  const searchParams = useSearchParams();
+  const queryFromUrl = searchParams.get("q") || "";
+  const [q, setQ] = useState(queryFromUrl);
   const [genre, setGenre] = useState("");
   const [format, setFormat] = useState("");
   const [sort, setSort] = useState("popular");
@@ -29,6 +32,7 @@ export function Browse({ kind }: { kind: MediaKind }) {
   const [page, setPage] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  useEffect(() => { setQ(queryFromUrl); setPage(1); }, [queryFromUrl]);
   useEffect(() => {
     const controller = new AbortController();
     const timer = setTimeout(async () => {
