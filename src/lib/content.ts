@@ -211,6 +211,14 @@ export async function getContentCatalog(
             Date.parse(c.attributes.readableAt) <= Date.now(),
         )
         .map(chapterUnit);
+      const sparse = result.total <= 10 || (!!media.total && result.total < media.total * 0.7);
+      if (language === "en" && sparse) {
+        try {
+          const alternate = await weebCatalog(media, offset, language);
+          if (alternate && alternate.total > result.total && alternate.units.length > units.length)
+            return alternate;
+        } catch { /* Keep the MangaDex chapters when the alternate source is unavailable. */ }
+      }
       return {
         media,
         source: "MangaDex",
@@ -219,7 +227,9 @@ export async function getContentCatalog(
         hasMore: offset + 100 < result.total,
         ...(!units.length
           ? { notice: "No readable chapters were found in this language. Try another language or use your own images." }
-          : {}),
+          : sparse
+            ? { notice: `MangaDex currently lists ${result.total} ${language === "en" ? "English " : ""}chapter${result.total === 1 ? "" : "s"} for this title.${media.total ? ` The catalog lists about ${media.total} chapters overall.` : ""} Other releases may not be available from this source.` }
+            : {}),
       };
     }
   } catch (error) {

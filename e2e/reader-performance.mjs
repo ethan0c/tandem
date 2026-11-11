@@ -49,17 +49,23 @@ try {
   const scrollSpot=await q.evaluate(()=>{
     const second=document.querySelector('[data-page="1"]');
     const top=second.getBoundingClientRect().top+window.scrollY;
-    window.scrollTo(0,top+150);
+    window.scrollTo({top:top+150,behavior:'instant'});
     return window.scrollY;
   });
   await q.waitForTimeout(600);
-  assert.ok(Math.abs((await q.evaluate(()=>window.scrollY))-scrollSpot)<35,'Vertical scrolling should not snap to a page top');
+  const scrollAfter=await q.evaluate(()=>({y:window.scrollY,page:document.querySelector('input[aria-label="Page number"]')?.value,top:document.querySelector('[data-page="1"]')?.getBoundingClientRect().top}));
+  assert.ok(Math.abs(scrollAfter.y-scrollSpot)<35,`Vertical scrolling should not snap to a page top (${scrollSpot} -> ${JSON.stringify(scrollAfter)})`);
   await q.getByRole('spinbutton',{name:'Page number'}).fill('60');
   await q.waitForFunction(()=>document.querySelector('[data-page="59"] img')?.naturalWidth>0);
   assert.ok(await q.locator('.reader-page img').count()<12,'Far-away page images should leave the DOM');
   const jumped=await q.getByRole('spinbutton',{name:'Page number'}).inputValue();
   assert.equal(jumped,'60');
   assert.ok(loaded.size<25,'Jumping should load only pages near the new position');
+  await q.getByRole('button',{name:'Open page grid'}).click();
+  assert.equal(await q.getByRole('button',{name:/^Open page \d+$/}).count(),120);
+  await q.getByRole('button',{name:'Open page 10',exact:true}).click();
+  assert.equal(await q.getByRole('spinbutton',{name:'Page number'}).inputValue(),'10');
+  assert.equal(await q.getByRole('button',{name:'Close page grid'}).count(),0);
   await long.close();
   const saver=await browser.newContext({viewport:{width:390,height:844}});
   await saver.addInitScript(()=>Object.defineProperty(navigator,'connection',{configurable:true,value:{saveData:true,effectiveType:'3g'}}));

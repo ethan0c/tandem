@@ -2,7 +2,7 @@
 /* Pages retain their source dimensions; chapter artwork is not cropped. */
 /* eslint-disable @next/next/no-img-element */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Maximize, Minimize } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutGrid, Maximize, Minimize } from "lucide-react";
 import { Button } from "@/components/Button";
 import { useClientValue } from "@/hooks/useClientValue";
 import type { CatalogTitle } from "@/lib/catalog-types";
@@ -45,6 +45,7 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
   const [pageRatio, setPageRatio] = useState(0.7);
   const [nearPages, setNearPages] = useState(() => new Set([position]));
   const [expanded, setExpanded] = useState(false);
+  const [gridOpen, setGridOpen] = useState(false);
   const [nativeFullscreen, setNativeFullscreen] = useState(false);
   const canvas = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLElement>(null);
@@ -202,7 +203,26 @@ export function MangaReader({ media, playback, settings, onSettings, onFailure, 
           {isExpanded ? <Minimize className="size-4" /> : <Maximize className="size-4" />}
           {isExpanded ? "Exit reader view" : canFullscreen ? "Fullscreen" : "Expand reader"}
         </Button>
+        <Button variant="ghost" size="sm" onClick={() => setGridOpen((open) => !open)} aria-label={gridOpen ? "Close page grid" : "Open page grid"} aria-expanded={gridOpen} aria-controls="manga-page-grid">
+          <LayoutGrid className="size-4" /> Pages
+        </Button>
       </div>
+      {gridOpen && <div id="manga-page-grid" className="reader-thumbnail-panel mt-4" aria-label="Page thumbnails">
+        <div className="reader-thumbnail-heading"><span>Jump to a page</span><span>{pages.length} pages</span></div>
+        <div className="reader-thumbnail-grid">
+          {pages.map((url, index) => <button key={`${index}:${url}`} type="button" className="reader-thumbnail" aria-label={`Open page ${index + 1}`} aria-current={index === position ? "page" : undefined} onClick={() => {
+            setGridOpen(false);
+            setPosition(index);
+            if (settings.mode === "scroll") {
+              lastScrolledPage.current = index;
+              requestAnimationFrame(() => canvas.current?.querySelector(`[data-page="${index}"]`)?.scrollIntoView({ block: "start", behavior: "instant" }));
+            }
+          }}>
+            <img src={url} alt="" loading="lazy" decoding="async" fetchPriority="low" referrerPolicy="no-referrer" />
+            <span>{index + 1}</span>
+          </button>)}
+        </div>
+      </div>}
       <div className="reader-page mt-6" data-mode={settings.mode} data-fit={settings.fit} ref={canvas}
         onTouchStart={(event) => { touch.current = event.touches.length === 1 ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null; }}
         onTouchEnd={(event) => {
