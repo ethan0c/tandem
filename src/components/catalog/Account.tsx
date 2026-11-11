@@ -54,14 +54,12 @@ export function Account() {
     }
   }
   return (
-    <div className="mx-auto max-w-sm py-8 sm:py-16">
+    <div className="account-screen mx-auto flex max-w-sm flex-col justify-center">
       <h1 className="text-3xl font-bold tracking-tight">
         {user ? "Account" : mode === "signup" ? "Create an account" : mode === "reset" ? "Reset password" : "Sign in"}
       </h1>
       <p className="mt-2 text-sm leading-6 text-zinc-400">
-        {user
-          ? "Your library and progress sync to this account."
-          : "Sync your library across devices. Browsing and rooms work without an account."}
+        {user ? "Your library syncs to this account." : "Sync your library across devices."}
       </p>
       {!isSupabaseConfigured ? (
         <div className="mt-8">
@@ -99,7 +97,7 @@ export function Account() {
         </div>
       ) : (
         <form
-          className="mt-8 space-y-5"
+          className="mt-7 space-y-4"
           onSubmit={submit}
         >
           <label className="block text-sm font-medium text-zinc-300">
@@ -153,9 +151,6 @@ export function Account() {
               </button>
             )}
           </div>
-          <p className="border-t border-white/10 pt-5 text-xs leading-5 text-zinc-400">
-            Your guest library stays in this browser. To bring it along, export it from Library before signing in, then import it.
-          </p>
         </form>
       )}
       {message && (

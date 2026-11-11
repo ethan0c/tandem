@@ -1,9 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import {
-  ArrowLeft,
   ArrowUpRight,
   Check,
   Heart,
@@ -18,6 +16,7 @@ import {
   mediaKey,
   libraryStatuses,
   type CatalogTitle,
+  type LibraryEntry,
   type LibraryStatus,
   type MediaKind,
 } from "@/lib/catalog-types";
@@ -27,9 +26,27 @@ import { useLibrary } from "./LibraryProvider";
 import { ContentChapters } from "./ContentChapters";
 import { TitleSkeleton } from "./LoadingStates";
 import { useTitlePreview } from "./useTitlePreview";
+import { useContent } from "./useContent";
+import { resumeHref } from "./Library";
+import type { ContentUnit } from "@/lib/content-types";
 import { fetchPublicCatalog } from "@/lib/public-catalog-client";
 import { canOptimizeArtwork, largeArtwork } from "@/lib/artwork";
 import { catalogFormatLabel } from "@/lib/catalog-formats";
+
+/** Where the main button goes: the saved place if there is one, otherwise the first episode or chapter. */
+function playTarget(kind: MediaKind, id: string, units: ContentUnit[], entry?: LibraryEntry) {
+  const href = (unit: string) => `/play/${kind}/${id}?${new URLSearchParams({ unit, language: "en" })}`;
+  const resume = entry && resumeHref(entry);
+  if (resume) return { href: resume, label: "Resume" };
+  const chapter = kind === "manga" ? entry?.readingPosition?.chapter : undefined;
+  const saved = chapter ? units.find((unit) => unit.number === chapter) : undefined;
+  if (saved) return { href: href(saved.id), label: `Continue ch. ${saved.number}` };
+  const playable = units.filter((unit) => !unit.group || unit.group === "Sub");
+  const first = (playable.length ? playable : units).reduce<ContentUnit | undefined>(
+    (lowest, unit) => (!lowest || unit.number < lowest.number ? unit : lowest), undefined);
+  if (first) return { href: href(first.id), label: kind === "anime" ? "Play" : "Read ch. " + first.number };
+  return { href: "#episodes", label: kind === "anime" ? "Episodes" : "Chapters" };
+}
 
 const statusLabels: Record<string, string> = { current: "Ongoing", finished: "Finished", upcoming: "Upcoming", tba: "TBA", unreleased: "Unreleased" };
 
@@ -52,6 +69,8 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
   const preview = useTitlePreview(kind, id);
   const media = fetchedMedia || preview || entry?.media || null;
   const [progress, setProgress] = useState<string | null>(null);
+  const content = useContent(kind, id);
+  const play = playTarget(kind, id, content.data?.units || [], entry);
   useEffect(() => {
     const controller = new AbortController();
     fetchPublicCatalog<{ title: CatalogTitle; providers: { name: string; url: string }[] }>(`/api/catalog?kind=${kind}&id=${id}`, retry > 0)
@@ -107,13 +126,6 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
         )}
         <div className="title-hero-scrim" aria-hidden="true" />
         <div className="hero-inner site-width site-gutter">
-          <Link
-            href={`/${kind}`}
-            className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-zinc-300 hover:text-white"
-          >
-            <ArrowLeft className="size-4" />
-            Back to {kind}
-          </Link>
           <div className="title-hero-grid">
             <div className="title-poster">
               {media.poster && (
@@ -156,9 +168,9 @@ export function TitleDetail({ kind, id }: { kind: MediaKind; id: string }) {
             </div>
           </div>
           <div className="title-actions">
-            <ButtonLink href="#episodes" variant="light" size="lg">
+            <ButtonLink href={play.href} variant="light" size="lg">
               <Play className="size-5 fill-current" aria-hidden="true" />
-              {kind === "anime" ? "Watch" : "Read"}
+              {play.label}
             </ButtonLink>
             <Button size="lg" onClick={startTogether}>
               <Users className="size-5" />

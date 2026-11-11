@@ -227,64 +227,63 @@ export function Library() {
           <ButtonLink href="/discover">Browse titles</ButtonLink>
         </div>
       ) : (
-        <div className={view === "grid" ? "grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" : "space-y-2"}>
-          {filtered.map((e) => (
+        <div className={view === "grid" ? "grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" : "divide-y divide-white/[0.06] rounded-xl border border-white/[0.07] bg-ink-800"}>
+          {filtered.map((e) => {
+            const grid = view === "grid";
+            const href = resumeHref(e) || titleHref(e.media);
+            const share = e.media.total ? Math.min(100, (e.progress / e.media.total) * 100) : 0;
+            const place = `${e.media.kind === "anime" ? "Ep" : "Ch"} ${e.progress}${e.media.total ? ` / ${e.media.total}` : ""}`;
+            return (
             <article
               key={mediaKey(e.media)}
-              className={`library-row flex gap-4 rounded-xl border border-white/[0.07] bg-ink-800 p-3 transition-colors hover:border-white/15 ${view === "grid" ? "min-w-0 flex-col items-stretch" : "flex-wrap items-center"}`}
+              className={`library-row flex min-w-0 ${grid ? "flex-col items-stretch gap-2 rounded-lg border border-white/[0.07] bg-ink-800 p-2 transition-colors hover:border-white/15" : "flex-wrap items-center gap-x-4 gap-y-2 px-3 py-2.5"}`}
             >
               <Link
-                href={resumeHref(e) || titleHref(e.media)}
-                className={`relative shrink-0 overflow-hidden rounded-md bg-ink-700 ${view === "grid" ? "aspect-[0.7] w-full" : "h-20 w-14"}`}
+                href={href}
+                className={`relative shrink-0 overflow-hidden rounded-md bg-ink-700 ${grid ? "aspect-[0.7] w-full" : "h-16 w-11"}`}
               >
                 {e.media.poster && (
                   <Image
                     src={e.media.poster}
                     alt=""
                     fill
-                    sizes={view === "grid" ? "(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 20vw" : "56px"}
+                    sizes={grid ? "(max-width: 639px) 45vw, (max-width: 1023px) 25vw, 180px" : "44px"}
                     unoptimized={!canOptimizeArtwork(e.media.poster)}
                     className="object-cover"
                   />
                 )}
+                {grid && share > 0 && (
+                  <span className="media-progress" aria-hidden="true"><span style={{ width: `${share}%` }} /></span>
+                )}
               </Link>
-              <div className={`min-w-0 ${view === "grid" ? "w-full" : "flex-1"}`}>
+              <div className={`min-w-0 ${grid ? "w-full" : "flex-1"}`}>
                 <Link
-                  href={resumeHref(e) || titleHref(e.media)}
-                  className={`${view === "grid" ? "line-clamp-2" : "line-clamp-1"} text-[15px] font-semibold hover:text-brand-300`}
+                  href={href}
+                  className={`${grid ? "line-clamp-2 text-[13px] leading-snug" : "line-clamp-1 text-sm"} font-semibold hover:text-brand-300`}
                 >
                   {e.media.title}
                 </Link>
-                <p className="mt-1 text-xs text-muted">
-                  {catalogFormatLabel(e.media)} · {e.media.year || "TBA"}
+                <p className="mt-0.5 truncate text-xs text-zinc-400">
+                  {!grid && <>{catalogFormatLabel(e.media)} · {e.media.year || "TBA"} · </>}
+                  <span className="text-brand-300">{place}</span>
                 </p>
-                <p className="mt-2 text-xs text-brand-300">
-                  {e.media.kind === "anime" ? "Episode" : "Chapter"}{" "}
-                  {e.progress}
-                  {e.media.total ? ` / ${e.media.total}` : ""}
-                </p>
-                {resumeHref(e) && <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-                  <Link href={resumeHref(e)!} className="font-medium text-brand-300 hover:text-white">
-                    {e.watchPosition?.unit === "film" ? "Resume film" : `Resume episode ${e.watchPosition?.unit.match(/-(\d+)$/)?.[1] || ""}`} →
+                {!grid && resumeHref(e) && <div className="mt-1 flex flex-wrap items-center gap-x-3 text-xs">
+                  <Link href={resumeHref(e)!} className="inline-flex min-h-6 items-center font-medium text-brand-300 hover:text-white">
+                    {e.watchPosition?.unit === "film" ? "Resume film" : `Resume episode ${e.watchPosition?.unit.match(/-(\d+)$/)?.[1] || ""}`}
                   </Link>
-                  <Link href={titleHref(e.media)} className="text-muted hover:text-white">Series details</Link>
+                  <Link href={titleHref(e.media)} className="inline-flex min-h-6 items-center text-zinc-400 hover:text-white">Details</Link>
                 </div>}
-                {e.media.total && (
-                  <div className="mt-2 h-1 max-w-64 overflow-hidden rounded-full bg-white/10">
-                    <div
-                      className="h-full rounded-full bg-brand-500"
-                      style={{
-                        width: `${Math.min(100, (e.progress / e.media.total) * 100)}%`,
-                      }}
-                    />
+                {!grid && e.media.total && (
+                  <div className="mt-1.5 h-1 max-w-48 overflow-hidden rounded-full bg-white/10">
+                    <div className="h-full rounded-full bg-brand-500" style={{ width: `${share}%` }} />
                   </div>
                 )}
               </div>
-              <div className={`flex w-full flex-wrap items-center gap-2 ${view === "grid" ? "mt-auto justify-start" : "justify-end sm:w-auto"}`}>
-                <label>
+              <div className={`flex flex-wrap items-center gap-1.5 ${grid ? "mt-auto w-full" : "w-full justify-end sm:w-auto"}`}>
+                <label className={grid ? "w-full max-[359px]:hidden" : undefined}>
                   <span className="sr-only">Status for {e.media.title}</span>
                   <select
-                    className="field text-xs"
+                    className={`field text-xs ${grid ? "w-full" : ""}`}
                     value={e.status}
                     onChange={(event) =>
                       save(e.media, {
@@ -373,7 +372,8 @@ export function Library() {
                 </details>
               )}
             </article>
-          ))}
+            );
+          })}
         </div>
       )}
     </>

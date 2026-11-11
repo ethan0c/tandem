@@ -27,6 +27,18 @@ export function PlatformShell({ children }: { children: ReactNode }) {
       <main className="platform-main mx-auto w-full site-width flex-1 site-gutter pb-12">
         {children}
       </main>
+      <Suspense fallback={<SiteFooter />}><RouteFooter /></Suspense>
+    </div>
+  );
+}
+
+/** Focused screens such as sign-in skip the footer so they fit in one view. */
+function RouteFooter() {
+  return usePathname().startsWith("/account") ? null : <SiteFooter />;
+}
+
+function SiteFooter() {
+  return (
       <footer className="mt-16 border-t border-white/[0.06]">
         <div className="mx-auto grid site-width gap-8 site-gutter py-10 text-sm text-muted sm:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
@@ -51,7 +63,6 @@ export function PlatformShell({ children }: { children: ReactNode }) {
           ))}
         </div>
       </footer>
-    </div>
   );
 }
 function ActiveNavigation() {
@@ -59,8 +70,7 @@ function ActiveNavigation() {
 }
 function HeaderSearch() {
   const pathname = usePathname();
-  const target = pathname.startsWith("/anime") || pathname.startsWith("/title/anime/")
-    ? "/anime" : "/manga";
+  const target = /^\/(manga|title\/manga|play\/manga|read)(\/|$)/.test(pathname) ? "/manga" : "/anime";
   return (
     <>
       <form action={target} className="platform-quick-search relative" role="search">

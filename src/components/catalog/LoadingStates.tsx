@@ -3,7 +3,15 @@ import type { MediaKind } from "@/lib/catalog-types";
 export function CatalogSkeleton() {
   return <section aria-label="Loading catalog" aria-busy="true" role="status">
     <span className="sr-only">Loading stories…</span>
-    <div aria-hidden="true" className="mb-8 space-y-3"><div className="loading-shape h-9 w-44" /><div className="loading-shape h-4 w-64 max-w-full" /></div>
+    <div aria-hidden="true" className="billboard bleed under-header">
+      <div className="billboard-content">
+        <div className="hero-inner billboard-layout site-width site-gutter">
+          <div className="billboard-poster loading-shape" />
+          <div className="billboard-copy space-y-4"><div className="loading-shape h-5 w-24" /><div className="loading-shape h-12 w-4/5" /><div className="loading-shape h-4 w-2/3" /><div className="loading-shape h-12 w-72 max-w-full" /></div>
+        </div>
+      </div>
+    </div>
+    <div aria-hidden="true" className="mb-4 mt-10 loading-shape h-6 w-40" />
     <div aria-hidden="true" className="media-grid">{Array.from({ length: 12 }, (_, index) => <div key={index} className="min-w-0"><div className="loading-shape aspect-[0.7] rounded-xl" /><div className="loading-shape mt-3 h-4 w-4/5" /><div className="loading-shape mt-2 h-3 w-1/2" /></div>)}</div>
   </section>;
 }

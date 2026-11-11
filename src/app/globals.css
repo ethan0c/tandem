@@ -844,7 +844,6 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .reader-toolbar > label { flex: 1 1 180px; }
   .reader-toolbar select { width: 100%; }
   .player-settings { width: 100%; }
-  .library-row { padding: 10px; }
   .chapter-row { gap: 12px; }
 }
 @media (max-width: 479px) {
@@ -870,3 +869,7 @@ select.field { appearance: none; -webkit-appearance: none; padding-right: 38px; 
   .platform summary { min-height: 44px; padding-block: 12px; }
 }
 .billboard-top .page-heading > p { color: #d4d2da; }
+.route-progress { position: fixed; top: var(--header-h); left: 0; right: 0; z-index: 50; height: 2px; overflow: hidden; pointer-events: none; }
+.route-progress::after { content: ""; position: absolute; inset: 0; background: var(--color-brand-500); transform-origin: left; animation: route-progress 1.6s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+@keyframes route-progress { 0% { transform: scaleX(0); } 60% { transform: scaleX(0.7); } 100% { transform: scaleX(0.92); } }
+.account-screen { min-height: calc(100svh - var(--header-h) - var(--main-pt) - 48px); padding-block: 24px; }

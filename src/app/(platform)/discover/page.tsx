@@ -1,5 +1,6 @@
 import { Discover } from "@/components/catalog/Discover";
-export const metadata = { title: "Discover" };
-export default function Page() {
-  return <Discover />;
+import { getHomeRows } from "@/lib/home-rows";
+export const metadata = { title: "Home" };
+export default async function Page() {
+  return <Discover rows={await getHomeRows()} />;
 }

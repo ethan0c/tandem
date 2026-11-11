@@ -38,7 +38,8 @@ export function Browse({ kind }: { kind: MediaKind }) {
     hasMore: false,
   });
   const [page, setPage] = useState(1);
-  const [busy, setBusy] = useState(false);
+  // A fetch always runs on mount, so the saved selection is shown as pending until it lands.
+  const [busy, setBusy] = useState(true);
   const [error, setError] = useState("");
   useEffect(() => {
     const controller = new AbortController();

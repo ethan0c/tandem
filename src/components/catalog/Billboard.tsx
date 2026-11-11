@@ -2,9 +2,11 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Info, Play, Star } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Info, Star, Users } from "lucide-react";
+import { newRoomId } from "@/lib/room-id";
 import { titleHref, type CatalogTitle } from "@/lib/catalog-types";
-import { ButtonLink } from "@/components/Button";
+import { Button, ButtonLink } from "@/components/Button";
 import { canOptimizeArtwork, largeArtwork } from "@/lib/artwork";
 import { catalogFormatLabel } from "@/lib/catalog-formats";
 import { rememberTitle } from "@/lib/public-catalog-client";
@@ -19,6 +21,7 @@ export function Billboard({ items, eyebrow, children }: {
   /** Extra content pinned to the top of the hero, such as a page heading. */
   children?: ReactNode;
 }) {
+  const router = useRouter();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(false);
@@ -89,10 +92,14 @@ export function Billboard({ items, eyebrow, children }: {
             </div>
             {media.synopsis && <p className="billboard-synopsis">{media.synopsis.replace(/\s*\(Source:[^)]*\)\s*$/, "")}</p>}
             <div className="billboard-actions">
-              <ButtonLink href={`${titleHref(media)}#episodes`} variant="light" size="lg" onClick={() => rememberTitle(media)}>
-                <Play className="size-5 fill-current" aria-hidden="true" />
-                {media.kind === "anime" ? "Play" : "Read"}
-              </ButtonLink>
+              <Button
+                variant="light"
+                size="lg"
+                onClick={() => router.push(`/${media.kind === "manga" ? "read" : "room"}/${newRoomId()}?${new URLSearchParams({ title: media.title, media: media.id, kind: media.kind })}`)}
+              >
+                <Users className="size-5" aria-hidden="true" />
+                {media.kind === "anime" ? "Watch together" : "Read together"}
+              </Button>
               <ButtonLink href={titleHref(media)} variant="ghost" size="lg" aria-label={`More info about ${media.title}`} onClick={() => rememberTitle(media)}>
                 <Info className="size-5" aria-hidden="true" />
                 More info
