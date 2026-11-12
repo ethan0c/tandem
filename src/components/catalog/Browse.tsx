@@ -128,23 +128,25 @@ export function Browse({ kind }: { kind: MediaKind }) {
         <h2>{q ? `Results for “${q}”` : `Browse all ${kind}`}</h2>
       </div>
       <div className="catalog-filters">
-        <label className="catalog-search relative">
-          <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted" />
-          <span className="sr-only">Search titles</span>
-          <input
-            value={q}
-            onChange={(e) => change(setQ, e.target.value, q)}
-            onKeyDown={(e) => { if (e.key === "Escape" && q) change(setQ, "", q); }}
-            placeholder="Search titles"
-            enterKeyHint="search"
-            className="field w-full pl-10 pr-11"
-          />
+        <div className="catalog-search relative">
+          <label className="block">
+            <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted" />
+            <span className="sr-only">Search titles</span>
+            <input
+              value={q}
+              onChange={(e) => change(setQ, e.target.value, q)}
+              onKeyDown={(e) => { if (e.key === "Escape" && q) change(setQ, "", q); }}
+              placeholder="Search titles"
+              enterKeyHint="search"
+              className="field w-full pl-10 pr-11"
+            />
+          </label>
           {q && (
             <button type="button" aria-label="Clear search" className="absolute right-1 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-md text-zinc-400 hover:text-white" onClick={() => change(setQ, "", q)}>
               <X className="size-4" />
             </button>
           )}
-        </label>
+        </div>
         <button
           type="button"
           className="catalog-filter-toggle"
