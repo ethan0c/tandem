@@ -52,8 +52,10 @@ export function JoinCard({
     (async () => {
       try {
         acquired = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 }, facingMode: "user" },
-          audio: { echoCancellation: true, noiseSuppression: true },
+          // The call never sends the camera above 720p (setCameraQuality), so capture no more than that:
+          // scaling a 1080p camera down on every frame takes encoder time the screen share needs.
+          video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24, max: 30 }, facingMode: "user" },
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 },
         });
       } catch {
         try {

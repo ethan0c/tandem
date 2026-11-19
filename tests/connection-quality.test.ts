@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { ConnectionQuality, RELAY_SHARE_TIER, SHARE_TIERS, ShareAdaptation, setCameraQuality, setShareQuality, viaRelay } from '../src/lib/connection-quality';
+import { ConnectionQuality, RELAY_SHARE_TIER, SHARE_MAX_FPS, SHARE_TIERS, ShareAdaptation, setCameraQuality, setShareQuality, tuneAudioSenders, viaRelay } from '../src/lib/connection-quality';
 
 function report(...rows: Record<string, unknown>[]) {
   return new Map(rows.map((row) => [row.id, row])) as unknown as RTCStatsReport;
@@ -122,15 +122,32 @@ test('screen share steps back up and backs off after a failed try', () => {
   assert.equal(share.tier, 0, 'a step up that held resets the wait');
 });
 
-test('share steps scale the capture to the step height', async () => {
+test('share steps scale the capture to the step height and cap the frame rate', async () => {
   let latest: RTCRtpSendParameters | undefined;
-  const video = { track: { kind: 'video', getSettings: () => ({ height: 2160 }) }, getParameters: () => ({ encodings: [{}] }), setParameters: async (params: RTCRtpSendParameters) => { latest = params; } };
+  const video = { track: { kind: 'video', getSettings: () => ({ height: 1440 }) }, getParameters: () => ({ encodings: [{}] }), setParameters: async (params: RTCRtpSendParameters) => { latest = params; } };
   const pc = { getSenders: () => [video] } as unknown as RTCPeerConnection;
   await setShareQuality(pc, 0);
   assert.equal(latest?.encodings[0].scaleResolutionDownBy, 1);
-  await setShareQuality(pc, 2);
-  assert.equal(latest?.encodings[0].scaleResolutionDownBy, 2);
+  assert.equal(latest?.encodings[0].maxFramerate, SHARE_MAX_FPS);
+  await setShareQuality(pc, 1);
+  assert.equal(latest?.encodings[0].scaleResolutionDownBy, 1440 / 1080);
   assert.equal(latest?.encodings[0].maxBitrate, 6_000_000);
+  assert.equal(latest?.degradationPreference, 'maintain-resolution');
+});
+
+test('the share never steps below 1080p', () => {
+  assert.ok(SHARE_TIERS.every((t) => t.height >= 1080));
+  assert.ok(SHARE_TIERS.every((t, i) => i === 0 || t.bitrate < SHARE_TIERS[i - 1].bitrate), 'each step sends less');
+});
+
+test('audio senders get priority and an optional cap; video is untouched', async () => {
+  let latest: RTCRtpSendParameters | undefined;
+  const audio = { track: { kind: 'audio' }, getParameters: () => ({ encodings: [{}] }), setParameters: async (params: RTCRtpSendParameters) => { latest = params; } };
+  const video = { track: { kind: 'video' }, getParameters: () => { throw Error('video must remain untouched'); } };
+  const pc = { getSenders: () => [audio, video] } as unknown as RTCPeerConnection;
+  await tuneAudioSenders(pc, 128_000);
+  assert.equal(latest?.encodings[0].priority, 'high');
+  assert.equal(latest?.encodings[0].maxBitrate, 128_000);
 });
 
 test('tells a relayed connection from a direct one, by the pair in use', () => {
@@ -146,7 +163,8 @@ test('tells a relayed connection from a direct one, by the pair in use', () => {
   assert.equal(viaRelay(report()), false, 'not connected yet');
 });
 
-test('the relay cap is the lowest share step', () => {
+test('the relay cap is the lowest share step, still 1080p', () => {
   assert.equal(RELAY_SHARE_TIER, SHARE_TIERS.length - 1);
-  assert.ok(SHARE_TIERS[RELAY_SHARE_TIER].bitrate <= 2_500_000);
+  assert.equal(SHARE_TIERS[RELAY_SHARE_TIER].height, 1080);
+  assert.ok(SHARE_TIERS[RELAY_SHARE_TIER].bitrate <= 3_500_000);
 });

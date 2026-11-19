@@ -3,11 +3,22 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { AppSocket } from "@/lib/socket";
 import type { Member, ScreenSignal, Source } from "@/lib/types";
-import { RELAY_SHARE_TIER, ShareAdaptation, setShareQuality, viaRelay } from "@/lib/connection-quality";
+import { RELAY_SHARE_TIER, SHARE_MAX_FPS, SHARE_TIERS, ShareAdaptation, setShareQuality, tuneAudioSenders, viaRelay } from "@/lib/connection-quality";
+import { startVideoBitrate, tuneMusicOpus, tuneSdp } from "@/lib/sdp";
 import { iceServers, preferCodecs, REJOIN_SETTLE_MS, STALL_MS } from "./useWebRTC";
 
 /** A viewer with no picture asks the sharer again this often, in case a request or offer was lost. */
 const REQUEST_RETRY_MS = 5_000;
+/** The show's audio: stereo Opus at this rate (a call's default is ~32 kbps mono). */
+const SHARE_AUDIO_BPS = 128_000;
+/** Where Chrome's bandwidth estimate starts, so the picture opens at 1080p instead of ramping up. */
+const SHARE_START_KBPS = 4_000;
+/**
+ * Viewer side: hold this much media before playing it. Wi-Fi delivers packets in bursts; a small
+ * buffer turns that into steady playback instead of stutter. Audio and video stay in sync with each
+ * other, and 150 ms is well under what anyone notices against the voice call.
+ */
+const SHARE_JITTER_MS = 150;
 
 interface Options {
   socketRef: RefObject<AppSocket | null>;
@@ -133,6 +144,7 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
       await pc.setLocalDescription(offer);
       // Start at the top step; the adaptation loop steps down if the link or the CPU can't keep up.
       await setShareQuality(pc, 0);
+      await tuneAudioSenders(pc, SHARE_AUDIO_BPS);
       send(peerId, { type: "offer", sdp: offer, nonce });
     },
     [dropViewer, newPc, send],
@@ -148,7 +160,7 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
         if (out.pc.connectionState !== "connected") continue;
         try {
           const stats = await out.pc.getStats();
-          // Through the metered relay, a share stays at 720p however good the link is.
+          // Through the metered relay, a share stays at its lightest 1080p step however good the link is.
           const relay = viaRelay(stats);
           const tier = Math.max(out.adaptation.sample(stats), relay ? RELAY_SHARE_TIER : 0);
           if (cancelled) return;
@@ -185,6 +197,11 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
         });
         recvPc.current = pc;
         pc.ontrack = (e) => {
+          try {
+            (e.receiver as RTCRtpReceiver & { jitterBufferTarget?: number | null }).jitterBufferTarget = SHARE_JITTER_MS;
+          } catch {
+            // Older browsers: their default buffer still works.
+          }
           haveRemote.current = true;
           setRemote({ from, stream: e.streams[0] ?? new MediaStream([e.track]) });
         };
@@ -197,7 +214,11 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
         const out = sendPcs.current.get(from);
         // An answer to an offer we have since replaced must not be applied to the new connection.
         if (!out || out.nonce !== data.nonce) return;
-        await out.pc.setRemoteDescription(data.sdp);
+        // Our sending side reads its codec settings from the viewer's answer: ask it for stereo audio
+        // at full rate, and a bandwidth estimate that starts high enough for 1080p.
+        await out.pc.setRemoteDescription(
+          tuneSdp(data.sdp, (sdp) => tuneMusicOpus(sdp, SHARE_AUDIO_BPS / 1000), (sdp) => startVideoBitrate(sdp, SHARE_START_KBPS)),
+        );
         await flushIce(out.pc);
       } else if (data.type === "candidate") {
         const pc = from === sharerRef.current && from !== selfId ? recvPc.current : sendPcs.current.get(from)?.pc;
@@ -287,15 +308,16 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
     setError(null);
     // Chrome captures a shared tab at exactly the requested size (its tab capture uses a fixed
     // resolution; the default is 1080p), and `min` constraints are not allowed. So ask for the
-    // largest a tab on this display can be, up to 4K: a maximised tab is captured 1:1 and nothing
-    // is ever downscaled. Windows and whole screens are captured at native size up to this.
+    // largest a tab on this display can be, up to the top share step (1440p): capturing larger only
+    // to scale it down again would cost CPU on every frame. Windows and screens are capped the same.
+    const top = SHARE_TIERS[0].height;
     const dpr = window.devicePixelRatio || 1;
-    const capW = Math.min(Math.round(window.screen.width * dpr), 3840);
-    const capH = Math.min(Math.round(window.screen.height * dpr), 2160);
+    const capH = Math.min(Math.round(window.screen.height * dpr), top);
+    const capW = Math.min(Math.round(window.screen.width * dpr), Math.round((top * 16) / 9));
     let stream: MediaStream;
     try {
       stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: { ideal: 30, max: 60 }, width: { ideal: capW }, height: { ideal: capH } },
+        video: { frameRate: { ideal: SHARE_MAX_FPS, max: SHARE_MAX_FPS }, width: { ideal: capW }, height: { ideal: capH } },
         audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
         // Chrome-only hints: offer tabs first, hide the Tandem tab (no hall of mirrors), allow tab audio.
         preferCurrentTab: false,
@@ -309,8 +331,10 @@ export function useScreenShare({ socketRef, selfId, members, source, changeSourc
     }
     const video = stream.getVideoTracks()[0];
     if (video) {
-      // "detail" keeps the encoder from downscaling under load; "motion" would trade sharpness for fps.
-      video.contentHint = "detail";
+      // What gets shared is a show playing, so tune the encoder for moving pictures: "detail" switches it
+      // into screen-content mode, which suits slides but drops frames and smears pans in video.
+      // Resolution is still held: setShareQuality pins degradation to "maintain-resolution".
+      video.contentHint = "motion";
       video.addEventListener("ended", () => {
         // The browser's own "Stop sharing" button.
         if (localRef.current === stream) changeSource(null);

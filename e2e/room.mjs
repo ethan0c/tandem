@@ -146,12 +146,13 @@ async function join(page, name) {
 const sessions = [];
 try {
   // The tab that gets shared: a title the picker flag can match, with something moving in it.
-  // 4K by default, to prove the share is not downscaled on the way to viewers. Chrome captures a
-  // tab at exactly the requested size, so the expected size is min(tab, sharer's display).
+  // 4K by default, to prove the share is captured at the 1440p ceiling and not downscaled further on
+  // the way to viewers. Chrome captures a tab at exactly the requested size, so the expected size is
+  // min(tab, sharer's display, 2560×1440).
   const SHARE_W = Number(process.env.SHARE_W ?? 3840);
   const SHARE_H = Number(process.env.SHARE_H ?? 2160);
-  const EXPECT_W = Math.min(SHARE_W, SCREEN_W);
-  const EXPECT_H = Math.min(SHARE_H, SCREEN_H);
+  const EXPECT_W = Math.min(SHARE_W, SCREEN_W, 2560);
+  const EXPECT_H = Math.min(SHARE_H, SCREEN_H, 1440);
   const shareCtx = await browser.newContext({ viewport: { width: SHARE_W, height: SHARE_H } });
   const sharePage = await shareCtx.newPage();
   await sharePage.setContent(
@@ -255,6 +256,24 @@ try {
         })),
     );
     log("Alice", `video m-lines: ${JSON.stringify(sdp)}`);
+    // The share's sending side was told to send stereo Opus and to start its bandwidth estimate high.
+    const tuned = await alice.evaluate(() =>
+      window.__pcs.some((p) => {
+        const r = p.remoteDescription?.sdp ?? "";
+        return p.connectionState === "connected" && /stereo=1/.test(r) && /x-google-start-bitrate=4000/.test(r);
+      }),
+    );
+    if (!tuned) throw new Error("share connection is missing the stereo / start-bitrate answer edits");
+    // The call offers RED (redundant voice) ahead of plain Opus.
+    const red = await alice.evaluate(() =>
+      window.__pcs.some((p) => {
+        const sdp = p.localDescription?.sdp ?? p.remoteDescription?.sdp ?? "";
+        const mline = sdp.split("\n").find((l) => l.startsWith("m=audio")) ?? "";
+        const pt = mline.split(" ")[3];
+        return new RegExp(`a=rtpmap:${pt} red/`, "i").test(sdp);
+      }),
+    );
+    if (!red) throw new Error("no call connection offers RED first for voice");
     if (w < minW) throw new Error(`received ${w}×${h}, wanted ≥ ${minW} wide`);
     if (w > EXPECT_W || h > EXPECT_H) throw new Error(`received ${w}×${h}: larger than the ${EXPECT_W}×${EXPECT_H} ceiling`);
     log("Bob", `share arrives at ${w}×${h}`);

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { AppSocket } from "@/lib/socket";
 import type { Member, SignalData } from "@/lib/types";
-import { ConnectionQuality, setCameraQuality, viaRelay } from "@/lib/connection-quality";
+import { ConnectionQuality, setCameraQuality, tuneAudioSenders, viaRelay } from "@/lib/connection-quality";
 import { rememberMedia } from "@/lib/last-room";
 
 export interface Peer {
@@ -78,7 +78,23 @@ export function preferCodecs(pc: RTCPeerConnection, order: string[] = CODEC_ORDE
   };
   const ranked = [...caps.codecs].sort((a, b) => rank(a.mimeType) - rank(b.mimeType));
   for (const t of pc.getTransceivers()) {
-    if (t.sender.track?.kind === "video") t.setCodecPreferences?.(ranked);
+    // The receiver's track kind covers receive-only transceivers too (we joined without a camera).
+    if (t.receiver.track.kind === "video") t.setCodecPreferences?.(ranked);
+  }
+}
+
+/**
+ * Voice: offer RED first. It sends each Opus frame again inside the next packet, so a lost packet is
+ * rebuilt from its neighbour instead of being concealed. On lossy Wi-Fi that is the difference between
+ * clean speech and robotic chirps, for ~30 kbps more. A browser without RED answers with plain Opus.
+ */
+export function preferVoiceCodecs(pc: RTCPeerConnection) {
+  const caps = RTCRtpSender.getCapabilities?.("audio");
+  if (!caps?.codecs.some((c) => c.mimeType.toLowerCase() === "audio/red")) return;
+  const rank = (mime: string) => ["audio/red", "audio/opus"].indexOf(mime.toLowerCase()) + 1 || 3;
+  const ranked = [...caps.codecs].sort((a, b) => rank(a.mimeType) - rank(b.mimeType));
+  for (const t of pc.getTransceivers()) {
+    if (t.receiver.track.kind === "audio") t.setCodecPreferences?.(ranked);
   }
 }
 
@@ -149,6 +165,7 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
             monitor.logged = true;
           }
           if (monitor.applied !== `${light}|${relay}`) {
+            if (monitor.applied === null) await tuneAudioSenders(pc);
             await setCameraQuality(pc, light, relay);
             monitor.applied = `${light}|${relay}`;
           }
@@ -193,7 +210,10 @@ export function useWebRTC({ socketRef, selfId, members, localStream }: Options) 
   const negotiate = useCallback(
     async (id: string, pc: RTCPeerConnection, iceRestart = false) => {
       try {
-        if (!iceRestart) preferCodecs(pc, CAMERA_CODEC_ORDER);
+        if (!iceRestart) {
+          preferCodecs(pc, CAMERA_CODEC_ORDER);
+          preferVoiceCodecs(pc);
+        }
         const offer = await pc.createOffer(iceRestart ? { iceRestart: true } : undefined);
         await pc.setLocalDescription(offer);
         send(id, { type: "offer", sdp: offer });

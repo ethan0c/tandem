@@ -84,8 +84,8 @@ export function viaRelay(stats: RTCStatsReport): boolean {
   return local?.candidateType === "relay" || remote?.candidateType === "relay";
 }
 
-/** The highest share step a relayed connection may use: 720p at 2.5 Mbps instead of up to 4K at 20. */
-export const RELAY_SHARE_TIER = 3;
+/** The highest share step a relayed connection may use: 1080p at 3.5 Mbps instead of 1440p at 10. */
+export const RELAY_SHARE_TIER = 2;
 
 /** `relay`: the call goes through the metered relay, so it sends about half (still a clear 540p picture). */
 export async function setCameraQuality(pc: RTCPeerConnection, poor: boolean, relay = false) {
@@ -109,15 +109,18 @@ export async function setCameraQuality(pc: RTCPeerConnection, poor: boolean, rel
 }
 
 /**
- * Screen share steps, best first. The top step is the largest capture we ever ask for, so it never
- * scales; the rest trade resolution for a picture the link and the encoder can keep up with.
+ * Screen share steps, best first. The top step is the largest capture we ask for (1440p), so it never
+ * scales. The picture never drops below 1080p: under pressure the bitrate falls first, and within a
+ * step the encoder sheds frames rather than resolution. 4K is left out on purpose: it costs ~4x the
+ * encode time and bandwidth of 1080p for a difference nobody sees in a video player.
  */
 export const SHARE_TIERS = [
-  { height: 2160, bitrate: 20_000_000 },
-  { height: 1440, bitrate: 12_000_000 },
+  { height: 1440, bitrate: 10_000_000 },
   { height: 1080, bitrate: 6_000_000 },
-  { height: 720, bitrate: 2_500_000 },
+  { height: 1080, bitrate: 3_500_000 },
 ] as const;
+/** Shows run at 24–30 fps; a higher rate only spends encoder time and bandwidth on duplicate frames. */
+export const SHARE_MAX_FPS = 30;
 /** Healthy samples (2 s apart) before trying a step up, and how far failed tries can push that out. */
 const SHARE_UP_MIN = 15;
 const SHARE_UP_MAX = 240;
@@ -196,11 +199,34 @@ export async function setShareQuality(pc: RTCPeerConnection, tier: number) {
       if (!params.encodings?.length) continue;
       const height = sender.track.getSettings().height ?? maxHeight;
       params.encodings[0].maxBitrate = bitrate;
+      params.encodings[0].maxFramerate = SHARE_MAX_FPS;
       params.encodings[0].scaleResolutionDownBy = Math.max(1, height / maxHeight);
       params.degradationPreference = "maintain-resolution";
       await sender.setParameters(params);
     } catch {
       // Unsupported constraints or a closing connection must not interrupt the share.
+    }
+  }
+}
+
+/**
+ * Audio first: when the link is congested, a frozen frame is forgivable but broken sound is not.
+ * `maxBitrate` caps the show's audio (the voice call keeps Opus's own rate).
+ */
+export async function tuneAudioSenders(pc: RTCPeerConnection, maxBitrate?: number) {
+  for (const sender of pc.getSenders()) {
+    if (sender.track?.kind !== "audio") continue;
+    try {
+      const params = sender.getParameters();
+      if (!params.encodings?.length) continue;
+      for (const encoding of params.encodings) {
+        encoding.priority = "high";
+        encoding.networkPriority = "high";
+        if (maxBitrate) encoding.maxBitrate = maxBitrate;
+      }
+      await sender.setParameters(params);
+    } catch {
+      // Unsupported fields or a closing connection must not interrupt the call.
     }
   }
 }
